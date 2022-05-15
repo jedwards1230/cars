@@ -1,9 +1,11 @@
 class Sensor {
-    constructor(car) {
+    constructor(car, rays, direction) {
         this.car = car;
-        this.rayCount = 20;
+        this.rayCount = rays;
         this.rayLength = 150;
-        this.raySpread = Math.PI;
+        this.raySpread = Math.PI / 4;
+
+        this.direction = direction;
 
         this.rays = [];
         this.readings = [];
@@ -40,7 +42,7 @@ class Sensor {
 
         for(let i=0; i<traffic.length; i++) {
             const poly = traffic[i].polygon;
-            if(poly && this.car.id != traffic[i].id && !traffic[i].useBrain) {
+            if(this.car.id != traffic[i].id && traffic[i].model != "fsd") {
                 for(let j=0; j<poly.length; j++) {
                     const value = getIntersection(
                         ray[0],
@@ -74,10 +76,34 @@ class Sensor {
             ) + this.car.angle;
 
             const start = {x:this.car.x, y:this.car.y};
-            const end = {
-                x: this.car.x - Math.sin(rayAngle) * this.rayLength,
-                y: this.car.y - Math.cos(rayAngle) * this.rayLength,
+            let end = {}
+            switch(this.direction) {
+                case "forward":
+                    end = {
+                        x: this.car.x - Math.sin(rayAngle) * this.rayLength,
+                        y: this.car.y - Math.cos(rayAngle) * this.rayLength,
+                    }
+                    break;
+                case "backward":
+                    end = {
+                        x: this.car.x - Math.sin(rayAngle) * this.rayLength * -1,
+                        y: this.car.y - Math.cos(rayAngle) * this.rayLength * -1,
+                    }
+                    break;
+                case "left":
+                    end = {
+                        x: this.car.x - Math.cos(rayAngle) * this.rayLength,
+                        y: this.car.y - Math.sin(rayAngle) * this.rayLength,
+                    }
+                    break;
+                case "right":
+                    end = {
+                        x: this.car.x - Math.cos(rayAngle) * this.rayLength * -1,
+                        y: this.car.y - Math.sin(rayAngle) * this.rayLength * -1,
+                    }
+                    break;
             }
+            
             this.rays.push([start, end]);
         }
     }

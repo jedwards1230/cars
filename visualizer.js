@@ -23,8 +23,8 @@ class Visualizer{
                 left,levelTop,
                 width,levelHeight,
                 i==network.levels.length-1
-                    // up, left, right, down
-                    ?['\u290a','\u21da','\u21db','\u290b']
+                    // up, down, left, right
+                    ?['\u290a','\u290b','\u21da','\u21db']
                     :[]
             );
         }

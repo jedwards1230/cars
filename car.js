@@ -1,5 +1,5 @@
 class Car {
-    constructor(id, x, y, maxspeed = 2, controller="dummy", color="blue", width=30, height=50) {
+    constructor(id, x, y, maxspeed = 2, controller="dummy", model=null, color="blue", width=30, height=50) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -17,21 +17,37 @@ class Car {
         this.damaged = false;
 
         this.useBrain = controller=="network";
+        this.model = model;
 
         this.controller = controller;
         this.controls = new Controls(controller);
 
         this.polygon = this.#createPolygon();
+        this.sensors = []
 
         if(controller != "dummy") {
-            this.sensor = new Sensor(this);
-            this.brain = new Network(
-                [this.sensor.rayCount, 6, 12, 4]
-            )
-            if(localStorage.getItem("bestBrain")) {
-                this.brain = JSON.parse(
-                    localStorage.getItem("bestBrain"));
+            switch(model) {
+                case "fsd":
+                    this.sensors.push(new Sensor(this, 5, "forward"));
+                    this.brain = new Network(
+                        [this.sensors[0].rayCount+1, 6, 12, 2]
+                    )
+                    if(localStorage.getItem("bestBrain")) {
+                        this.brain = JSON.parse(localStorage.getItem("bestBrain"));
+                    }
+                    break;
+                case "forward":
+                    this.sensors.push(new Sensor(this, 5, "forward"));
+                    // todo: calc raycount for all sensors
+                    this.brain = new Network(
+                        [this.sensors[0].rayCount, 6, 12, 2]
+                    )
+                    if(localStorage.getItem("forwardBrain")) {
+                        this.brain = JSON.parse(localStorage.getItem("forwardBrain"));
+                    }
+                    break;
             }
+            console.log(this.model, this.sensors[0].rayCount, "rays")
         }
     }
 
@@ -44,7 +60,7 @@ class Car {
                 this.damaged;
                 this.speed = 0;
             } else if(damage) {
-                if(!this.useBrain) {
+                if(this.model != "fsd") {
                     traffic[damage].damaged = true;
                     traffic[damage].controls.forward = false;
                 }
@@ -52,18 +68,22 @@ class Car {
                 this.speed = 0;
             }
         }
-        if(this.sensor) {
-            this.sensor.update(roadBorders, traffic);
-            const offsets = this.sensor.readings.map(
-                s=>s==null ? 0 : 1 - s.offset
-            );
-            const outputs = Network.forward(offsets, this.brain);
+        if(this.sensors.length > 0) {
+            var inputs = [this.speed];
+            for(let i=0; i<this.sensors.length; i++) {
+                this.sensors[i].update(roadBorders, traffic);
+                const offsets = this.sensors[i].readings.map(
+                    s=>s==null ? 0 : 1 - s.offset
+                );
+                inputs = inputs.concat(offsets)
+            }
+            const outputs = Network.forward(inputs, this.brain);
 
             if(this.useBrain) {
                 this.controls.forward = outputs[0];
-                this.controls.left = outputs[1];
-                this.controls.right = outputs[2];
-                this.controls.backward = outputs[3];
+                this.controls.backward = outputs[1];
+                //this.controls.left = outputs[1];
+                //this.controls.right = outputs[2];
             }
         }
     }
@@ -75,7 +95,7 @@ class Car {
             }
         }
         for(let i=0; i < traffic.length; i++) {
-            if(traffic[i].id != this.id && !traffic[i].useBrain) {
+            if(traffic[i].id != this.id && traffic[i].model != "fsd") {
                 if(polysIntersect(this.polygon, traffic[i].polygon)) {
                     return traffic[i].id;
                 }
@@ -112,10 +132,10 @@ class Car {
         if(!this.damaged) {
             // accelerate
             if(this.controls.forward) {
-                this.speed += this.acceleration
+                this.speed += this.acceleration;
             }
             if(this.controls.backward) {
-                this.speed -= this.acceleration
+                this.speed -= this.acceleration * 3 / 2;
             }
 
             // check direction
@@ -157,8 +177,8 @@ class Car {
             ctx.fillStyle = "gray";
         } else {
             ctx.fillStyle = this.color;
-            if(this.sensor && drawSensors) {
-                this.sensor.draw(ctx);
+            if(this.sensors[0] && drawSensors) {
+                this.sensors[0].draw(ctx);
             }
         }
 

@@ -3,17 +3,19 @@ carCanvas.width = 300;
 const networkCanvas = document.getElementById("networkCanvas");
 networkCanvas.width = 450;
 
+const laneCount = 3
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
-const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, 3);
+const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, laneCount);
 
-const trafficCount = 30;
+const trafficCount = 100;
 const brainCount = 300;
+
+var startLane = 1;
+var mutateDegree = 0.25;
 
 let traffic = generateCars(brainCount).concat(generateTraffic(trafficCount));
 let bestCar = traffic[0];
-
-var mutateDegree = 0.05;
 
 animate();
 
@@ -30,10 +32,21 @@ function destroy() {
     localStorage.removeItem("bestBrain");
 }
 
+function deleteBest() {
+    const id = bestCar.id;
+    const car = traffic.find(
+        c=>c.id == id
+    );
+    const index = traffic.indexOf(car);
+    if (index > -1) {
+        traffic.splice(index, 1); // 2nd parameter means remove one item only
+      }
+}
+
 function generateCars(N) {
     const cars = [];
     for(let i=0; i<N; i++) {
-        cars.push(new Car(i, road.getLaneCenter(getRandomInt(1,1)), 100, 5, "network", "red"));
+        cars.push(new Car(i, road.getLaneCenter(startLane), 100, 3, "network", "fsd", "red"));
         if(i!=0) {
             Network.mutate(cars[i].brain, mutateDegree);
         }
@@ -45,62 +58,67 @@ function generateTraffic(N) {
     const cars = [];
     const placed = [];
     for(let i=0; i<road.laneCount; i++) {
-        placed.push(-50);
+        placed.push(100);
     }
+
     for(let i=0; i<N; i++) {
+        // randomize lane
         const lane = getRandomInt(0,road.laneCount-1);
+        
         const nextLane = placed[lane - 1] ? lane - 1 : lane + 1;
-        let speed = 0
-        if(lane == 0) {
-            speed = 2.8;
-        } else if(lane == 1) {
-            speed = 2.5;
-        } else if(lane == 2) {
-            speed = 2.7;
-        } else if(lane == 3) {
-            speed = 3;
-        } else if(lane == 4) {
-            speed = 2.8;
-        }
-        placed[lane] = placed[lane] + (placed[nextLane] * 0.3) - getRandomInt(150, 250);
-        cars.push(new Car(i+brainCount, road.getLaneCenter(lane), placed[lane], speed));
+        placed[lane] = placed[lane] + (placed[nextLane] * 0.1) - getRandomInt(150, 250);
+        //cars.push(new Car(i+brainCount, road.getLaneCenter(lane), placed[lane], getRandomInt(2,2), "dummy"));
+        cars.push(new Car(i+brainCount, road.getLaneCenter(lane), placed[lane], getRandomInt(2,4), "network", "forward"));
 1    }
     return cars
 }
 
-function animate(time) {
-    for(let i=0; i<traffic.length; i++) {
-        traffic[i].update(road.borders, traffic);
-    }
-
+// Search for best car
+function getBestCar() {
     const te = traffic.filter(
-        c=>c.useBrain==true && !c.damaged
+        c=>c.model=="fsd" && !c.damaged
     )
-
     bestCar = te.find(
         c=>c.y==Math.min(
             ...te.map(c=>c.y)
         )
     )
+}
 
-    carCanvas.height = window.innerHeight;
-    networkCanvas.height = window.innerHeight;
-
+function drawCars() {
     carCtx.save();
     carCtx.translate(0, carCanvas.height * 0.7 - bestCar.y);
     road.draw(carCtx);
     for(let i=0; i<traffic.length; i++) {
-        if(traffic[i].useBrain) {
+        if(traffic[i].model == "fsd") {
             carCtx.globalAlpha = 0.2;
         }
         traffic[i].draw(carCtx);
         carCtx.globalAlpha = 1;
     }
     bestCar.draw(carCtx, true);
-
     carCtx.restore();
+}
 
+function drawVisualizer(time) {
     networkCtx.lineDashOffset = -time / 40;
     Visualizer.drawNetwork(networkCtx, bestCar.brain)
+}
+
+function animate(time) {
+    // update cars
+    for(let i=0; i<traffic.length; i++) {
+        traffic[i].update(road.borders, traffic);
+    }
+
+    getBestCar();    
+
+    // update dimensions
+    carCanvas.height = window.innerHeight;
+    networkCanvas.height = window.innerHeight;
+
+    drawCars();
+    drawVisualizer(time);
+
     requestAnimationFrame(animate);
 }
