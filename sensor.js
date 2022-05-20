@@ -28,6 +28,7 @@ class Sensor {
     #getReading(ray, roadBorders, traffic) {
         let touches = [];
 
+        // check overlap with borders
         for(let i = 0; i < roadBorders.length; i++) {
             const touch = getIntersection(
                 ray[0],
@@ -40,6 +41,7 @@ class Sensor {
             }
         };
 
+        // check overlap with other traffic
         for(let i=0; i<traffic.length; i++) {
             const poly = traffic[i].polygon;
             if(this.car.id != traffic[i].id && traffic[i].model != "fsd") {
@@ -57,6 +59,7 @@ class Sensor {
             }
         }
 
+        // no touches
         if(touches.length == 0) {
             return null;
         } 

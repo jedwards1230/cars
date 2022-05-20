@@ -11,7 +11,8 @@ const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, laneCount);
 const trafficCount = 100;
 const brainCount = 300;
 
-var startLane = 1;
+var startLane = 2;
+var driverSpeed = 3;
 var mutateDegree = 0.25;
 
 let traffic = generateCars(brainCount).concat(generateTraffic(trafficCount));
@@ -32,6 +33,24 @@ function destroy() {
     localStorage.removeItem("bestBrain");
 }
 
+function end() {
+    let dmgCt = 0;
+    let goodCt = 0;
+    let goodW = [];
+    let badW = [];
+    for(let i=0; i<traffic.length; i++) {
+        if(traffic[i].model == 'fsd') {
+            if(traffic[i].damaged) {
+                dmgCt += 1;
+                console.log(traffic[i].brain.levels)
+            } else {
+                goodCt += 1;
+            }
+        } 
+    }
+    console.log("good", goodCt, ", bad", dmgCt);
+}
+
 function deleteBest() {
     const id = bestCar.id;
     const car = traffic.find(
@@ -46,7 +65,7 @@ function deleteBest() {
 function generateCars(N) {
     const cars = [];
     for(let i=0; i<N; i++) {
-        cars.push(new Car(i, road.getLaneCenter(startLane), 100, 3, "network", "fsd", "red"));
+        cars.push(new Car(i, road.getLaneCenter(startLane), 100, driverSpeed, "network", "fsd", "red"));
         if(i!=0) {
             Network.mutate(cars[i].brain, mutateDegree);
         }
@@ -66,7 +85,7 @@ function generateTraffic(N) {
         const lane = getRandomInt(0,road.laneCount-1);
         
         const nextLane = placed[lane - 1] ? lane - 1 : lane + 1;
-        placed[lane] = placed[lane] + (placed[nextLane] * 0.1) - getRandomInt(150, 250);
+        placed[lane] = placed[lane] - getRandomInt(150, 250);
         //cars.push(new Car(i+brainCount, road.getLaneCenter(lane), placed[lane], getRandomInt(2,2), "dummy"));
         cars.push(new Car(i+brainCount, road.getLaneCenter(lane), placed[lane], getRandomInt(2,4), "network", "forward"));
 1    }
@@ -122,3 +141,15 @@ function animate(time) {
 
     requestAnimationFrame(animate);
 }
+
+/*
+    info card per car
+        speed
+        network info
+            inputs applied
+        clickable objects
+
+        loss function fo networkedobjects
+        lat and long spacing 
+
+*/

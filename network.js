@@ -68,17 +68,21 @@ class Level {
         }
     }
 
+    // speed + sensors
     static forward(inputs, level) {
+        // update inputs
         for(let i=0; i<inputs.length; i++) {
             level.inputs[i] = inputs[i];
         }
 
+        // compute for each output (up, down, left, right) 
         for(let i=0; i<level.outputs.length; i++) {
             let sum = 0;
             for(let j=0; j<level.inputs.length; j++) {
                 sum += level.inputs[j] * level.weights[j][i];
             }
 
+            // binary activation
             if(sum > level.biases[i]) {
                 level.outputs[i] = 1;
             } else {

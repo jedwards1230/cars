@@ -51,10 +51,14 @@ class Car {
         }
     }
 
+    // update car object
+    // only process slow down and sensors if damaged
     update(roadBorders, traffic) {
         this.#move();
         if(!this.damaged) {
             this.polygon = this.#createPolygon();
+
+            // check damage
             const damage = this.#checkDamage(roadBorders, traffic);
             if(damage == this.id) {
                 this.damaged;
@@ -70,6 +74,7 @@ class Car {
         }
         if(this.sensors.length > 0) {
             var inputs = [this.speed];
+            // update each sensor
             for(let i=0; i<this.sensors.length; i++) {
                 this.sensors[i].update(roadBorders, traffic);
                 const offsets = this.sensors[i].readings.map(
