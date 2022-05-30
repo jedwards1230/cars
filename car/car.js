@@ -1,4 +1,4 @@
-import {polysIntersect} from "../utils.js";
+import {polysIntersect} from "../utils/utils.js";
 import {Controls} from "./controls.js";
 import {Sensor} from "./sensor.js";
 import {Network} from "../network.js";
@@ -56,7 +56,7 @@ export class Car {
     }
 
     // update car object
-    // only process slow down and sensors if damaged
+    // if damaged, only process slow down and sensors
     update(roadBorders, traffic) {
         this.#move();
         if(!this.damaged) {
@@ -76,25 +76,27 @@ export class Car {
                 this.speed = 0;
             }
         }
-        if(this.sensors.length > 0) {
-            var inputs = [this.speed];
-            // update each sensor
-            for(let i=0; i<this.sensors.length; i++) {
-                this.sensors[i].update(roadBorders, traffic);
-                const offsets = this.sensors[i].readings.map(
-                    s=>s==null ? 0 : 1 - s.offset
-                );
-                inputs = inputs.concat(offsets)
-            }
-            const outputs = Network.forward(inputs, this.brain);
+    }
 
-            if(this.useBrain) {
-                this.controls.forward = outputs[0];
-                this.controls.backward = outputs[1];
-                //this.controls.left = outputs[1];
-                //this.controls.right = outputs[2];
-            }
+    updateControls(controls) {
+        this.controls.forward = controls[0];
+        this.controls.backward = controls[1];
+        //this.controls.left = controls[1];
+        //this.controls.right = controls[2];
+    }
+
+    getSensorData(roadBorders, traffic) {
+        let inputs = [this.speed];
+        // update each sensor
+        for(let i=0; i<this.sensors.length; i++) {
+            this.sensors[i].update(roadBorders, traffic);
+            const offsets = this.sensors[i].readings.map(
+                s=>s==null ? 0 : 1 - s.offset
+            );
+            inputs = inputs.concat(offsets)
         }
+
+        return inputs
     }
 
     #checkDamage(roadBorders, traffic) {

@@ -1,4 +1,4 @@
-import { lerp } from "./utils.js";
+import { lerp } from "./utils/utils.js";
 
 export class Network {
     constructor(neurons) {

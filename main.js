@@ -15,11 +15,17 @@ var startLane = 2;
 var driverSpeed = 3;
 var mutateDegree = 0.25;
 
-import {getRandomInt} from "./utils.js";
-import {Car} from "./car.js";
-import {Road} from "./road.js";
-import {Visualizer} from "./visualizer.js";
+import {getRandomInt} from "./utils/utils.js";
+import {Car} from "./car/car.js";
+import {Road} from "./utils/road.js";
+import {Visualizer} from "./utils/visualizer.js";
 import {Network} from "./network.js";
+
+document.querySelector("#resetBtn").addEventListener("click", reset);
+document.querySelector("#saveBtn").addEventListener("click", save);
+document.querySelector("#destroyBtn").addEventListener("click", destroy);
+document.querySelector("#deleteBestBtn").addEventListener("click", deleteBest);
+document.querySelector("#endBtn").addEventListener("click", end);
 
 let traffic = generateCars(brainCount).concat(generateTraffic(trafficCount));
 let bestCar = traffic[0];
@@ -134,6 +140,13 @@ function animate(time) {
     // update cars
     for(let i=0; i<traffic.length; i++) {
         traffic[i].update(road.borders, traffic);
+        if(traffic[i].sensors.length > 0) {
+            const inputs = traffic[i].getSensorData(road.borders, traffic);
+            const outputs = Network.forward(inputs, traffic[i].brain);
+            if(traffic[i].useBrain) {
+                traffic[i].updateControls(outputs);
+            }
+        }
     }
 
     getBestCar();    
