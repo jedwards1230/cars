@@ -15,6 +15,12 @@ var startLane = 2;
 var driverSpeed = 3;
 var mutateDegree = 0.25;
 
+import {getRandomInt} from "./utils.js";
+import {Car} from "./car.js";
+import {Road} from "./road.js";
+import {Visualizer} from "./visualizer.js";
+import {Network} from "./network.js";
+
 let traffic = generateCars(brainCount).concat(generateTraffic(trafficCount));
 let bestCar = traffic[0];
 

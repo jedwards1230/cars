@@ -1,4 +1,8 @@
-class Car {
+import {polysIntersect} from "../utils.js";
+import {Controls} from "./controls.js";
+import {Sensor} from "./sensor.js";
+import {Network} from "../network.js";
+export class Car {
     constructor(id, x, y, maxspeed = 2, controller="dummy", model=null, color="blue", width=30, height=50) {
         this.id = id;
         this.x = x;

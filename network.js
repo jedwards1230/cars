@@ -1,4 +1,6 @@
-class Network {
+import { lerp } from "./utils.js";
+
+export class Network {
     constructor(neurons) {
         this.levels = [];
         for(let i=0; i<neurons.length-1; i++) {

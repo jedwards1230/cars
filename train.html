@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<head>
+    <title>Miles' Adventure</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Settigns -->
+        <form>
+            <div class="row py-4">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="episodeCountInput" class="form-label">Episode Count</label>
+                        <input type="number" class="form-control" id="episodeCountInput">
+                      </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="timeLimitInput" class="form-label">Time Limit</label>
+                        <input type="number" class="form-control" id="timeLimitInput">
+                      </div>
+                </div>
+            </div>
+            <button type="button" onclick="preset()" class="btn btn-primary">Start</button>
+          </form>
+
+          <div id="trainStats">
+              <p>Episodes: <div id="episodeCounter"></div></p>
+              <p>Time Limit: <div id="timeLimit"></div></p>
+          </div>
+    </div>
+   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="module" src="main.js"></script>
+</body>

@@ -1,4 +1,6 @@
-class Sensor {
+import { getIntersection, lerp } from "./utils.js";
+
+export class Sensor {
     constructor(car, rays, direction) {
         this.car = car;
         this.rayCount = rays;

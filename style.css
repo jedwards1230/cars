@@ -7,6 +7,15 @@ body {
     align-items: center;
 }
 
+#homeBtns {
+    display: flex;
+    flex-direction: row;
+}
+
+#trainStats {
+    display: none;
+}
+
 #confBtns {
     display: flex;
     flex-direction: column;
