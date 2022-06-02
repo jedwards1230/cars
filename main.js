@@ -1,164 +1,192 @@
+import {Environment} from "./utils/environment.js";
+import {Visualizer} from "./utils/visualizer.js";
+import {Car} from "./car/car.js";
+import {train} from "./train.js";
+
+const canvases = document.getElementById("canvases");
 const carCanvas = document.getElementById("carCanvas");
-carCanvas.width = 300;
 const networkCanvas = document.getElementById("networkCanvas");
+
+carCanvas.width = 300;
 networkCanvas.width = 450;
 
-const laneCount = 3
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
-const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, laneCount);
 
 const trafficCount = 100;
-const brainCount = 300;
+const brainCount = 1;
+let numEpisodes = 1;
+let maxTimeSteps = 21;
 
-var startLane = 2;
-var driverSpeed = 3;
-var mutateDegree = 0.25;
+let env
+let model
 
-import {getRandomInt} from "./utils/utils.js";
-import {Car} from "./car/car.js";
-import {Road} from "./utils/road.js";
-import {Visualizer} from "./utils/visualizer.js";
-import {Network} from "./network.js";
+let anim = true;
+let animFrame;
 
-document.querySelector("#resetBtn").addEventListener("click", reset);
-document.querySelector("#saveBtn").addEventListener("click", save);
-document.querySelector("#destroyBtn").addEventListener("click", destroy);
-document.querySelector("#deleteBestBtn").addEventListener("click", deleteBest);
-document.querySelector("#endBtn").addEventListener("click", end);
+handleButtons();
 
-let traffic = generateCars(brainCount).concat(generateTraffic(trafficCount));
-let bestCar = traffic[0];
+function main() {
+    if(anim) {
+        reset();
+        animate();
+    }
+}
 
-animate();
+function animate(time) {
+    // update cars
+    env.update();
+    model.update(env.road.borders, env.traffic);
+
+    let observation = model.getSensorData(env.road.borders, env.traffic);
+    const action = model.brain.forward(observation);
+    model.updateControls(action);
+
+    env.render();
+    drawCars();
+    drawVisualizer(time);
+
+    animFrame = requestAnimationFrame(animate);
+}
+
+function drawCars() {
+    carCtx.save();
+    carCtx.translate(0, carCanvas.height * 0.7 - model.y);
+    env.road.draw(carCtx);
+    for(let i=0; i<env.traffic.length; i++) {
+        env.traffic[i].draw(carCtx);
+        carCtx.globalAlpha = 1;
+    }
+    model.draw(carCtx, true);
+    carCtx.restore();
+}
+
+function drawVisualizer(time) {
+    networkCtx.lineDashOffset = -time / 40;
+    Visualizer.drawNetwork(networkCtx, model.brain)
+}
+
+function setPlayView() {
+    setTimeout( function() {
+        document.getElementById("trainTableBody").replaceChildren();
+        document.body.style.overflow = "hidden";
+        document.getElementById("welcome").style.display = "none";
+        document.getElementById("play").style.display = "flex";
+        document.getElementById("train").style.display = "none";
+        document.getElementById("nav").style.display = "flex";
+        document.getElementById("toggleView").innerHTML = "Train";
+    } , 100);
+}
+
+function setTrainView() {
+    setTimeout( function() {
+        document.body.style.overflow = "visible";
+        document.getElementById("welcome").style.display = "none";
+        document.getElementById("play").style.display = "none";
+        document.getElementById("train").style.display = "flex";
+        document.getElementById("nav").style.display = "flex";
+        document.getElementById("toggleView").innerHTML = "Play";
+
+        document.getElementById("episodeCountInput").value = numEpisodes;
+        document.getElementById("timeLimitInput").value = maxTimeSteps;
+    } , 100);
+}
+
+function toggleView() {
+    cancelAnimationFrame(animFrame);
+    if(anim) {
+        setPlayView();
+    } else {
+        setTrainView();
+    }
+    main();
+}
+
+function handleButtons() {
+    document.querySelector("#saveBtn").addEventListener("click", save);
+    document.querySelector("#destroyBtn").addEventListener("click", destroy);
+    document.querySelector("#resetBtn").addEventListener("click", reset);
+    document.querySelector("#trainBtn").addEventListener("click", beginTrain);
+    document.querySelector("#endBtn").addEventListener("click", function() {
+        env.end();
+    });
+    document.querySelector("#startTrain").addEventListener("click", function() {
+        anim = false;
+        setTrainView();
+        main();
+    });
+    document.querySelector("#startPlay").addEventListener("click", function() {
+        anim = true;
+        setPlayView();
+        main();
+    });
+    document.querySelector("#toggleView").addEventListener("click", function() {
+        anim = !anim;
+        toggleView();
+    });
+}
+
+function updateTrainStats(info) {
+    document.getElementById("trainStats").style.display = "table";
+    let body = document.getElementById("trainTableBody");
+    let row = document.createElement("tr");
+    let header = document.createElement("th");
+    header.scope = "row";
+    header.innerHTML = info.episode;
+    let damaged = document.createElement("td");
+    damaged.innerHTML = info.damaged;
+    let distance = document.createElement("td");
+    distance.innerHTML = info.distance;
+    let speed = document.createElement("td");
+    speed.innerHTML = info.speed;
+    let reward = document.createElement("td");
+    reward.innerHTML = info.reward;
+
+    row.appendChild(header);
+    row.appendChild(damaged);
+    row.appendChild(distance);
+    row.appendChild(speed);
+    row.appendChild(reward);
+    body.appendChild(row);
+}
 
 function reset() {
-    traffic = generateCars(brainCount).concat(generateTraffic(trafficCount));
+    carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
+
+    env = new Environment(trafficCount, brainCount, carCanvas);
+    model = new Car(-1, env.road.getLaneCenter(env.startLane), 100, env.driverSpeed + 1, "network", "red");
+    model.addBrain("fsd", env);
 }
 
 function save() {
     localStorage.setItem("bestBrain",
-        JSON.stringify(bestCar.brain));
+        JSON.stringify(model.brain.save()));
 }
 
 function destroy() {
     localStorage.removeItem("bestBrain");
 }
 
-function end() {
-    let dmgCt = 0;
-    let goodCt = 0;
-    let goodW = [];
-    let badW = [];
-    for(let i=0; i<traffic.length; i++) {
-        if(traffic[i].model == 'fsd') {
-            if(traffic[i].damaged) {
-                dmgCt += 1;
-                console.log(traffic[i].brain.levels)
-            } else {
-                goodCt += 1;
-            }
-        } 
-    }
-    console.log("good", goodCt, ", bad", dmgCt);
-}
+function beginTrain() {
+    document.getElementById("trainTableBody").replaceChildren();
+    numEpisodes = document.getElementById("episodeCountInput").value;
+    maxTimeSteps = document.getElementById("timeLimitInput").value;
 
-function deleteBest() {
-    const id = bestCar.id;
-    const car = traffic.find(
-        c=>c.id == id
-    );
-    const index = traffic.indexOf(car);
-    if (index > -1) {
-        traffic.splice(index, 1); // 2nd parameter means remove one item only
-      }
-}
+    let info;
+    reset();
 
-function generateCars(N) {
-    const cars = [];
-    for(let i=0; i<N; i++) {
-        cars.push(new Car(i, road.getLaneCenter(startLane), 100, driverSpeed, "network", "fsd", "red"));
-        if(i!=0) {
-            Network.mutate(cars[i].brain, mutateDegree);
+    for(let i=0; i<numEpisodes; i++) {
+        if(localStorage.getItem("trainBrain")) {
+            model.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
         }
-    }
-    return cars
-}
+        info = train(model, env, maxTimeSteps);
+        info.episode = i + 1;
+        updateTrainStats(info);
 
-function generateTraffic(N) {
-    const cars = [];
-    const placed = [];
-    for(let i=0; i<road.laneCount; i++) {
-        placed.push(100);
+        env.reset();
     }
 
-    for(let i=0; i<N; i++) {
-        // randomize lane
-        const lane = getRandomInt(0,road.laneCount-1);
-        
-        const nextLane = placed[lane - 1] ? lane - 1 : lane + 1;
-        placed[lane] = placed[lane] - getRandomInt(150, 250);
-        //cars.push(new Car(i+brainCount, road.getLaneCenter(lane), placed[lane], getRandomInt(2,2), "dummy"));
-        cars.push(new Car(i+brainCount, road.getLaneCenter(lane), placed[lane], getRandomInt(2,4), "network", "forward"));
-1    }
-    return cars
-}
-
-// Search for best car
-function getBestCar() {
-    const te = traffic.filter(
-        c=>c.model=="fsd" && !c.damaged
-    )
-    bestCar = te.find(
-        c=>c.y==Math.min(
-            ...te.map(c=>c.y)
-        )
-    )
-}
-
-function drawCars() {
-    carCtx.save();
-    carCtx.translate(0, carCanvas.height * 0.7 - bestCar.y);
-    road.draw(carCtx);
-    for(let i=0; i<traffic.length; i++) {
-        if(traffic[i].model == "fsd") {
-            carCtx.globalAlpha = 0.2;
-        }
-        traffic[i].draw(carCtx);
-        carCtx.globalAlpha = 1;
-    }
-    bestCar.draw(carCtx, true);
-    carCtx.restore();
-}
-
-function drawVisualizer(time) {
-    networkCtx.lineDashOffset = -time / 40;
-    Visualizer.drawNetwork(networkCtx, bestCar.brain)
-}
-
-function animate(time) {
-    // update cars
-    for(let i=0; i<traffic.length; i++) {
-        traffic[i].update(road.borders, traffic);
-        if(traffic[i].sensors.length > 0) {
-            const inputs = traffic[i].getSensorData(road.borders, traffic);
-            const outputs = Network.forward(inputs, traffic[i].brain);
-            if(traffic[i].useBrain) {
-                traffic[i].updateControls(outputs);
-            }
-        }
-    }
-
-    getBestCar();    
-
-    // update dimensions
-    carCanvas.height = window.innerHeight;
-    networkCanvas.height = window.innerHeight;
-
-    drawCars();
-    drawVisualizer(time);
-
-    requestAnimationFrame(animate);
+    main();
 }
 
 /*

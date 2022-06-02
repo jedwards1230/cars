@@ -3,7 +3,7 @@ import {Controls} from "./controls.js";
 import {Sensor} from "./sensor.js";
 import {Network} from "../network.js";
 export class Car {
-    constructor(id, x, y, maxspeed = 2, controller="dummy", model=null, color="blue", width=30, height=50) {
+    constructor(id, x, y, maxspeed = 2, controller="dummy", color="blue", width=30, height=50) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -18,40 +18,38 @@ export class Car {
         this.acceleration = 0.2;
         this.friction = 0.05;
 
+        this.distance = 0;
         this.damaged = false;
 
-        this.useBrain = controller=="network";
-        this.model = model;
+        this.useBrain = false;
 
         this.controller = controller;
         this.controls = new Controls(controller);
 
         this.polygon = this.#createPolygon();
         this.sensors = []
+    }
 
-        if(controller != "dummy") {
-            switch(model) {
-                case "fsd":
-                    this.sensors.push(new Sensor(this, 5, "forward"));
-                    this.brain = new Network(
-                        [this.sensors[0].rayCount+1, 6, 12, 2]
-                    )
-                    if(localStorage.getItem("bestBrain")) {
-                        this.brain = JSON.parse(localStorage.getItem("bestBrain"));
-                    }
-                    break;
-                case "forward":
-                    this.sensors.push(new Sensor(this, 5, "forward"));
-                    // todo: calc raycount for all sensors
-                    this.brain = new Network(
-                        [this.sensors[0].rayCount, 6, 12, 2]
-                    )
-                    if(localStorage.getItem("forwardBrain")) {
-                        this.brain = JSON.parse(localStorage.getItem("forwardBrain"));
-                    }
-                    break;
-            }
-            console.log(this.model, this.sensors[0].rayCount, "rays")
+    addBrain(model, env) {
+        this.model = model;
+        this.useBrain = true;
+        switch(model) {
+            case "fsd":
+                this.sensors.push(new Sensor(this, 5, "forward"));
+                this.brain = new Network(this, env)
+                if(localStorage.getItem("trainBrain")) {
+                    this.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
+                }
+                break;
+
+            case "forward":
+                this.sensors.push(new Sensor(this, 5, "forward"));
+                // todo: calc raycount for all sensors
+                this.brain = new Network(this, env)
+                if(localStorage.getItem("forwardBrain")) {
+                    this.brain.updateLevels(JSON.parse(localStorage.getItem("forwardBrain")));
+                }
+                break;
         }
     }
 
@@ -62,12 +60,16 @@ export class Car {
         if(!this.damaged) {
             this.polygon = this.#createPolygon();
 
+            if(this.controls.forward) {
+                this.distance++;
+            }
+
             // check damage
             const damage = this.#checkDamage(roadBorders, traffic);
             if(damage == this.id) {
                 this.damaged;
                 this.speed = 0;
-            } else if(damage) {
+            } else if(traffic[damage]) {
                 if(this.model != "fsd") {
                     traffic[damage].damaged = true;
                     traffic[damage].controls.forward = false;
@@ -79,10 +81,23 @@ export class Car {
     }
 
     updateControls(controls) {
+        let max = Math.max(...controls);
+        //console.log("inputs", controls);
+        for(let i=0; i<controls.length; i++) {
+            if(controls[i] == max && max > 0.4) {
+                controls[i] = 1;
+                max++;
+            } else {
+                controls[i] = 0;
+            }
+        }
+        
+        //console.log("controls ", controls);
+
         this.controls.forward = controls[0];
         this.controls.backward = controls[1];
-        //this.controls.left = controls[1];
-        //this.controls.right = controls[2];
+        //this.controls.left = controls[2];
+        //this.controls.right = controls[3];
     }
 
     getSensorData(roadBorders, traffic) {
@@ -180,7 +195,7 @@ export class Car {
         }
 
         this.x -= Math.sin(this.angle)*this.speed;
-        this.y -= Math.cos(this.angle)*this.speed;        
+        this.y -= Math.cos(this.angle)*this.speed;
     }
 
     draw(ctx, drawSensors) {

@@ -8,23 +8,23 @@ export class Visualizer{
         const width=ctx.canvas.width-margin*2;
         const height=ctx.canvas.height-margin*2;
 
-        const levelHeight=height/network.levels.length;
+        const levelHeight=height/network.layers.length;
 
-        for(let i=network.levels.length-1;i>=0;i--){
+        for(let i=network.layers.length-1;i>=0;i--){
             const levelTop=top+
                 lerp(
                     height-levelHeight,
                     0,
-                    network.levels.length==1
+                    network.layers.length==1
                         ?0.5
-                        :i/(network.levels.length-1)
+                        :i/(network.layers.length-1)
                 );
 
             ctx.setLineDash([7,3]);
-            Visualizer.drawLevel(ctx,network.levels[i],
+            Visualizer.drawLevel(ctx,network.layers[i],
                 left,levelTop,
                 width,levelHeight,
-                i==network.levels.length-1
+                i==network.layers.length-1
                     // up, down, left, right
                     ?['\u290a','\u290b','\u21da','\u21db']
                     :[]
@@ -36,7 +36,10 @@ export class Visualizer{
         const right=left+width;
         const bottom=top+height;
 
-        const {inputs,outputs,weights,biases}=level;
+        const inputs = level.inputs;
+        const outputs = level.outputs;
+        const weights = level.weights;
+        const biases = level.biases;
 
         for(let i=0;i<inputs.length;i++){
             for(let j=0;j<outputs.length;j++){

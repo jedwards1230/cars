@@ -1,6 +1,6 @@
 export class Controls {
     constructor(controller) {
-        this.forward = false;
+        this.forward = true;
         this.backward = false;
         this.left = false;
         this.right = false;

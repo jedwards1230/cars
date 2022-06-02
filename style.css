@@ -1,3 +1,7 @@
+body,html {
+    height: 100%;
+  }
+
 body {
     margin: 0;
     overflow: hidden;
@@ -7,13 +11,26 @@ body {
     align-items: center;
 }
 
+#nav, #play, #train, #trainStats {
+    display: none;
+}
+
+#welcome {
+    justify-content: center;
+    align-items: center;
+}
+
+#train {
+    flex-direction: column;
+}
+
+#play {
+    justify-content: center;
+}
+
 #homeBtns {
     display: flex;
     flex-direction: row;
-}
-
-#trainStats {
-    display: none;
 }
 
 #confBtns {
@@ -28,14 +45,25 @@ button {
     margin: 2px;
     cursor: pointer;
 }
+
 button:hover {
     background: blue;
 }
 
+#canvases {
+    position: absolute;
+    -webkit-transform: translateX(0%);
+    transform: translateX(0%)
+}
+
 #carCanvas {
     background: black;
+    position: relative;
+    display: inline-block;
 }
 
 #networkCanvas {
     background: black;
+    position: relative;
+    display: inline-block;
 }
