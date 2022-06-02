@@ -18,29 +18,24 @@ const brainCount = 1;
 let numEpisodes = 1;
 let maxTimeSteps = 21;
 
-let env
-let model
+let env;
+let model;
 
 let anim = true;
 let animFrame;
 
 handleButtons();
 
-function main() {
-    if(anim) {
-        reset();
-        animate();
-    }
-}
-
 function animate(time) {
     // update cars
     env.update();
-    model.update(env.road.borders, env.traffic);
+    if(!model.damaged) {
+        model.update(env.road.borders, env.traffic);
 
-    let observation = model.getSensorData(env.road.borders, env.traffic);
-    const action = model.brain.forward(observation);
-    model.updateControls(action);
+        let observation = model.getSensorData(env.road.borders, env.traffic);
+        const action = model.brain.forward(observation);
+        model.updateControls(action);
+    }
 
     env.render();
     drawCars();
@@ -96,10 +91,11 @@ function toggleView() {
     cancelAnimationFrame(animFrame);
     if(anim) {
         setPlayView();
+        reset();
+        animate();
     } else {
         setTrainView();
     }
-    main();
 }
 
 function handleButtons() {
@@ -113,12 +109,12 @@ function handleButtons() {
     document.querySelector("#startTrain").addEventListener("click", function() {
         anim = false;
         setTrainView();
-        main();
     });
     document.querySelector("#startPlay").addEventListener("click", function() {
         anim = true;
         setPlayView();
-        main();
+        reset();
+        animate();
     });
     document.querySelector("#toggleView").addEventListener("click", function() {
         anim = !anim;
@@ -159,12 +155,12 @@ function reset() {
 }
 
 function save() {
-    localStorage.setItem("bestBrain",
+    localStorage.setItem("trainBrain",
         JSON.stringify(model.brain.save()));
 }
 
 function destroy() {
-    localStorage.removeItem("bestBrain");
+    localStorage.removeItem("trainBrain");
 }
 
 function beginTrain() {
@@ -182,11 +178,10 @@ function beginTrain() {
         info = train(model, env, maxTimeSteps);
         info.episode = i + 1;
         updateTrainStats(info);
+        localStorage.setItem("trainBrain", JSON.stringify(model.brain.save()));
 
-        env.reset();
+        reset();
     }
-
-    main();
 }
 
 /*

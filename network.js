@@ -5,86 +5,108 @@ export class Network {
         this.env = env;
         this.layers = [];
         this.memory = [];
-        this.gamma = 0.95;
-        this.epsilon = 0.1;
+        this.epsilon = 0.5;
 
-        let neurons = [car.sensors[0].rayCount+1, 6, 12, 2];
+        // +2 for inital inputs in car sensor data
+        let neurons = [car.sensors[0].rayCount+2, 6, 12, 2];
         for(let i=0; i<neurons.length-2; i++) {
-            this.layers.push(new Level(neurons[i], neurons[i+1], new Relu));
+            this.layers.push(new Level(neurons[i], neurons[i+1], new Relu()));
         }
-        this.layers.push(new Level(neurons[neurons.length-2], neurons[neurons.length-1], new Sigmoid));
+        this.layers.push(new Level(neurons[neurons.length-2], neurons[neurons.length-1], new Sigmoid()));
     }
 
     reward(metrics) {
         let reward = 0;
         if(metrics.damaged) {
-            reward -= 1;
-        } 
-        if(metrics.distances[0] >= metrics.distances[1] || metrics.distances[1] < 1) {
-            reward -= 1;
+            reward -= 3;
         } else {
-            reward += 1 + this.gamma;
-        }
-        if(metrics.speed < 0.1) {
-            reward -= 1;
-        } else {
-            reward += 1 + this.gamma;
+            reward += 2;
+            if(metrics.speed < 0.1) {
+                reward -= 4;
+            } else {
+                reward += 2;
+                
+            }
+            if(metrics.distances[1] <= 1) {
+                reward -= 1;
+            } else {
+                reward += 1;
+                if(metrics.distances[0] + 1 > metrics.distances[1]) {
+                    reward -= 2;
+                } else {
+                    reward += 3;
+                }
+            }
         }
         
         return reward;
     }
 
     experienceReplay(batchSize=20) {
-        if(this.memory.length < batchSize) {
-            return;
-        } else {
+        const gamma = 0.95;
+        if(this.memory.length > batchSize) {
             let idx = Math.floor(Math.random()*this.memory.length/batchSize);
             let batch_indices = this.memory[idx];
             for(let i=0; i<batch_indices.length; i++) {
-                let [metrics, action, new_observation, prev_observation] = this.memory[i];
-                let actionValues = this.forward(prev_observation);
-                let nextActionValues = this.forward(new_observation, false);
+                let [metrics, new_observation, prev_observation] = this.memory[i];
+                const actionValues = this.forward(prev_observation);
+                const nextActionValues = this.forward(new_observation, false);
                 let experimentalValues = JSON.parse(JSON.stringify(actionValues));
 
-                for(let i=0; i<action.length; i++) {
-                    if(action[i] == 1) {
-                        experimentalValues[i] = metrics.reward;
-                    }
+                experimentalValues[metrics.action] = metrics.reward;
+                if(metrics.reward > 0) {
+                    experimentalValues[metrics.action] += gamma * Math.max(...nextActionValues);
+                    //console.log("experimentalValues", experimentalValues, "nextActionValues", nextActionValues);
                 }
-               
+
+                console.log("metrics", metrics);
                 this.backward(actionValues, experimentalValues);
-                if(this.epsilon >= 0.01) {
-                    this.epsilon = this.epsilon * 0.99;
-                }
+                if(this.epsilon > 0.01) {
+                    this.epsilon *=  0.997;
+                } 
                 // for each layer
                 for(let i=this.layers.length-1; i>=0; i--) {
                     if(this.layers[i].lr >= 0.0001) {
-                        this.layers[i].lr = this.layers[i].lr * 0.995;
+                        this.layers[i].lr *= 0.995;
                     }
                 }
             }
         }
     }
 
-    // todo: derivative of sigmoid and relu
+    // as epsilon decays, the network will be more likely to explore
+    selectAction(observation) {
+        const action = this.forward(observation);
+        const random = Math.random();
+        if(random > this.epsilon) {
+            return Math.floor(Math.random()*action.length);
+        } else {
+            return action.indexOf(Math.max(...action));
+        }
+    }
+
     backward(actionValues, experimentalValues) {
         let delta = [];
+        //console.log("actionValues", actionValues, "experimentalValues", experimentalValues);
         for(let i=0; i<actionValues.length; i++) {
             delta[i] = actionValues[i] - experimentalValues[i];
         }
+        //console.log("delta", delta);
         for(let i=this.layers.length-1; i>=0; i--) {
             delta = this.layers[i].backward(delta);
         }
     }
 
-    remember(metrics, action, observation, prev_observation) {
-        this.memory.push([metrics, action, observation, prev_observation]);
+    remember(metrics, observation, prev_observation) {
+        this.memory.push([metrics, observation, prev_observation]);
     }
 
     forward(inputs, backprop=true) {
         let outputs = this.layers[0].forward(inputs, backprop);
+        //console.log(0, outputs);
         for(let i=1; i<this.layers.length; i++) {
             outputs = this.layers[i].forward(outputs, backprop);
+            //console.log(i, outputs);
         }
 
         return outputs;
@@ -183,20 +205,18 @@ class Level {
             delta += gradient[i] - this.biases[i];
         }
         delta /= gradient.length;
-        //console.log("loss: ", delta);
 
-        let adjustedGradient = new Array(gradient.length);
+        let adjustedGradient = JSON.parse(JSON.stringify(gradient));
 
         if(this.activation) {
             for(let i=0; i<gradient.length; i++) {
-                adjustedGradient[i] = this.activation.backward(gradient[i]);
+                adjustedGradient[i] = this.activation.backward(this.backwardStoreOut[i] - gradient[i]);
             }
         }
         
-        //console.log("gradient: ", gradient);
         for(let i=0; i<this.inputs.length; i++) {
             for(let j=0; j<this.outputs.length; j++) {
-                this.weights[i][j] -= this.lr * adjustedGradient[j] * this.inputs[i];
+                this.weights[i][j] -= this.lr * adjustedGradient[j] - this.inputs[i];
             }
         }
         for(let i=0; i<this.biases.length; i++) {
@@ -219,10 +239,12 @@ class Level {
         for(let i=0; i<this.outputsCount; i++) {
             let sum = 0;
             for(let j=0; j<this.inputsCount; j++) {
+                //console.log(inputs[j], this.weights[j][i]);
                 sum += inputs[j] * this.weights[j][i];
             }
-            output[i] = sum;
-            unactivated[i] = sum;
+            output[i] = sum / this.inputsCount;
+            unactivated[i] = sum / this.inputsCount;
+
 
             if(this.activation) {
                 output[i] = this.activation.forward(output[i]);

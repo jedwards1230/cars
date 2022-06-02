@@ -4,20 +4,23 @@ export function train(model, env, maxTimeSteps) {
     let reward = 0;
     let speed = 0;
     let count = 0;
+    let observation = model.getSensorData(env.road.borders, env.traffic);
+    let distance = model.distance;
     for(let j=0; j<maxTimeSteps; j++) {
-        // todo: something about this feels out of order
-        const prev_observation = model.getSensorData(env.road.borders, env.traffic);
-
-        const action = model.brain.forward(prev_observation);
-        const prev_distance = model.distance;
-
         env.update();
-        model.updateControls(action);
+
+        const chosen = model.brain.selectAction(observation);
+        const prev_distance = model.distance;
+        const prev_observation = observation;
+
+        observation = model.getSensorData(env.road.borders, env.traffic);
+        console.log("observation", observation);
+
+        model.updateControls(chosen);
         model.update(env.road.borders, env.traffic);
 
-        const observation = model.getSensorData(env.road.borders, env.traffic);
-
         const metrics = {
+            action: chosen,
             damaged: model.damaged,
             distances: [prev_distance, model.distance],
             speed: model.speed,
@@ -29,8 +32,8 @@ export function train(model, env, maxTimeSteps) {
         count++;
 
 
-        //console.log(metrics);
-        model.brain.remember(metrics, action, observation, prev_observation);
+        console.log("metrics", metrics);
+        model.brain.remember(metrics, observation, prev_observation);
         
         model.brain.experienceReplay(20);
 
@@ -39,7 +42,6 @@ export function train(model, env, maxTimeSteps) {
             break;
         }
     }
-    localStorage.setItem("trainBrain", JSON.stringify(model.brain.save()));
     return {
         reward: reward.toFixed(2),
         speed: (speed / count).toFixed(2),

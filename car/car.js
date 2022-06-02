@@ -13,7 +13,7 @@ export class Car {
 
         this.angle = 0;
 
-        this.speed = 0;
+        this.speed = 1;
         this.maxSpeed = maxspeed;
         this.acceleration = 0.2;
         this.friction = 0.05;
@@ -46,8 +46,8 @@ export class Car {
                 this.sensors.push(new Sensor(this, 5, "forward"));
                 // todo: calc raycount for all sensors
                 this.brain = new Network(this, env)
-                if(localStorage.getItem("forwardBrain")) {
-                    this.brain.updateLevels(JSON.parse(localStorage.getItem("forwardBrain")));
+                if(localStorage.getItem("trainBrain")) {
+                    this.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
                 }
                 break;
         }
@@ -60,14 +60,12 @@ export class Car {
         if(!this.damaged) {
             this.polygon = this.#createPolygon();
 
-            if(this.controls.forward) {
-                this.distance++;
-            }
+            this.distance += this.speed;
 
             // check damage
             const damage = this.#checkDamage(roadBorders, traffic);
             if(damage == this.id) {
-                this.damaged;
+                this.damaged = true;
                 this.speed = 0;
             } else if(traffic[damage]) {
                 if(this.model != "fsd") {
@@ -78,30 +76,31 @@ export class Car {
                 this.speed = 0;
             }
         }
+        if(this.damaged) {
+            console.log("crashed at ", this.distance);
+        }
     }
 
-    updateControls(controls) {
-        let max = Math.max(...controls);
-        //console.log("inputs", controls);
-        for(let i=0; i<controls.length; i++) {
-            if(controls[i] == max && max > 0.4) {
-                controls[i] = 1;
-                max++;
-            } else {
-                controls[i] = 0;
-            }
+    updateControls(a) {
+        switch (a) {
+            case 0:
+                console.log("forward");
+                this.controls.forward = true;
+                this.controls.backward = false;
+            case 1:
+                console.log("backward");
+                this.controls.backward = true;
+                this.controls.forward = false;
+            default:
+                this.controls.forward = false;
+                this.controls.backward  = false;
+                this.controls.left = false;
+                this.controls.right = false;
         }
-        
-        //console.log("controls ", controls);
-
-        this.controls.forward = controls[0];
-        this.controls.backward = controls[1];
-        //this.controls.left = controls[2];
-        //this.controls.right = controls[3];
     }
 
     getSensorData(roadBorders, traffic) {
-        let inputs = [this.speed];
+        let inputs = [this.speed, this.distance];
         // update each sensor
         for(let i=0; i<this.sensors.length; i++) {
             this.sensors[i].update(roadBorders, traffic);

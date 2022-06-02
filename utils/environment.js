@@ -59,9 +59,9 @@ export class Environment {
                 this.traffic[i].update(this.road.borders, this.traffic);
                 if(this.traffic[i].sensors.length > 0) {
                     const inputs = this.traffic[i].getSensorData(this.road.borders, this.traffic);
-                    const outputs = this.traffic[i].brain.forward(inputs);
+                    const chosen = this.traffic[i].brain.selectAction(observation);
                     if(this.traffic[i].useBrain) {
-                        this.traffic[i].updateControls(outputs);
+                        this.traffic[i].updateControls(chosen);
                     }
                 }
             }
