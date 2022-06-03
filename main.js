@@ -3,7 +3,6 @@ import {Visualizer} from "./utils/visualizer.js";
 import {Car} from "./car/car.js";
 import {train} from "./train.js";
 
-const canvases = document.getElementById("canvases");
 const carCanvas = document.getElementById("carCanvas");
 const networkCanvas = document.getElementById("networkCanvas");
 
@@ -15,11 +14,15 @@ const networkCtx = networkCanvas.getContext("2d");
 
 const trafficCount = 100;
 const brainCount = 1;
+
+let episodeCounter = 0;
 let numEpisodes = 1;
 let maxTimeSteps = 21;
 
 let env;
 let model;
+let info;
+let episodes = [];
 
 let anim = true;
 let animFrame;
@@ -30,12 +33,13 @@ function animate(time) {
     // update cars
     env.update();
     if(!model.damaged) {
-        model.update(env.road.borders, env.traffic);
-
         let observation = model.getSensorData(env.road.borders, env.traffic);
-        const action = model.brain.forward(observation);
+        const action = model.brain.selectAction(observation);
         model.updateControls(action);
+        model.update(env.road.borders, env.traffic);
     }
+
+    console.log(model.speed)
 
     env.render();
     drawCars();
@@ -75,10 +79,10 @@ function setPlayView() {
 
 function setTrainView() {
     setTimeout( function() {
-        document.body.style.overflow = "visible";
+        document.body.style.overflow = "scroll";
         document.getElementById("welcome").style.display = "none";
         document.getElementById("play").style.display = "none";
-        document.getElementById("train").style.display = "flex";
+        document.getElementById("train").style.display = "block";
         document.getElementById("nav").style.display = "flex";
         document.getElementById("toggleView").innerHTML = "Play";
 
@@ -122,10 +126,24 @@ function handleButtons() {
     });
 }
 
-function updateTrainStats(info) {
-    document.getElementById("trainStats").style.display = "table";
+function updateTrainStats() {
+    const progress = document.getElementById("trainProgress");
+    progress.ariaValueNow = info.episode;
+    if(episodeCounter < numEpisodes - 1) {
+        progress.style.width = `${(info.episode / numEpisodes) * 100}%`;
+    } else {
+        progress.style.width = "0%";
+    }
+
+    document.getElementById("trainStats").style.display = "block";
     let body = document.getElementById("trainTableBody");
     let row = document.createElement("tr");
+    row.id = info.episode - 1;
+    row.addEventListener("click", function(event) {
+        console.log("episode: " + event.target.parentElement.id);
+        console.log(episodes[event.target.parentElement.id].weights[0].weights);
+        console.log(episodes[event.target.parentElement.id].weights[1].weights);
+    });
     let header = document.createElement("th");
     header.scope = "row";
     header.innerHTML = info.episode;
@@ -163,25 +181,43 @@ function destroy() {
     localStorage.removeItem("trainBrain");
 }
 
+// prepare for training
 function beginTrain() {
     document.getElementById("trainTableBody").replaceChildren();
     numEpisodes = document.getElementById("episodeCountInput").value;
     maxTimeSteps = document.getElementById("timeLimitInput").value;
+    let progress = document.getElementById("trainProgress");
 
-    let info;
+    progress.style.width = "0%";
+    progress.ariaValueNow = 0;
+    progress.ariaValueMax = numEpisodes;
+
+    episodeCounter = 0;
+
     reset();
+    console.log("beginning training");
+    episodeLoop();
+}
 
-    for(let i=0; i<numEpisodes; i++) {
-        if(localStorage.getItem("trainBrain")) {
-            model.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
-        }
-        info = train(model, env, maxTimeSteps);
-        info.episode = i + 1;
-        updateTrainStats(info);
-        localStorage.setItem("trainBrain", JSON.stringify(model.brain.save()));
-
-        reset();
+function episodeLoop() {
+    // load training brain
+    if(localStorage.getItem("trainBrain")) {
+        model.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
     }
+
+    // collect episode info
+    info = train(model, env, maxTimeSteps);
+    info.episode = episodeCounter + 1;
+    updateTrainStats();
+    localStorage.setItem("trainBrain", JSON.stringify(model.brain.save()));
+
+    episodes.push(info);
+    reset();
+    episodeCounter++;
+
+    if(episodeCounter < numEpisodes) {
+        animFrame = requestAnimationFrame(episodeLoop);
+    } 
 }
 
 /*

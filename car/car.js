@@ -57,25 +57,13 @@ export class Car {
     // if damaged, only process slow down and sensors
     update(roadBorders, traffic) {
         this.#move();
+
         if(!this.damaged) {
             this.polygon = this.#createPolygon();
-
             this.distance += this.speed;
-
-            // check damage
-            const damage = this.#checkDamage(roadBorders, traffic);
-            if(damage == this.id) {
-                this.damaged = true;
-                this.speed = 0;
-            } else if(traffic[damage]) {
-                if(this.model != "fsd") {
-                    traffic[damage].damaged = true;
-                    traffic[damage].controls.forward = false;
-                }
-                this.damaged = true;
-                this.speed = 0;
-            }
+            this.#checkDamage(roadBorders, traffic);
         }
+
         if(this.damaged) {
             console.log("crashed at ", this.distance);
         }
@@ -84,23 +72,16 @@ export class Car {
     updateControls(a) {
         switch (a) {
             case 0:
-                console.log("forward");
                 this.controls.forward = true;
                 this.controls.backward = false;
             case 1:
-                console.log("backward");
                 this.controls.backward = true;
                 this.controls.forward = false;
-            default:
-                this.controls.forward = false;
-                this.controls.backward  = false;
-                this.controls.left = false;
-                this.controls.right = false;
         }
     }
 
     getSensorData(roadBorders, traffic) {
-        let inputs = [this.speed, this.distance];
+        let inputs = [Math.sin(this.speed), Math.sin(this.acceleration)];
         // update each sensor
         for(let i=0; i<this.sensors.length; i++) {
             this.sensors[i].update(roadBorders, traffic);
@@ -114,19 +95,31 @@ export class Car {
     }
 
     #checkDamage(roadBorders, traffic) {
+        let damage = null;
         for(let i=0; i < roadBorders.length; i++) {
             if(polysIntersect(this.polygon, roadBorders[i])) {
-                return this.id;
+                damage = this.id;
             }
         }
         for(let i=0; i < traffic.length; i++) {
             if(traffic[i].id != this.id && traffic[i].model != "fsd") {
                 if(polysIntersect(this.polygon, traffic[i].polygon)) {
-                    return traffic[i].id;
+                    damage = traffic[i].id;
                 }
             }
         }
-        return null;
+
+        if(damage == this.id) {
+            this.damaged = true;
+            this.speed = 0;
+        } else if(traffic[damage]) {
+            if(this.model != "fsd") {
+                traffic[damage].damaged = true;
+                traffic[damage].controls.forward = false;
+            }
+            this.damaged = true;
+            this.speed = 0;
+        }
     }
 
     #createPolygon() {
@@ -156,11 +149,21 @@ export class Car {
     #move() {
         if(!this.damaged) {
             // accelerate
-            if(this.controls.forward) {
-                this.speed += this.acceleration;
-            }
-            if(this.controls.backward) {
-                this.speed -= this.acceleration * 3 / 2;
+            if(this.model == "fsd") {
+                if(this.controls.forward) {
+                    console.log("moving: accelerate");
+                    this.speed += this.acceleration;
+                } else if(this.controls.backward) {
+                    console.log("moving: backward");
+                    this.speed -= this.acceleration * 3 / 2;
+                }
+                console.log("moving: speed: ", this.speed);
+            } else {
+                if(this.controls.forward) {
+                    this.speed += this.acceleration;
+                } else if(this.controls.backward) {
+                    this.speed -= this.acceleration * 3 / 2;
+                }
             }
 
             // check direction
@@ -181,6 +184,8 @@ export class Car {
             } else if(this.speed < -this.maxSpeed * 2 / 3) {
                 this.speed = -this.maxSpeed * 2 / 3;
             }
+        } else {
+            console.log("damaged");
         }
 
         // add friction
@@ -192,6 +197,8 @@ export class Car {
         if(Math.abs(this.speed) < this.friction) {
             this.speed = 0;
         }
+        
+        this.speed = parseFloat(this.speed.toFixed(2));
 
         this.x -= Math.sin(this.angle)*this.speed;
         this.y -= Math.cos(this.angle)*this.speed;

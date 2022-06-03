@@ -6,7 +6,6 @@ body {
     margin: 0;
     overflow: hidden;
     background: lightgreen;
-    display: flex;
     justify-content: center;
     align-items: center;
 }
@@ -20,10 +19,6 @@ body {
     align-items: center;
 }
 
-#train {
-    flex-direction: column;
-}
-
 #play {
     justify-content: center;
 }
@@ -34,6 +29,11 @@ body {
 }
 
 #confBtns {
+    display: inline-block;
+    position: relative;
+}
+
+#confBtns button {
     display: flex;
     flex-direction: column;
 }
@@ -50,7 +50,7 @@ button:hover {
     background: blue;
 }
 
-#canvases {
+#playView {
     position: absolute;
     -webkit-transform: translateX(0%);
     transform: translateX(0%)

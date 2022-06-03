@@ -1,11 +1,10 @@
-import { Network } from "./network.js";
+
 
 export function train(model, env, maxTimeSteps) {
     let reward = 0;
     let speed = 0;
     let count = 0;
     let observation = model.getSensorData(env.road.borders, env.traffic);
-    let distance = model.distance;
     for(let j=0; j<maxTimeSteps; j++) {
         env.update();
 
@@ -14,7 +13,6 @@ export function train(model, env, maxTimeSteps) {
         const prev_observation = observation;
 
         observation = model.getSensorData(env.road.borders, env.traffic);
-        console.log("observation", observation);
 
         model.updateControls(chosen);
         model.update(env.road.borders, env.traffic);
@@ -22,7 +20,9 @@ export function train(model, env, maxTimeSteps) {
         const metrics = {
             action: chosen,
             damaged: model.damaged,
-            distances: [prev_distance, model.distance],
+            prev_distance: prev_distance,
+            next_distance: model.distance,
+            acceleration: model.acceleration,
             speed: model.speed,
         }
 
@@ -32,7 +32,7 @@ export function train(model, env, maxTimeSteps) {
         count++;
 
 
-        console.log("metrics", metrics);
+        //console.log("metrics", metrics);
         model.brain.remember(metrics, observation, prev_observation);
         
         model.brain.experienceReplay(20);
@@ -43,10 +43,10 @@ export function train(model, env, maxTimeSteps) {
         }
     }
     return {
-        reward: reward.toFixed(2),
+        reward: (reward / count).toFixed(2),
         speed: (speed / count).toFixed(2),
         damaged: model.damaged,
-        distance: model.distance,
+        distance: model.distance.toFixed(2),
         weights: model.brain.save(),
     };
 }

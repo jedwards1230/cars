@@ -11,6 +11,20 @@ export class Visualizer{
         const levelHeight=height/network.layers.length;
 
         for(let i=network.layers.length-1;i>=0;i--){
+
+            if(i==network.layers.length-1){
+                let actionValues = network.layers[i].outputs;
+                const idx = actionValues.indexOf(Math.max(...actionValues));
+                for(let j=0;j<actionValues.length;j++){
+                    if(j == idx) {
+                        actionValues[j] = 1;
+                    } else {
+                        actionValues[j] = 0;
+                    }
+                }
+                network.layers[i].outputs = actionValues;
+            }
+
             const levelTop=top+
                 lerp(
                     height-levelHeight,

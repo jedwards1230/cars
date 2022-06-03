@@ -8,31 +8,33 @@ export class Network {
         this.epsilon = 0.5;
 
         // +2 for inital inputs in car sensor data
-        let neurons = [car.sensors[0].rayCount+2, 6, 12, 2];
+        let neurons = [car.sensors[0].rayCount+2, 6, 2];
         for(let i=0; i<neurons.length-2; i++) {
             this.layers.push(new Level(neurons[i], neurons[i+1], new Relu()));
         }
         this.layers.push(new Level(neurons[neurons.length-2], neurons[neurons.length-1], new Sigmoid()));
     }
 
-    reward(metrics) {
+    reward(m) {
         let reward = 0;
-        if(metrics.damaged) {
-            reward -= 3;
+        //if car is damaged, punish
+        if(m.damaged) {
+            return -3;
         } else {
-            reward += 2;
-            if(metrics.speed < 0.1) {
-                reward -= 4;
+            reward += 1;
+            //if car is still or reversed, punish
+            if(m.speed < 0.1) {
+                return -1;
             } else {
                 reward += 2;
-                
             }
-            if(metrics.distances[1] <= 1) {
-                reward -= 1;
+            //if car moving in wrong direction, punish
+            if(m.next_distance < 1) {
+                return -1;
             } else {
                 reward += 1;
-                if(metrics.distances[0] + 1 > metrics.distances[1]) {
-                    reward -= 2;
+                if(m.prev_distance + 1 > m.next_distance) {
+                    return -1;
                 } else {
                     reward += 3;
                 }
@@ -59,15 +61,16 @@ export class Network {
                     //console.log("experimentalValues", experimentalValues, "nextActionValues", nextActionValues);
                 }
 
-                console.log("metrics", metrics);
+                //console.log("metrics", metrics);
                 this.backward(actionValues, experimentalValues);
                 if(this.epsilon > 0.01) {
                     this.epsilon *=  0.997;
                 } 
                 // for each layer
                 for(let i=this.layers.length-1; i>=0; i--) {
-                    if(this.layers[i].lr >= 0.0001) {
-                        this.layers[i].lr *= 0.995;
+                    if(this.layers[i].lr > 0.0001) {
+                        this.layers[i].lr *= 0.9;
+                        this.layers[i].lr = parseFloat(this.layers[i].lr.toFixed(8));
                     }
                 }
             }
@@ -76,24 +79,26 @@ export class Network {
 
     // as epsilon decays, the network will be more likely to explore
     selectAction(observation) {
-        const action = this.forward(observation);
+        const actionValues = this.forward(observation);
         const random = Math.random();
         if(random > this.epsilon) {
-            return Math.floor(Math.random()*action.length);
+            return Math.floor(Math.random()*actionValues.length);
         } else {
-            return action.indexOf(Math.max(...action));
+            return actionValues.indexOf(Math.max(...actionValues));
         }
+        //return actionValues.indexOf(Math.max(...actionValues));
     }
 
     backward(actionValues, experimentalValues) {
         let delta = [];
         //console.log("actionValues", actionValues, "experimentalValues", experimentalValues);
         for(let i=0; i<actionValues.length; i++) {
-            delta[i] = actionValues[i] - experimentalValues[i];
+            delta[i] =  experimentalValues[i] - actionValues[i];
         }
-        //console.log("delta", delta);
+        //console.log(this.layers.length, "delta", delta);
         for(let i=this.layers.length-1; i>=0; i--) {
             delta = this.layers[i].backward(delta);
+            //console.log(i, "delta", delta);
         }
     }
 
@@ -190,74 +195,91 @@ class Level {
     }
 
     updateWeights(gradient) {
-        this.weights = this.weights - this.lr * gradient;
-    }
-
-    /*  write a back propagation function that:
-        1: finds the derivative of the loss function
-        2. calculates the gradient of the loss function
-        3. updates the weights and biases
-        4. returns the loss amount
-    */
-   backward(gradient) {
-        let delta = 0;
-        for(let i=0; i<gradient.length; i++) {
-            delta += gradient[i] - this.biases[i];
-        }
-        delta /= gradient.length;
-
-        let adjustedGradient = JSON.parse(JSON.stringify(gradient));
-
-        if(this.activation) {
-            for(let i=0; i<gradient.length; i++) {
-                adjustedGradient[i] = this.activation.backward(this.backwardStoreOut[i] - gradient[i]);
-            }
-        }
-        
         for(let i=0; i<this.inputs.length; i++) {
             for(let j=0; j<this.outputs.length; j++) {
-                this.weights[i][j] -= this.lr * adjustedGradient[j] - this.inputs[i];
+                this.weights[i][j] -= this.lr * gradient[j] - this.inputs[i];
             }
         }
+    }
+
+    updateBiases(gradient) {
         for(let i=0; i<this.biases.length; i++) {
-            this.biases[i] -= this.lr * adjustedGradient[i];
+            this.biases[i] -= this.lr * gradient[i];
+        }
+    }
+
+    backward(gradient) {
+        // compute mean squared error
+        console.log("backwards layer outputs", gradient);
+        let loss = this.MSE(gradient, this.biases);
+        let adjustedGradient = JSON.parse(JSON.stringify(gradient));
+        console.log("backwards layer delta loss: ", loss, "gradient", gradient, "outputs", this.outputs, "biases", this.biases);
+
+        if(this.activation) {
+            adjustedGradient = this.activation.backward(this.backwardStoreOut);
+            console.log("backwards layer storeOut", adjustedGradient);
         }
 
         let nextGradient = [];
-        for(let i=0; i<this.backwardStoreIn.length; i++) {
-            nextGradient[i] = this.backwardStoreIn[i] - delta;
+        for(let i=0; i<this.inputs.length; i++) {
+            nextGradient[i] = 0;
+            for(let j=0; j<this.outputs.length; j++) {
+                nextGradient[i] += this.backwardStoreIn[i] * adjustedGradient[j];
+            }
+            nextGradient[i] /= this.outputsCount;
         }
 
+        console.log("backwards layer nextGradient", nextGradient);
+
+        /* for(let i=0; i<this.backwardStoreIn.length; i++) {
+            nextGradient[i] = this.backwardStoreIn[i] + loss;
+        } */
+
+        this.updateWeights(adjustedGradient);
+        this.updateBiases(adjustedGradient);
+
+        console.log("backwards layer inputs", nextGradient);
         return nextGradient;
+    }
+
+    // function to find mean squared error between two values
+    MSE(expected, actual) {
+        let error = 0;
+        for(let i=0; i<expected.length; i++) {
+            error += Math.pow(expected[i] - actual[i], 2);
+        }
+        return error / expected.length;
     }
 
     // speed + sensors
     forward(inputs, backprop=true) {
+        console.log("forward inputs", inputs);
         let output = new Array(this.outputsCount);
-        let unactivated = new Array(this.outputsCount);
         // compute for each output (none, up, down, left, right) 
+        let sums = [];
         for(let i=0; i<this.outputsCount; i++) {
             let sum = 0;
             for(let j=0; j<this.inputsCount; j++) {
-                //console.log(inputs[j], this.weights[j][i]);
                 sum += inputs[j] * this.weights[j][i];
             }
             output[i] = sum / this.inputsCount;
-            unactivated[i] = sum / this.inputsCount;
-
-
-            if(this.activation) {
-                output[i] = this.activation.forward(output[i]);
-            }
+            sums.push(sum);
         }
 
         if(backprop) {
             this.backwardStoreIn = inputs;
-            this.backwardStoreOut = unactivated;
+            this.backwardStoreOut = JSON.parse(JSON.stringify(output));
+            console.log("output: ", output, "sums", sums);
+        }
+
+        if(this.activation) {
+            output = this.activation.forward(output);
         }
 
         this.inputs = inputs;
         this.outputs = output;
+
+        console.log("forward outputs", output);
 
         return output;
     }
@@ -269,13 +291,21 @@ class Sigmoid {
         this.backward = this.backward;
     }
 
-    forward(z) {
-        const k = 2;
-        return 1 / (1 + Math.exp(-z/k));
+    forward(inputs) {
+        let output = [];
+        const k = 2
+        for(let i=0; i<inputs.length; i++) {
+            output[i] = 1 / (1 + Math.exp(-inputs[i]/2));
+        }
+        return output;
     }
 
-    backward(z) {
-        return z * (1 - z);
+    backward(inputs) {
+        let output = [];
+        for(let i=0; i<inputs.length; i++) {
+            output[i] = inputs[i] * (1 - inputs[i]);
+        }
+        return output;
     }
 }
 
@@ -285,11 +315,27 @@ class Relu {
         this.backward = this.backward;
     }
 
-    forward(x) {
-        return x > 0 ? x : 0;
+    forward(inputs) {
+        let output = [];
+        for(let i=0; i<inputs.length; i++) {
+            if(inputs[i] > 0) {
+                output[i] = inputs[i];
+            } else {
+                output[i] = 0;
+            }
+        }
+        return output;
     }
 
-    backward(x) {
-        return x > 0 ? 0 : 1;
+    backward(inputs) {
+        let output = [];
+        for(let i=0; i<inputs.length; i++) {
+            if(inputs[i] > 0) {
+                output[i] = 1;
+            } else {
+                output[i] = 0;
+            }
+        }
+        return output;
     }
 }
