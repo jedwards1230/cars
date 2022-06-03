@@ -33,18 +33,16 @@ function animate(time) {
     // update cars
     env.update();
     if(!model.damaged) {
-        let observation = model.getSensorData(env.road.borders, env.traffic);
+        const observation = model.getSensorData(env.road.borders, env.traffic);
         const action = model.brain.selectAction(observation);
         model.updateControls(action);
-        model.update(env.road.borders, env.traffic);
+        env.traffic = model.update(env.road.borders, env.traffic);
     }
 
-    console.log(model.speed)
-
+    // draw cars
     env.render();
     drawCars();
     drawVisualizer(time);
-
     animFrame = requestAnimationFrame(animate);
 }
 

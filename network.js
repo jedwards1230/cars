@@ -91,14 +91,11 @@ export class Network {
 
     backward(actionValues, experimentalValues) {
         let delta = [];
-        //console.log("actionValues", actionValues, "experimentalValues", experimentalValues);
         for(let i=0; i<actionValues.length; i++) {
-            delta[i] =  experimentalValues[i] - actionValues[i];
+            delta[i] = actionValues[i] - experimentalValues[i];
         }
-        //console.log(this.layers.length, "delta", delta);
         for(let i=this.layers.length-1; i>=0; i--) {
             delta = this.layers[i].backward(delta);
-            //console.log(i, "delta", delta);
         }
     }
 
@@ -108,12 +105,9 @@ export class Network {
 
     forward(inputs, backprop=true) {
         let outputs = this.layers[0].forward(inputs, backprop);
-        //console.log(0, outputs);
         for(let i=1; i<this.layers.length; i++) {
             outputs = this.layers[i].forward(outputs, backprop);
-            //console.log(i, outputs);
         }
-
         return outputs;
     }
 
@@ -210,15 +204,18 @@ class Level {
 
     backward(gradient) {
         // compute mean squared error
-        console.log("backwards layer outputs", gradient);
-        let loss = this.MSE(gradient, this.biases);
         let adjustedGradient = JSON.parse(JSON.stringify(gradient));
-        console.log("backwards layer delta loss: ", loss, "gradient", gradient, "outputs", this.outputs, "biases", this.biases);
 
+        // derive activation function
         if(this.activation) {
-            adjustedGradient = this.activation.backward(this.backwardStoreOut);
-            console.log("backwards layer storeOut", adjustedGradient);
+            const stored = this.activation.backward(this.backwardStoreOut);
+            for(let i=0; i<adjustedGradient.length; i++) {
+                adjustedGradient[i] *= stored[i];
+            }
         }
+
+        // update biases with gradient
+        this.updateBiases(adjustedGradient);
 
         let nextGradient = [];
         for(let i=0; i<this.inputs.length; i++) {
@@ -226,19 +223,11 @@ class Level {
             for(let j=0; j<this.outputs.length; j++) {
                 nextGradient[i] += this.backwardStoreIn[i] * adjustedGradient[j];
             }
-            nextGradient[i] /= this.outputsCount;
+            nextGradient[i] /= this.outputs.length;
+            nextGradient[i] = parseFloat(nextGradient[i].toFixed(8));
         }
+        this.updateWeights(nextGradient);
 
-        console.log("backwards layer nextGradient", nextGradient);
-
-        /* for(let i=0; i<this.backwardStoreIn.length; i++) {
-            nextGradient[i] = this.backwardStoreIn[i] + loss;
-        } */
-
-        this.updateWeights(adjustedGradient);
-        this.updateBiases(adjustedGradient);
-
-        console.log("backwards layer inputs", nextGradient);
         return nextGradient;
     }
 
@@ -253,7 +242,6 @@ class Level {
 
     // speed + sensors
     forward(inputs, backprop=true) {
-        console.log("forward inputs", inputs);
         let output = new Array(this.outputsCount);
         // compute for each output (none, up, down, left, right) 
         let sums = [];
@@ -269,7 +257,6 @@ class Level {
         if(backprop) {
             this.backwardStoreIn = inputs;
             this.backwardStoreOut = JSON.parse(JSON.stringify(output));
-            console.log("output: ", output, "sums", sums);
         }
 
         if(this.activation) {
@@ -278,8 +265,6 @@ class Level {
 
         this.inputs = inputs;
         this.outputs = output;
-
-        console.log("forward outputs", output);
 
         return output;
     }

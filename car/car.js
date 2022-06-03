@@ -13,7 +13,7 @@ export class Car {
 
         this.angle = 0;
 
-        this.speed = 1;
+        this.speed = 0;
         this.maxSpeed = maxspeed;
         this.acceleration = 0.2;
         this.friction = 0.05;
@@ -61,12 +61,13 @@ export class Car {
         if(!this.damaged) {
             this.polygon = this.#createPolygon();
             this.distance += this.speed;
-            this.#checkDamage(roadBorders, traffic);
+            traffic = this.#checkDamage(roadBorders, traffic);
         }
 
         if(this.damaged) {
             console.log("crashed at ", this.distance);
         }
+        return traffic;
     }
 
     updateControls(a) {
@@ -74,14 +75,16 @@ export class Car {
             case 0:
                 this.controls.forward = true;
                 this.controls.backward = false;
+                break;
             case 1:
-                this.controls.backward = true;
                 this.controls.forward = false;
+                this.controls.backward = true;
+                break;
         }
     }
 
     getSensorData(roadBorders, traffic) {
-        let inputs = [Math.sin(this.speed), Math.sin(this.acceleration)];
+        let inputs = [this.speed, this.acceleration];
         // update each sensor
         for(let i=0; i<this.sensors.length; i++) {
             this.sensors[i].update(roadBorders, traffic);
@@ -120,6 +123,7 @@ export class Car {
             this.damaged = true;
             this.speed = 0;
         }
+        return traffic;
     }
 
     #createPolygon() {
@@ -149,21 +153,10 @@ export class Car {
     #move() {
         if(!this.damaged) {
             // accelerate
-            if(this.model == "fsd") {
-                if(this.controls.forward) {
-                    console.log("moving: accelerate");
-                    this.speed += this.acceleration;
-                } else if(this.controls.backward) {
-                    console.log("moving: backward");
-                    this.speed -= this.acceleration * 3 / 2;
-                }
-                console.log("moving: speed: ", this.speed);
-            } else {
-                if(this.controls.forward) {
-                    this.speed += this.acceleration;
-                } else if(this.controls.backward) {
-                    this.speed -= this.acceleration * 3 / 2;
-                }
+            if(this.controls.forward) {
+                this.speed += this.acceleration;
+            } else if(this.controls.backward) {
+                this.speed -= this.acceleration * 3 / 2;
             }
 
             // check direction
