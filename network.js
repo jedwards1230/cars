@@ -20,21 +20,21 @@ export class Network {
         if(m.damaged) {
             return -10;
         } else {
-            reward += 1;
             if(m.speed < 0.1) {
-                return -1;
+                return -5;
             } else {
-                reward += 2;
+                reward += 1;
             }
             if(m.next_distance < 1) {
-                return -1;
+                return -5;
             } else {
-                reward += 2;
-                if(m.prev_distance + 1 > m.next_distance) {
-                    return -1;
-                } else {
-                    reward += 3 * Math.abs(m.prev_distance + 1 - m.next_distance);
-                }
+                reward += 1;
+            }
+            if(m.prev_distance + 1 > m.next_distance) {
+                return -3;
+            } else {
+                let n = 3 * (m.next_distance - m.prev_distance);
+                reward += parseFloat(n.toFixed(3));
             }
         }
         
@@ -42,33 +42,39 @@ export class Network {
     }
 
     experienceReplay(batchSize=20) {
+        if(this.memory.length < batchSize) {
+            return;
+        }
+
         const gamma = 0.95;
-        if(this.memory.length > batchSize) {
-            let idx = Math.floor(Math.random()*this.memory.length/batchSize);
-            let batch_indices = this.memory[idx];
-            for(let i=0; i<batch_indices.length; i++) {
-                let [metrics, new_observation, prev_observation] = this.memory[i];
-                const actionValues = this.forward(prev_observation);
-                const nextActionValues = this.forward(new_observation, false);
-                let experimentalValues = JSON.parse(JSON.stringify(actionValues));
+        let idx = Math.floor(Math.random()*this.memory.length/batchSize);
+        let batch_indices = this.memory[idx];
+        for(let i=0; i<batch_indices.length; i++) {
+            let [metrics, new_observation, prev_observation] = this.memory[i];
+            const actionValues = this.forward(prev_observation);
+            const nextActionValues = this.forward(new_observation, false);
+            let experimentalValues = JSON.parse(JSON.stringify(actionValues));
 
-                experimentalValues[metrics.action] = metrics.reward;
-                if(metrics.reward > 0) {
-                    experimentalValues[metrics.action] += gamma * Math.max(...nextActionValues);
-                    //console.log("experimentalValues", experimentalValues, "nextActionValues", nextActionValues);
-                }
+            experimentalValues[metrics.action] = metrics.reward;
+            if(metrics.reward > 0) {
+                experimentalValues[metrics.action] += gamma * Math.max(...nextActionValues);
+                //console.log("experimentalValues", experimentalValues, "nextActionValues", nextActionValues);
+            }
 
-                //console.log("metrics", metrics);
-                this.backward(actionValues, experimentalValues);
-                if(this.epsilon > 0.01) {
-                    this.epsilon *=  0.997;
-                } 
-                // for each layer
-                for(let i=this.layers.length-1; i>=0; i--) {
-                    if(this.layers[i].lr > 0.0001) {
-                        this.layers[i].lr *= 0.9;
-                        this.layers[i].lr = parseFloat(this.layers[i].lr.toFixed(8));
-                    }
+            this.backward(actionValues, experimentalValues);
+
+            // epsilon decay
+            if(this.epsilon > 0.01) {
+                this.epsilon *=  0.997;
+            } 
+
+            // learning rate decay
+            for(let i=this.layers.length-1; i>=0; i--) {
+                if(this.layers[i].lr > 0.0001) {
+                    this.layers[i].lr *= 0.9;
+                    //this.layers[i].lr = parseFloat(this.layers[i].lr.toFixed(8));
+                } else {
+                    this.layers[i].lr = 0.0001;
                 }
             }
         }
@@ -76,7 +82,7 @@ export class Network {
 
     // as epsilon decays, the network will be more likely to explore
     selectAction(observation) {
-        const actionValues = this.forward(observation);
+        const actionValues = this.forward(observation, false);
         const random = Math.random();
         /* if(random > this.epsilon) {
             return Math.floor(Math.random()*actionValues.length);
@@ -108,16 +114,19 @@ export class Network {
         return outputs;
     }
 
-    updateLevels(weights) {
-        this.layers.weights = weights;
+    updateLevels(levels) {
+        for(let i=0; i<this.layers.length; i++) {
+            this.layers[i].weights = levels[i].weights;
+            this.layers[i].biases = levels[i].biases;
+        }
     }
 
     save() {
         let state = [];
         for(let i=0; i<this.layers.length; i++) {
             state.push({
-                weights: this.layers[i].getWeights(),
-                biases: this.layers[i].getBiases()
+                weights: this.layers[i].weights,
+                biases: this.layers[i].biases,
             });
         }
         return state;
@@ -158,39 +167,34 @@ class Level {
 
         this.lr = 0.001;
         
-        for(let i=0; i<inputs; i++) {
+        for(let i=0; i<this.inputs.length; i++) {
             this.weights[i] = new Array(outputs);
         }
 
-        Level.#randomize(this);
+        this.#randomize();
     }
 
-    getWeights() {
-        return this.weights;
-    }
-
-    getBiases() {
-        return this.biases;
-    }
-
-    static #randomize(level) {
-        for(let i=0; i<level.inputsCount; i++) {
-            for(let j=0; j<level.outputsCount; j++) {
-                level.weights[i][j] = Math.random() * 2 - 1;
+    #randomize() {
+        for(let i=0; i<this.inputs.length; i++) {
+            for(let j=0; j<this.outputs.length; j++) {
+                this.weights[i][j] = Math.random() * 2 - 1;
             }
         }
 
-        for(let i=0; i<level.biases.length; i++) {
-            level.biases[i] = Math.random() * 2 - 1;
+        for(let i=0; i<this.biases.length; i++) {
+            this.biases[i] = Math.random() * 2 - 1;
         }
     }
 
     updateWeights(gradient) {
+        //console.log("updating weights", gradient);
         for(let i=0; i<this.inputs.length; i++) {
             for(let j=0; j<this.outputs.length; j++) {
+                //console.log("weight", this.weights[i][j], "gradient", gradient[j], "input", this.inputs[i]);
                 this.weights[i][j] -= this.lr * gradient[j] - this.inputs[i];
             }
         }
+        return
     }
 
     updateBiases(gradient) {
@@ -220,7 +224,6 @@ class Level {
             for(let j=0; j<this.outputs.length; j++) {
                 nextGradient[i] += this.backwardStoreIn[i] * adjustedGradient[j];
             }
-            nextGradient[i] /= this.outputs.length;
             nextGradient[i] = parseFloat(nextGradient[i].toFixed(8));
         }
         this.updateWeights(nextGradient);
@@ -240,14 +243,15 @@ class Level {
     // speed + sensors
     forward(inputs, backprop=true) {
         let output = new Array(this.outputsCount);
-        // compute for each output (none, up, down, left, right) 
         let sums = [];
-        for(let i=0; i<this.outputsCount; i++) {
+        for(let i=0; i<this.outputs.length; i++) {
             let sum = 0;
-            for(let j=0; j<this.inputsCount; j++) {
+            // for each output, compute the sum of the inputs multiplied by the weights
+            for(let j=0; j<this.inputs.length; j++) {
                 sum += inputs[j] * this.weights[j][i];
             }
-            output[i] = sum / this.inputsCount;
+            // add bias
+            output[i] = sum + this.biases[i];
             sums.push(sum);
         }
 

@@ -174,8 +174,7 @@ function reset() {
 }
 
 function save() {
-    localStorage.setItem("trainBrain",
-        JSON.stringify(model.brain.save()));
+    localStorage.setItem("trainBrain", JSON.stringify(model.brain.save()));
 }
 
 function destroy() {
@@ -210,7 +209,7 @@ function episodeLoop() {
     info = train(model, env, maxTimeSteps);
     info.episode = episodeCounter + 1;
     updateTrainStats();
-    localStorage.setItem("trainBrain", JSON.stringify(model.brain.save()));
+    localStorage.setItem("trainBrain", JSON.stringify(info.weights));
 
     episodes.push(info);
     reset();
