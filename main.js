@@ -147,6 +147,9 @@ function updateTrainStats() {
     header.innerHTML = info.episode;
     let damaged = document.createElement("td");
     damaged.innerHTML = info.damaged;
+    if(info.damaged) {
+        damaged.style.fontWeight="bold";
+    }
     let distance = document.createElement("td");
     distance.innerHTML = info.distance;
     let speed = document.createElement("td");

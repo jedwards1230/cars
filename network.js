@@ -8,7 +8,7 @@ export class Network {
         this.epsilon = 0.5;
 
         // +2 for inital inputs in car sensor data
-        let neurons = [car.sensors[0].rayCount+2, 6, 2];
+        let neurons = [car.sensors[0].rayCount+2, 6, 12, 2];
         for(let i=0; i<neurons.length-2; i++) {
             this.layers.push(new Level(neurons[i], neurons[i+1], new Relu()));
         }
@@ -17,26 +17,23 @@ export class Network {
 
     reward(m) {
         let reward = 0;
-        //if car is damaged, punish
         if(m.damaged) {
-            return -3;
+            return -10;
         } else {
             reward += 1;
-            //if car is still or reversed, punish
             if(m.speed < 0.1) {
                 return -1;
             } else {
                 reward += 2;
             }
-            //if car moving in wrong direction, punish
             if(m.next_distance < 1) {
                 return -1;
             } else {
-                reward += 1;
+                reward += 2;
                 if(m.prev_distance + 1 > m.next_distance) {
                     return -1;
                 } else {
-                    reward += 3;
+                    reward += 3 * Math.abs(m.prev_distance + 1 - m.next_distance);
                 }
             }
         }
@@ -81,12 +78,12 @@ export class Network {
     selectAction(observation) {
         const actionValues = this.forward(observation);
         const random = Math.random();
-        if(random > this.epsilon) {
+        /* if(random > this.epsilon) {
             return Math.floor(Math.random()*actionValues.length);
         } else {
             return actionValues.indexOf(Math.max(...actionValues));
-        }
-        //return actionValues.indexOf(Math.max(...actionValues));
+        } */
+        return actionValues.indexOf(Math.max(...actionValues));
     }
 
     backward(actionValues, experimentalValues) {
@@ -153,7 +150,7 @@ class Level {
         this.inputsCount = inputs;
         this.outputsCount = outputs;
         this.activation = activation;
-        this.weights = [];
+        this.weights = new Array(inputs);
         this.biases = new Array(outputs);
 
         this.inputs = new Array(inputs);
