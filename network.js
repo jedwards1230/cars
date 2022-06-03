@@ -18,20 +18,20 @@ export class Network {
     reward(m) {
         let reward = 0;
         if(m.damaged) {
-            return -10;
+            reward -= 100;
         } else {
             if(m.speed < 0.1) {
-                return -5;
+                reward -= 5;
             } else {
                 reward += 1;
             }
             if(m.next_distance < 1) {
-                return -5;
+                reward -= 5;
             } else {
                 reward += 1;
             }
             if(m.prev_distance + 1 > m.next_distance) {
-                return -3;
+                reward -= 3;
             } else {
                 let n = 3 * (m.next_distance - m.prev_distance);
                 reward += parseFloat(n.toFixed(3));

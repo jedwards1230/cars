@@ -29,7 +29,7 @@ export function train(model, env, maxTimeSteps) {
         model.brain.remember(metrics, observation, prev_observation);
         model.brain.experienceReplay(20);
 
-        reward += metrics.reward;
+        reward = metrics.reward;
         speed += model.speed;
         count++;
 
@@ -38,7 +38,7 @@ export function train(model, env, maxTimeSteps) {
         }
     }
     return {
-        reward: (reward / count).toFixed(2),
+        reward: reward,
         speed: (speed / count).toFixed(2),
         damaged: model.damaged,
         distance: model.distance.toFixed(2),

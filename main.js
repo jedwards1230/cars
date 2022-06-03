@@ -65,7 +65,6 @@ function drawVisualizer(time) {
 
 function setPlayView() {
     setTimeout( function() {
-        document.getElementById("trainTableBody").replaceChildren();
         document.body.style.overflow = "hidden";
         document.getElementById("welcome").style.display = "none";
         document.getElementById("play").style.display = "flex";
@@ -77,7 +76,9 @@ function setPlayView() {
 
 function setTrainView() {
     setTimeout( function() {
-        document.body.style.overflow = "scroll";
+        if(document.getElementById("0")) {
+            document.body.style.overflow = "scroll";
+        }
         document.getElementById("welcome").style.display = "none";
         document.getElementById("play").style.display = "none";
         document.getElementById("train").style.display = "block";
@@ -125,6 +126,7 @@ function handleButtons() {
 }
 
 function updateTrainStats() {
+    document.body.style.overflow = "scroll";
     const progress = document.getElementById("trainProgress");
     progress.ariaValueNow = info.episode;
     if(episodeCounter < numEpisodes - 1) {
@@ -183,6 +185,7 @@ function destroy() {
 
 // prepare for training
 function beginTrain() {
+    document.body.style.overflow = "hidden";
     document.getElementById("trainTableBody").replaceChildren();
     numEpisodes = document.getElementById("episodeCountInput").value;
     maxTimeSteps = document.getElementById("timeLimitInput").value;
