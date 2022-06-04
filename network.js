@@ -8,37 +8,42 @@ export class Network {
         this.epsilon = 0.5;
 
         // +2 for inital inputs in car sensor data
-        let neurons = [car.sensors[0].rayCount+2, 6, 12, 2];
+        let neurons = [car.sensors[0].rayCount + 3, 6, 12, 2];
         for(let i=0; i<neurons.length-2; i++) {
             this.layers.push(new Level(neurons[i], neurons[i+1], new Relu()));
         }
         this.layers.push(new Level(neurons[neurons.length-2], neurons[neurons.length-1], new Sigmoid()));
     }
 
-    reward(m) {
-        let reward = 0;
-        if(m.damaged) {
-            reward -= 100;
-        } else {
-            if(m.speed < 0.1) {
-                reward -= 5;
-            } else {
-                reward += 1;
-            }
-            if(m.next_distance < 1) {
-                reward -= 5;
-            } else {
-                reward += 1;
-            }
-            if(m.prev_distance + 1 > m.next_distance) {
-                reward -= 3;
-            } else {
-                let n = 3 * (m.next_distance - m.prev_distance);
-                reward += parseFloat(n.toFixed(3));
-            }
+    forward(inputs, backprop=true) {
+        let outputs = this.layers[0].forward(inputs, backprop);
+        for(let i=1; i<this.layers.length; i++) {
+            outputs = this.layers[i].forward(outputs, backprop);
         }
-        
-        return reward;
+        return outputs;
+    }
+
+    backward(actionValues, experimentalValues) {
+        let delta = [];
+        for(let i=0; i<actionValues.length; i++) {
+            delta[i] = (actionValues[i] + experimentalValues[i])/2;
+        }
+        for(let i=this.layers.length-1; i>=0; i--) {
+            delta = this.layers[i].backward(delta);
+        }
+    }
+
+    reward(m) {
+        if(m.damaged) {
+            return -3;
+        } else if(m.speed < 0 || m.next_distance < 1) {
+            return -2;
+        } else if(m.prev_distance + 1 > m.next_distance) {
+            return -1;
+        } else {
+            let n = 2 * (m.next_distance - m.prev_distance);
+            return parseFloat(n.toFixed(3));
+        }
     }
 
     experienceReplay(batchSize=20) {
@@ -55,10 +60,16 @@ export class Network {
             const nextActionValues = this.forward(new_observation, false);
             let experimentalValues = JSON.parse(JSON.stringify(actionValues));
 
-            experimentalValues[metrics.action] = metrics.reward;
-            if(metrics.reward > 0) {
-                experimentalValues[metrics.action] += gamma * Math.max(...nextActionValues);
-                //console.log("experimentalValues", experimentalValues, "nextActionValues", nextActionValues);
+            for(let i=0; i<actionValues.length; i++) {
+                if(i == metrics.action) {
+                    experimentalValues[i] *= metrics.reward;
+                    if(metrics.reward > 0) {
+                        experimentalValues[i] += gamma * Math.max(...nextActionValues);
+                        //console.log("experimentalValues", experimentalValues, "nextActionValues", nextActionValues);
+                    }
+                } else {
+                    experimentalValues[i] *= -metrics.reward;
+                }
             }
 
             this.backward(actionValues, experimentalValues);
@@ -71,7 +82,7 @@ export class Network {
             // learning rate decay
             for(let i=this.layers.length-1; i>=0; i--) {
                 if(this.layers[i].lr > 0.0001) {
-                    this.layers[i].lr *= 0.9;
+                    this.layers[i].lr *= 0.995;
                     //this.layers[i].lr = parseFloat(this.layers[i].lr.toFixed(8));
                 } else {
                     this.layers[i].lr = 0.0001;
@@ -92,26 +103,8 @@ export class Network {
         return actionValues.indexOf(Math.max(...actionValues));
     }
 
-    backward(actionValues, experimentalValues) {
-        let delta = [];
-        for(let i=0; i<actionValues.length; i++) {
-            delta[i] = actionValues[i] - experimentalValues[i];
-        }
-        for(let i=this.layers.length-1; i>=0; i--) {
-            delta = this.layers[i].backward(delta);
-        }
-    }
-
     remember(metrics, observation, prev_observation) {
         this.memory.push([metrics, observation, prev_observation]);
-    }
-
-    forward(inputs, backprop=true) {
-        let outputs = this.layers[0].forward(inputs, backprop);
-        for(let i=1; i<this.layers.length; i++) {
-            outputs = this.layers[i].forward(outputs, backprop);
-        }
-        return outputs;
     }
 
     updateLevels(levels) {
@@ -119,6 +112,11 @@ export class Network {
             this.layers[i].weights = levels[i].weights;
             this.layers[i].biases = levels[i].biases;
         }
+    }
+
+    // function to find mean squared error between two values
+    MSE(expected, actual) {
+        return Math.pow(expected - actual, 2);
     }
 
     save() {
@@ -156,29 +154,80 @@ export class Network {
 
 class Level {
     constructor(inputs, outputs, activation=null) {
-        this.inputsCount = inputs;
-        this.outputsCount = outputs;
         this.activation = activation;
-        this.weights = new Array(inputs);
-        this.biases = new Array(outputs);
+        this.lr = 0.001;
+
+        this.backwardStoreIn = new Array(inputs);
+        this.backwardStoreOut = new Array(outputs);
 
         this.inputs = new Array(inputs);
-        this.outputs = new Array(outputs);
+        this.weights = new Array(inputs);
 
-        this.lr = 0.001;
-        
-        for(let i=0; i<this.inputs.length; i++) {
-            this.weights[i] = new Array(outputs);
-        }
+        this.outputs = new Array(outputs);
+        this.biases = new Array(outputs);
 
         this.#randomize();
     }
 
+    // speed + sensors
+    forward(inputs, backprop=true) {
+        let output = new Array(this.outputs.length);
+        let sums = [];
+        if(backprop) this.backwardStoreIn = inputs;
+
+        // output = activation(sum(weights*inputs + biases))
+        for(let i=0; i<this.outputs.length; i++) {
+            let sum = 0;
+            // weights * inputs + bias
+            for(let j=0; j<this.inputs.length; j++) {
+                sum += inputs[j] * this.weights[j] + this.biases[i];
+            }
+
+            if(backprop) this.backwardStoreOut[i] = sum;
+
+            // activation
+            if(this.activation) output[i] = this.activation.forward(sum);
+
+            sums.push(sum);
+        }
+        this.inputs = inputs;
+        this.outputs = output;
+
+        return output;
+    }
+
+    backward(gradient) {
+        // update biases with gradient
+        this.updateBiases(gradient);
+
+        let adjustedGradient = JSON.parse(JSON.stringify(gradient));
+        let stored;
+        // derive activation function
+        if(this.activation) {
+            stored = this.backwardStoreOut;
+            //stored = this.activation.backward(this.backwardStoreOut);
+            // update adjusted gradient with stored outputs
+            for(let i=0; i<adjustedGradient.length; i++) {
+                adjustedGradient[i] = stored[i] * gradient[i];
+            }
+        }
+
+        let nextGradient = new Array(this.inputs.length).fill(0);
+        for(let i=0; i<this.inputs.length; i++) {
+            if(this.backwardStoreIn[i] != 0) {
+                for(let j=0; j<this.outputs.length; j++) {
+                    nextGradient[i] += this.backwardStoreIn[i] * adjustedGradient[j];
+                }
+            }
+        }
+        this.updateWeights(nextGradient);
+
+        return nextGradient;
+    }
+
     #randomize() {
         for(let i=0; i<this.inputs.length; i++) {
-            for(let j=0; j<this.outputs.length; j++) {
-                this.weights[i][j] = Math.random() * 2 - 1;
-            }
+            this.weights[i] = Math.random() * 2 - 1;
         }
 
         for(let i=0; i<this.biases.length; i++) {
@@ -187,87 +236,22 @@ class Level {
     }
 
     updateWeights(gradient) {
-        //console.log("updating weights", gradient);
         for(let i=0; i<this.inputs.length; i++) {
-            for(let j=0; j<this.outputs.length; j++) {
-                //console.log("weight", this.weights[i][j], "gradient", gradient[j], "input", this.inputs[i]);
-                this.weights[i][j] -= this.lr * gradient[j] - this.inputs[i];
-            }
+            this.weights[i] += this.lr * gradient[i];
         }
         return
     }
 
     updateBiases(gradient) {
-        for(let i=0; i<this.biases.length; i++) {
-            this.biases[i] -= this.lr * gradient[i];
+        for(let i=0; i<this.outputs.length; i++) {
+            this.biases[i] += this.lr * gradient[i];
         }
-    }
-
-    backward(gradient) {
-        // compute mean squared error
-        let adjustedGradient = JSON.parse(JSON.stringify(gradient));
-
-        // derive activation function
-        if(this.activation) {
-            const stored = this.activation.backward(this.backwardStoreOut);
-            for(let i=0; i<adjustedGradient.length; i++) {
-                adjustedGradient[i] *= stored[i];
-            }
-        }
-
-        // update biases with gradient
-        this.updateBiases(adjustedGradient);
-
-        let nextGradient = [];
-        for(let i=0; i<this.inputs.length; i++) {
-            nextGradient[i] = 0;
-            for(let j=0; j<this.outputs.length; j++) {
-                nextGradient[i] += this.backwardStoreIn[i] * adjustedGradient[j];
-            }
-            nextGradient[i] = parseFloat(nextGradient[i].toFixed(8));
-        }
-        this.updateWeights(nextGradient);
-
-        return nextGradient;
+        return
     }
 
     // function to find mean squared error between two values
     MSE(expected, actual) {
-        let error = 0;
-        for(let i=0; i<expected.length; i++) {
-            error += Math.pow(expected[i] - actual[i], 2);
-        }
-        return error / expected.length;
-    }
-
-    // speed + sensors
-    forward(inputs, backprop=true) {
-        let output = new Array(this.outputsCount);
-        let sums = [];
-        for(let i=0; i<this.outputs.length; i++) {
-            let sum = 0;
-            // for each output, compute the sum of the inputs multiplied by the weights
-            for(let j=0; j<this.inputs.length; j++) {
-                sum += inputs[j] * this.weights[j][i];
-            }
-            // add bias
-            output[i] = sum + this.biases[i];
-            sums.push(sum);
-        }
-
-        if(backprop) {
-            this.backwardStoreIn = inputs;
-            this.backwardStoreOut = JSON.parse(JSON.stringify(output));
-        }
-
-        if(this.activation) {
-            output = this.activation.forward(output);
-        }
-
-        this.inputs = inputs;
-        this.outputs = output;
-
-        return output;
+        return Math.pow(expected - actual, 2);
     }
 }
 
@@ -277,13 +261,8 @@ class Sigmoid {
         this.backward = this.backward;
     }
 
-    forward(inputs) {
-        let output = [];
-        const k = 2
-        for(let i=0; i<inputs.length; i++) {
-            output[i] = 1 / (1 + Math.exp(-inputs[i]/2));
-        }
-        return output;
+    forward(n) {
+        return 1 / (1 + Math.exp(-n));
     }
 
     backward(inputs) {
@@ -301,16 +280,12 @@ class Relu {
         this.backward = this.backward;
     }
 
-    forward(inputs) {
-        let output = [];
-        for(let i=0; i<inputs.length; i++) {
-            if(inputs[i] > 0) {
-                output[i] = inputs[i];
-            } else {
-                output[i] = 0;
-            }
+    forward(n) {
+        if(n > 0) {
+            return n;
+        } else {
+            return 0;
         }
-        return output;
     }
 
     backward(inputs) {

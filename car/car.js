@@ -84,7 +84,7 @@ export class Car {
     }
 
     getSensorData(roadBorders, traffic) {
-        let inputs = [this.speed, this.acceleration];
+        let inputs = [this.speed, this.acceleration, this.distance];
         // update each sensor
         for(let i=0; i<this.sensors.length; i++) {
             this.sensors[i].update(roadBorders, traffic);

@@ -64,30 +64,26 @@ function drawVisualizer(time) {
 }
 
 function setPlayView() {
-    setTimeout( function() {
-        document.body.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
         document.getElementById("welcome").style.display = "none";
         document.getElementById("play").style.display = "flex";
         document.getElementById("train").style.display = "none";
         document.getElementById("nav").style.display = "flex";
         document.getElementById("toggleView").innerHTML = "Train";
-    } , 100);
 }
 
 function setTrainView() {
-    setTimeout( function() {
-        if(document.getElementById("0")) {
-            document.body.style.overflow = "scroll";
-        }
-        document.getElementById("welcome").style.display = "none";
-        document.getElementById("play").style.display = "none";
-        document.getElementById("train").style.display = "block";
-        document.getElementById("nav").style.display = "flex";
-        document.getElementById("toggleView").innerHTML = "Play";
+    if(document.getElementById("0")) {
+        document.body.style.overflow = "scroll";
+    }
+    document.getElementById("welcome").style.display = "none";
+    document.getElementById("play").style.display = "none";
+    document.getElementById("train").style.display = "block";
+    document.getElementById("nav").style.display = "flex";
+    document.getElementById("toggleView").innerHTML = "Play";
 
-        document.getElementById("episodeCountInput").value = numEpisodes;
-        document.getElementById("timeLimitInput").value = maxTimeSteps;
-    } , 100);
+    document.getElementById("episodeCountInput").value = numEpisodes;
+    document.getElementById("timeLimitInput").value = maxTimeSteps;
 }
 
 function toggleView() {
