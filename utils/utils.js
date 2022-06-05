@@ -19,7 +19,6 @@ export function getIntersection(A, B, C, D) {
             }
         }
     }
-
     return null;
 }
 
@@ -32,9 +31,7 @@ export function polysIntersect(poly1, poly2) {
                 poly2[j],
                 poly2[(j+1) % poly2.length],
             );
-            if(touch) {
-                return true;
-            }
+            if(touch) return true;
         }
     }
     return false;
@@ -42,9 +39,9 @@ export function polysIntersect(poly1, poly2) {
 
 export function getRGBA(value){
     const alpha=Math.abs(value);
-    const R=value<0?0:255;
-    const G=R;
-    const B=value>0?0:255;
+    const R=value>0?0:255;
+    const B=value<0?0:255;
+    const G=B;
     return "rgba("+R+","+G+","+B+","+alpha+")";
 }
 

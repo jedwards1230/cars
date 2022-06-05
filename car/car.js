@@ -64,9 +64,8 @@ export class Car {
             traffic = this.#checkDamage(roadBorders, traffic);
         }
 
-        if(this.damaged) {
-            console.log("crashed at ", this.distance);
-        }
+        if(this.damaged) console.log("crashed at ", this.distance);
+
         return traffic;
     }
 
@@ -84,17 +83,14 @@ export class Car {
     }
 
     getSensorData(roadBorders, traffic) {
-        let inputs = [this.speed, this.acceleration, this.distance];
+        let sensorOffsets = [];
         // update each sensor
         for(let i=0; i<this.sensors.length; i++) {
             this.sensors[i].update(roadBorders, traffic);
-            const offsets = this.sensors[i].readings.map(
-                s=>s==null ? 0 : 1 - s.offset
-            );
-            inputs = inputs.concat(offsets)
+            const offsets = this.sensors[i].getSensorOffsets();
+            sensorOffsets = sensorOffsets.concat(offsets)
         }
-
-        return inputs
+        return sensorOffsets
     }
 
     #checkDamage(roadBorders, traffic) {
@@ -163,12 +159,8 @@ export class Car {
             if(this.speed != 0) {
                 const flip=this.speed>0?1:-1;
 
-                if(this.controls.left) {
-                    this.angle += 0.04 * flip;
-                }
-                if(this.controls.right) {
-                    this.angle -= 0.04 * flip;
-                }
+                if(this.controls.left) this.angle += 0.04 * flip;
+                if(this.controls.right) this.angle -= 0.04 * flip;
             } 
 
             // limit speed
@@ -187,9 +179,7 @@ export class Car {
         } else if(this.speed < 0) {
             this.speed += this.friction;
         }
-        if(Math.abs(this.speed) < this.friction) {
-            this.speed = 0;
-        }
+        if(Math.abs(this.speed) < this.friction) this.speed = 0;
         
         this.speed = parseFloat(this.speed.toFixed(2));
 

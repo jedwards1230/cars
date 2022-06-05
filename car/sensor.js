@@ -5,7 +5,7 @@ export class Sensor {
         this.car = car;
         this.rayCount = rays;
         this.rayLength = 150;
-        this.raySpread = Math.PI / 4;
+        this.raySpread = Math.PI / 3;
 
         this.direction = direction;
 
@@ -25,6 +25,12 @@ export class Sensor {
                 ),
             );
         };
+    }
+
+    getSensorOffsets() {
+        return this.readings.map(
+            s=>s==null ? 0 : parseFloat((1 - s.offset).toFixed(4))
+        );
     }
 
     #getReading(ray, roadBorders, traffic) {

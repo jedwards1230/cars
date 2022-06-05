@@ -19,8 +19,9 @@ let episodeCounter = 0;
 let numEpisodes = 1;
 let maxTimeSteps = 21;
 
-let env;
-let model;
+let env =new Environment(trafficCount, brainCount, carCanvas);
+let model = new Car(-1, env.road.getLaneCenter(env.startLane), 100, env.driverSpeed + 1, "network", "red");
+model.addBrain("fsd", env);
 let info;
 let episodes = [];
 
@@ -65,11 +66,11 @@ function drawVisualizer(time) {
 
 function setPlayView() {
     document.body.style.overflow = "hidden";
-        document.getElementById("welcome").style.display = "none";
-        document.getElementById("play").style.display = "flex";
-        document.getElementById("train").style.display = "none";
-        document.getElementById("nav").style.display = "flex";
-        document.getElementById("toggleView").innerHTML = "Train";
+    document.getElementById("welcome").style.display = "none";
+    document.getElementById("play").style.display = "flex";
+    document.getElementById("train").style.display = "none";
+    document.getElementById("nav").style.display = "flex";
+    document.getElementById("toggleView").innerHTML = "Train";
 }
 
 function setTrainView() {
@@ -133,6 +134,7 @@ function updateTrainStats() {
 
     document.getElementById("trainStats").style.display = "block";
     let body = document.getElementById("trainTableBody");
+
     let row = document.createElement("tr");
     row.id = info.episode - 1;
     row.addEventListener("click", function(event) {
@@ -140,18 +142,21 @@ function updateTrainStats() {
         console.log(episodes[event.target.parentElement.id].weights[0].weights);
         console.log(episodes[event.target.parentElement.id].weights[1].weights);
     });
+
     let header = document.createElement("th");
     header.scope = "row";
     header.innerHTML = info.episode;
+
     let damaged = document.createElement("td");
     damaged.innerHTML = info.damaged;
-    if(info.damaged) {
-        damaged.style.fontWeight="bold";
-    }
+    if(info.damaged) damaged.style.fontWeight="bold";
+
     let distance = document.createElement("td");
     distance.innerHTML = info.distance;
+
     let speed = document.createElement("td");
     speed.innerHTML = info.speed;
+
     let reward = document.createElement("td");
     reward.innerHTML = info.reward;
 
@@ -163,12 +168,14 @@ function updateTrainStats() {
     body.appendChild(row);
 }
 
-function reset() {
+function reset(remember = false) {
     carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 
     env = new Environment(trafficCount, brainCount, carCanvas);
+    const memory = model.brain.memory;
     model = new Car(-1, env.road.getLaneCenter(env.startLane), 100, env.driverSpeed + 1, "network", "red");
     model.addBrain("fsd", env);
+    if(remember) model.brain.memory = memory;
 }
 
 function save() {
@@ -205,18 +212,20 @@ function episodeLoop() {
     }
 
     // collect episode info
-    info = train(model, env, maxTimeSteps);
+    info = train(model, env, parseInt(maxTimeSteps));
     info.episode = episodeCounter + 1;
     updateTrainStats();
     localStorage.setItem("trainBrain", JSON.stringify(info.weights));
 
     episodes.push(info);
-    reset();
-    episodeCounter++;
+    if(episodeCounter % 10 == 0) {
+        reset(true);
+    } else {
+        reset();
+    }
+     episodeCounter++;
 
-    if(episodeCounter < numEpisodes) {
-        animFrame = requestAnimationFrame(episodeLoop);
-    } 
+    if(episodeCounter < numEpisodes) animFrame = requestAnimationFrame(episodeLoop);
 }
 
 /*

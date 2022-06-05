@@ -9,7 +9,7 @@ export class Environment {
 
         this.startLane = 2;
         this.driverSpeed = 3;
-        this.laneCount = 3;
+        this.laneCount = 4;
 
         this.done = false;
 

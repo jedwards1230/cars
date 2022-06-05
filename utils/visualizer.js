@@ -67,7 +67,7 @@ export class Visualizer{
                     top
                 );
                 ctx.lineWidth=2;
-                ctx.strokeStyle=getRGBA(weights[i][j]);
+                ctx.strokeStyle=getRGBA(weights[i]);
                 ctx.stroke();
             }
         }
