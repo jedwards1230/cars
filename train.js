@@ -5,66 +5,59 @@ export function train(model, env, maxTimeSteps) {
     let rewards = 0;
     let count = 0;
 
-    let sensorOffsets = model.getSensorData(env.road.borders, env.traffic);
-    let observation = [model.speed, model.distance].concat(sensorOffsets);
-
     let metrics = {
-        damaged: false,
-        prev_distance: 0,
-        next_distance: model.distance,
-        speed: 0,
-        sensorOffsets: [],
+        damaged: model.damaged,
+        distances: [0, model.distance],
+        maxSpeed: model.maxSpeed,
+        speeds: [model.speed],
+        sensorOffsets: model.getSensorData(env.road.borders, env.traffic),
         reward: 0,
     }
+
+    let observation = [model.speed, model.distance].concat(metrics.sensorOffsets);
     
     for(let i=0; i<maxTimeSteps; i++) {
-        env.update();
-
-        const action = model.brain.selectAction(observation);
+        // store previous data
         const prev_observation = observation;
 
         // update car
+        env.update();
+        const action = model.brain.selectAction(observation, true);
         model.updateControls(action);
-        metrics.prev_distance = metrics.next_distance;
-
         env.traffic = model.update(env.road.borders, env.traffic);
-        metrics.damaged = model.damaged;
-
-        metrics.next_distance = model.distance;
-        metrics.speed = model.speed;
-
-        // observe environment
-        const sOffsets = model.getSensorData(env.road.borders, env.traffic);
-        metrics.sensorOffsets = sOffsets;
-        observation = [model.speed, model.distance].concat(sOffsets);
+        model.damaged = model.distance <= -10 ? true : model.damaged;
 
         // update metrics
-        metrics.next_distance = model.distance;
+        metrics.sensorOffsets = model.getSensorData(env.road.borders, env.traffic);
+        metrics.damaged = model.damaged;
+        metrics.distances.push(model.distance);
+        metrics.speeds.push(model.speed);
+
+        // calculate reward
         metrics.reward = model.brain.reward(metrics);
 
-        // update brain
-        if(i % 5 == 0 || model.damaged || Math.max(sOffsets) > 0.7) {
+        // observe environment
+        observation = [model.speed, model.distance].concat(metrics.sensorOffsets);
+
+        // remember this state
+        if(i % 10 == 0 || model.damaged || Math.max(metrics.sensorOffsets) > 0.3) {
             model.brain.remember(metrics, action, observation, prev_observation);
-        }
-        model.brain.experienceReplay(20);
+        } 
+        //model.brain.remember(metrics, action, observation, prev_observation);
+        model.brain.experienceReplay(20, model.damaged);
 
         // update return info
         rewards += metrics.reward;
         speed += model.speed;
         count++;
 
-        if(model.damaged || i === maxTimeSteps - 1) break;
-    }
-    if(model.damaged) {
-        rewards = -1;
-    } else {
-        rewards = rewards / count;
+        if(model.damaged || i >= maxTimeSteps) break;
     }
     return {
-        reward: rewards.toFixed(2),
-        speed: (speed / count).toFixed(2),
+        metrics: metrics,
+        time: count,
+        reward: (rewards / count).toFixed(2),
         damaged: model.damaged,
-        distance: model.distance.toFixed(2),
-        weights: model.brain.save(),
+        brain: model.brain.save(),
     };
 }

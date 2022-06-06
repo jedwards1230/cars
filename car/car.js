@@ -71,11 +71,18 @@ export class Car {
 
     updateControls(a) {
         switch (a) {
+            /* case 0:
+                console.log("release")
+                this.controls.forward = false;
+                this.controls.backward = false;
+                break; */
             case 0:
+                //console.log("forward")
                 this.controls.forward = true;
                 this.controls.backward = false;
                 break;
             case 1:
+                //console.log("backward")
                 this.controls.forward = false;
                 this.controls.backward = true;
                 break;

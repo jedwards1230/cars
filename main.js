@@ -19,23 +19,222 @@ let episodeCounter = 0;
 let numEpisodes = 1;
 let maxTimeSteps = 21;
 
-let env =new Environment(trafficCount, brainCount, carCanvas);
+let env = new Environment(trafficCount, brainCount, carCanvas);
 let model = new Car(-1, env.road.getLaneCenter(env.startLane), 100, env.driverSpeed + 1, "network", "red");
 model.addBrain("fsd", env);
+
 let info;
 let episodes = [];
+let distances = [];
+let speeds = [];
+let times = []
+
 
 let anim = true;
 let animFrame;
 
-handleButtons();
+// Program begins with button click
+
+// Train view
+document.querySelector("#startTrain").addEventListener("click", function() {
+    anim = false;
+    setTrainView();
+});
+document.querySelector("#trainBtn").addEventListener("click", beginTrain);
+
+function setTrainView() {
+    if(document.getElementById("0")) {
+        document.body.style.overflow = "scroll";
+    }
+    document.getElementById("welcome").style.display = "none";
+    document.getElementById("play").style.display = "none";
+    document.getElementById("train").style.display = "block";
+    document.getElementById("nav").style.display = "flex";
+    document.getElementById("toggleView").innerHTML = "Play";
+
+    document.getElementById("episodeCountInput").value = numEpisodes;
+    document.getElementById("timeLimitInput").value = maxTimeSteps;
+}
+
+// prepare for training
+function beginTrain() {
+    document.body.style.overflow = "hidden";
+    document.getElementById("trainTableBody").replaceChildren();
+    numEpisodes = document.getElementById("episodeCountInput").value;
+    maxTimeSteps = document.getElementById("timeLimitInput").value;
+    let progress = document.getElementById("trainProgress");
+
+    progress.style.width = "0%";
+    progress.ariaValueNow = 0;
+    progress.ariaValueMax = numEpisodes;
+
+    let survivedProgress = document.getElementById("survivedBar");
+    survivedProgress.style.width = "0%";
+    survivedProgress.ariaValueNow = 0;
+    survivedProgress.ariaValueMax = episodes.length;
+
+    episodes = [];
+    episodeCounter = 0;
+
+    reset();
+    console.log("beginning training");
+    episodeLoop();
+}
+
+function episodeLoop() {
+    // load training brain
+    if(localStorage.getItem("trainBrain")) {
+        model.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
+    }
+
+    // collect episode info
+    info = train(model, env, parseInt(maxTimeSteps));
+    info.episode = episodeCounter + 1;
+
+    info.speed = Math.max(...info.metrics.speeds);
+    info.distance = Math.max(...info.metrics.distances);
+    info.reward = info.metrics.reward;
+
+    updateTrainStats();
+    localStorage.setItem("trainBrain", JSON.stringify(info.brain));
+
+    episodes.push(info);
+    reset();
+    episodeCounter++;
+
+    //animFrame = requestAnimationFrame(episodeLoop);
+    if(episodeCounter <= numEpisodes) setTimeout(episodeLoop, 0);
+}
+
+function updateTrainStats() {
+    document.body.style.overflow = "scroll";
+
+    // style progress bar
+    const progress = document.getElementById("trainProgress");
+    progress.ariaValueNow = info.episode;
+    progress.style.width = `${(info.episode / numEpisodes) * 100}%`;
+
+    // update survivedBar
+    const survivedBar = document.getElementById("survivedBar");
+    // get how many episodes survived
+    // episode survived if !damaged
+    const survived = episodes.filter(episode => !episode.damaged).length;
+    survivedBar.style.width = `${(survived / episodes.length) * 100}%`;
+    survivedBar.ariaValueNow = survived;
+    document.getElementById("survivedCount").innerHTML = `Models Survived: ${survived}/${episodes.length}`;
+
+
+    // find min, max, and avg distance of all episodes
+    const distanceMap = episodes.map(e => e.distance);
+    const distanceMax = Math.max(...distanceMap);
+    const distanceMin = Math.min(...distanceMap);
+    const distanceAvg = episodes.reduce((a, e) => a + e.distance, 0) / episodes.length;
+
+    // find min, max, and avg time of all episodes
+    const timeMap = episodes.map(e => e.time);
+    const timeMax = Math.max(...timeMap);
+    const timeMin = Math.min(...timeMap);
+    const timeAvg = episodes.reduce((a, e) => a + e.time, 0) / episodes.length;
+
+    // find min, max, and avg speed of all episodes
+    const speedMap = episodes.map(e => e.speed);
+    const speedMax = Math.max(...speedMap);
+    const speedMin = Math.min(...speedMap);
+    const speedAvg = episodes.reduce((a, e) => a + e.speed, 0) / episodes.length;
+
+    // update trainStatsTable
+    document.getElementById("distanceMax").innerHTML = distanceMax.toFixed(0);
+    document.getElementById("distanceMin").innerHTML = distanceMin.toFixed(0);
+    document.getElementById("distanceAvg").innerHTML = distanceAvg.toFixed(0);
+    document.getElementById("timeMax").innerHTML = timeMax.toFixed(2);
+    document.getElementById("timeMin").innerHTML = timeMin.toFixed(2);
+    document.getElementById("timeAvg").innerHTML = timeAvg.toFixed(2);
+    document.getElementById("speedMax").innerHTML = speedMax.toFixed(2);
+    document.getElementById("speedMin").innerHTML = speedMin.toFixed(2);
+    document.getElementById("speedAvg").innerHTML = speedAvg.toFixed(2);
+
+    // find table for episode entries
+    document.getElementById("trainStats").style.display = "block";
+    let body = document.getElementById("trainTableBody");
+
+    // create row
+    let row = document.createElement("tr");
+    row.id = info.episode - 1;
+    // view brain on row click
+    row.addEventListener("click", function(event) {
+        console.log("episode: " + event.target.parentElement.id);
+        console.table(episodes[event.target.parentElement.id].brain);
+        console.table(episodes[event.target.parentElement.id].brain.biases);
+    });
+
+    // create header
+    let header = document.createElement("th");
+    header.scope = "row";
+    header.innerHTML = info.episode;
+    row.appendChild(header);
+
+    // create cells
+    let damaged = document.createElement("td");
+    damaged.innerHTML = info.damaged;
+    if(info.damaged) damaged.style.fontWeight="bold";
+    if(info.damaged) {
+        damaged.style.backgroundColor = "red";
+    } else {
+        damaged.style.backgroundColor = "green";
+    }
+    row.appendChild(damaged);
+
+    let distance = document.createElement("td");
+    distance.innerHTML = info.distance.toFixed(0);
+    row.appendChild(distance);
+
+    let speed = document.createElement("td");
+    speed.innerHTML = info.speed;
+    row.appendChild(speed);
+
+    let reward = document.createElement("td");
+    reward.innerHTML = info.reward;
+    row.appendChild(reward);
+
+    body.appendChild(row);
+}
+
+
+// Play view
+document.querySelector("#startPlay").addEventListener("click", function() {
+    anim = true;
+    setPlayView();
+    reset();
+    animate();
+});
+document.querySelector("#saveBtn").addEventListener("click", save);
+document.querySelector("#destroyBtn").addEventListener("click", destroy);
+document.querySelector("#resetBtn").addEventListener("click", reset);
+document.querySelector("#endBtn").addEventListener("click", function() {
+    env.end();
+});
+
+document.querySelector("#toggleView").addEventListener("click", function() {
+    anim = !anim;
+    episodeCounter = numEpisodes;
+    toggleView();
+});
+
+function setPlayView() {
+    document.body.style.overflow = "hidden";
+    document.getElementById("welcome").style.display = "none";
+    document.getElementById("play").style.display = "flex";
+    document.getElementById("train").style.display = "none";
+    document.getElementById("nav").style.display = "flex";
+    document.getElementById("toggleView").innerHTML = "Train";
+}
 
 function animate(time) {
     // update cars
     env.update();
     if(!model.damaged) {
         const observation = model.getSensorData(env.road.borders, env.traffic);
-        const action = model.brain.selectAction(observation);
+        const action = model.brain.selectAction(observation, true);
         model.updateControls(action);
         env.traffic = model.update(env.road.borders, env.traffic);
     }
@@ -64,29 +263,6 @@ function drawVisualizer(time) {
     Visualizer.drawNetwork(networkCtx, model.brain)
 }
 
-function setPlayView() {
-    document.body.style.overflow = "hidden";
-    document.getElementById("welcome").style.display = "none";
-    document.getElementById("play").style.display = "flex";
-    document.getElementById("train").style.display = "none";
-    document.getElementById("nav").style.display = "flex";
-    document.getElementById("toggleView").innerHTML = "Train";
-}
-
-function setTrainView() {
-    if(document.getElementById("0")) {
-        document.body.style.overflow = "scroll";
-    }
-    document.getElementById("welcome").style.display = "none";
-    document.getElementById("play").style.display = "none";
-    document.getElementById("train").style.display = "block";
-    document.getElementById("nav").style.display = "flex";
-    document.getElementById("toggleView").innerHTML = "Play";
-
-    document.getElementById("episodeCountInput").value = numEpisodes;
-    document.getElementById("timeLimitInput").value = maxTimeSteps;
-}
-
 function toggleView() {
     cancelAnimationFrame(animFrame);
     if(anim) {
@@ -98,84 +274,12 @@ function toggleView() {
     }
 }
 
-function handleButtons() {
-    document.querySelector("#saveBtn").addEventListener("click", save);
-    document.querySelector("#destroyBtn").addEventListener("click", destroy);
-    document.querySelector("#resetBtn").addEventListener("click", reset);
-    document.querySelector("#trainBtn").addEventListener("click", beginTrain);
-    document.querySelector("#endBtn").addEventListener("click", function() {
-        env.end();
-    });
-    document.querySelector("#startTrain").addEventListener("click", function() {
-        anim = false;
-        setTrainView();
-    });
-    document.querySelector("#startPlay").addEventListener("click", function() {
-        anim = true;
-        setPlayView();
-        reset();
-        animate();
-    });
-    document.querySelector("#toggleView").addEventListener("click", function() {
-        anim = !anim;
-        toggleView();
-    });
-}
-
-function updateTrainStats() {
-    document.body.style.overflow = "scroll";
-    const progress = document.getElementById("trainProgress");
-    progress.ariaValueNow = info.episode;
-    if(episodeCounter < numEpisodes - 1) {
-        progress.style.width = `${(info.episode / numEpisodes) * 100}%`;
-    } else {
-        progress.style.width = "0%";
-    }
-
-    document.getElementById("trainStats").style.display = "block";
-    let body = document.getElementById("trainTableBody");
-
-    let row = document.createElement("tr");
-    row.id = info.episode - 1;
-    row.addEventListener("click", function(event) {
-        console.log("episode: " + event.target.parentElement.id);
-        console.log(episodes[event.target.parentElement.id].weights[0].weights);
-        console.log(episodes[event.target.parentElement.id].weights[1].weights);
-    });
-
-    let header = document.createElement("th");
-    header.scope = "row";
-    header.innerHTML = info.episode;
-
-    let damaged = document.createElement("td");
-    damaged.innerHTML = info.damaged;
-    if(info.damaged) damaged.style.fontWeight="bold";
-
-    let distance = document.createElement("td");
-    distance.innerHTML = info.distance;
-
-    let speed = document.createElement("td");
-    speed.innerHTML = info.speed;
-
-    let reward = document.createElement("td");
-    reward.innerHTML = info.reward;
-
-    row.appendChild(header);
-    row.appendChild(damaged);
-    row.appendChild(distance);
-    row.appendChild(speed);
-    row.appendChild(reward);
-    body.appendChild(row);
-}
-
-function reset(remember = false) {
+function reset() {
     carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 
     env = new Environment(trafficCount, brainCount, carCanvas);
-    const memory = model.brain.memory;
     model = new Car(-1, env.road.getLaneCenter(env.startLane), 100, env.driverSpeed + 1, "network", "red");
     model.addBrain("fsd", env);
-    if(remember) model.brain.memory = memory;
 }
 
 function save() {
@@ -184,48 +288,6 @@ function save() {
 
 function destroy() {
     localStorage.removeItem("trainBrain");
-}
-
-// prepare for training
-function beginTrain() {
-    document.body.style.overflow = "hidden";
-    document.getElementById("trainTableBody").replaceChildren();
-    numEpisodes = document.getElementById("episodeCountInput").value;
-    maxTimeSteps = document.getElementById("timeLimitInput").value;
-    let progress = document.getElementById("trainProgress");
-
-    progress.style.width = "0%";
-    progress.ariaValueNow = 0;
-    progress.ariaValueMax = numEpisodes;
-
-    episodeCounter = 0;
-
-    reset();
-    console.log("beginning training");
-    episodeLoop();
-}
-
-function episodeLoop() {
-    // load training brain
-    if(localStorage.getItem("trainBrain")) {
-        model.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
-    }
-
-    // collect episode info
-    info = train(model, env, parseInt(maxTimeSteps));
-    info.episode = episodeCounter + 1;
-    updateTrainStats();
-    localStorage.setItem("trainBrain", JSON.stringify(info.weights));
-
-    episodes.push(info);
-    if(episodeCounter % 10 == 0) {
-        reset(true);
-    } else {
-        reset();
-    }
-     episodeCounter++;
-
-    if(episodeCounter < numEpisodes) animFrame = requestAnimationFrame(episodeLoop);
 }
 
 /*
