@@ -40,7 +40,7 @@ export function train(model, env, maxTimeSteps) {
         observation = [model.speed, model.distance].concat(metrics.sensorOffsets);
 
         // remember this state
-        if(i % 10 == 0 || model.damaged || Math.max(metrics.sensorOffsets) > 0.3) {
+        if(i % 5 == 0 || model.damaged || Math.max(metrics.sensorOffsets) > 0.3) {
             model.brain.remember(metrics, action, observation, prev_observation);
         } 
         //model.brain.remember(metrics, action, observation, prev_observation);

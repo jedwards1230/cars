@@ -8,8 +8,11 @@ export class Network {
         this.epsilon = 0.3;
         this.confidence = 0.5;
 
+        this.inputs = new Array(car.sensors[0].rayCount + 2);
+        this.outputs = new Array(2);;
+
         // +2 for inital inputs in car sensor data
-        let neurons = [car.sensors[0].rayCount + 2, 10, 12, 6, 2];
+        let neurons = [this.inputs.length, 10, 12, 6, this.outputs.length];
         this.layers.push(new Level(neurons[0], neurons[1], new Tanh()));
         if(neurons.length > 2) {
             for(let i=1; i<neurons.length-2; i++) {
@@ -47,14 +50,13 @@ export class Network {
     }
 
     experienceReplay(batchSize=20, damaged=false) {
-        if(this.memory.length < batchSize) return;
+        if(this.memory.length <= batchSize) return;
 
         let idx = getRandomInt(1, this.memory.length - batchSize - 1);
         if(damaged) {
             idx = this.memory.length - batchSize - 1;
         }
-        if(idx < 1) return;
-        
+
         for(let i = idx; i<batchSize; i++) {
             if(this.memory[i] === undefined) {
                 break;
@@ -62,7 +64,8 @@ export class Network {
             let [metrics, action, new_observation, prev_observation] = this.memory[i];
             const actualValues = this.forward(prev_observation);
             const nextActualValues = this.forward(new_observation, false);
-            const deltaGradient = this.getDelta(metrics.reward, action, actualValues, nextActualValues);
+            let deltaGradient = JSON.parse(JSON.stringify(actualValues));
+            deltaGradient[action] = -(metrics.reward - actualValues[action]) * this.layers[0].lr;
 
             this.backward(deltaGradient);
 
@@ -193,7 +196,8 @@ class Level {
         }
 
         let adjustedOut = [balancedOut];
-        let adjustedIn = transpose([this.backwardStoreIn]);
+        const derivedIn = this.activation ? this.activation.backward(this.backwardStoreIn) : this.backwardStoreIn;
+        let adjustedIn = transpose([derivedIn]);
         const D_i = multiplyGradients(adjustedIn, adjustedOut);
         const delta_i = this.findDelta(balancedOut);
 

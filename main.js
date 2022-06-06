@@ -54,6 +54,9 @@ function setTrainView() {
 
     document.getElementById("episodeCountInput").value = numEpisodes;
     document.getElementById("timeLimitInput").value = maxTimeSteps;
+
+    document.getElementById("inputNeuronsInput").value = model.brain.inputs.length;
+    document.getElementById("inputNeuronsInput").disabled = true;
 }
 
 // prepare for training
