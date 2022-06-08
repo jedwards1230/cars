@@ -26,6 +26,7 @@ export class Car {
 
         this.controller = controller;
         this.controls = new Controls(controller);
+        this.actionCount = 2;
 
         this.polygon = this.#createPolygon();
         this.sensors = []
@@ -34,10 +35,14 @@ export class Car {
     addBrain(model, env) {
         this.model = model;
         this.useBrain = true;
+        let observation, metrics;
+
         switch(model) {
             case "fsd":
                 this.sensors.push(new Sensor(this, 5, "forward"));
-                this.brain = new Network(this, env)
+                [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
+
+                this.brain = new Network(observation.length, this.actionCount)
                 if(localStorage.getItem("trainBrain")) {
                     this.brain.loadWeights(JSON.parse(localStorage.getItem("trainBrain")));
                 }
@@ -45,8 +50,10 @@ export class Car {
 
             case "forward":
                 this.sensors.push(new Sensor(this, 5, "forward"));
+                [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
+
                 // todo: calc raycount for all sensors
-                this.brain = new Network(this, env)
+                this.brain = new Network(observation.length, this.actionCount)
                 if(localStorage.getItem("trainBrain")) {
                     this.brain.loadWeights(JSON.parse(localStorage.getItem("trainBrain")));
                 }
@@ -118,10 +125,9 @@ export class Car {
     getReward(sensorOffsets) {
         let mOffset = Math.max(...sensorOffsets);
 
-        if(this.damaged) return -3;
-        if(this.speed < 0 || this.distance < 1) return -1;
+        if(this.damaged) return -2;
         if(!this.onTrack) return -1;
-        if(mOffset >= 0.5) return -0.5;
+        //if(this.speed < 0 || this.distance <= 0) return -0.5;
 
         let reward = 1 - mOffset;
         if(this.speed > 0) reward += 0.5;

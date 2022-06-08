@@ -31,6 +31,16 @@ let episodes = [];
 let anim = true;
 let animFrame;
 
+// Set play view
+function setPlayView() {
+    document.body.style.overflow = "hidden";
+    document.getElementById("welcome").style.display = "none";
+    document.getElementById("play").style.display = "flex";
+    document.getElementById("train").style.display = "none";
+    document.getElementById("nav").style.display = "flex";
+    document.getElementById("toggleView").innerHTML = "Train";
+}
+
 // Set train view
 function setTrainView() {
     if(document.getElementById("0")) {
@@ -82,7 +92,8 @@ function episodeLoop() {
         model.brain.loadWeights(JSON.parse(localStorage.getItem("trainBrain")));
     }
     // mutate less over time
-    model.brain.mutate(1 / 2 * (episodeCounter + 1));
+    const mutateBrain = 1 / (5 * (episodeCounter + 1));
+    model.brain.mutate(mutateBrain);
 
     // collect episode info
     info = train(model, env, parseInt(maxTimeSteps));
@@ -109,6 +120,23 @@ function episodeLoop() {
             console.table(info.brain[i]);
         }
     }
+}
+
+// animate model
+function animate(time) {
+    // update cars
+    env.update();
+    if(!model.damaged) {
+        const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
+        const action = model.brain.selectAction(observation, true);
+        env.traffic = model.update(env.traffic, env.road.borders, action);
+    }
+
+    // draw cars
+    env.render();
+    drawCars();
+    drawVisualizer(time);
+    animFrame = requestAnimationFrame(animate);
 }
 
 // Update training stats on page
@@ -216,34 +244,6 @@ function updateTrainStats() {
     row.appendChild(loss);
 
     body.appendChild(row);
-}
-
-
-// Set play view
-function setPlayView() {
-    document.body.style.overflow = "hidden";
-    document.getElementById("welcome").style.display = "none";
-    document.getElementById("play").style.display = "flex";
-    document.getElementById("train").style.display = "none";
-    document.getElementById("nav").style.display = "flex";
-    document.getElementById("toggleView").innerHTML = "Train";
-}
-
-// animate model
-function animate(time) {
-    // update cars
-    env.update();
-    if(!model.damaged) {
-        const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
-        const action = model.brain.selectAction(observation, true);
-        env.traffic = model.update(env.traffic, env.road.borders, action);
-    }
-
-    // draw cars
-    env.render();
-    drawCars();
-    drawVisualizer(time);
-    animFrame = requestAnimationFrame(animate);
 }
 
 function drawCars() {

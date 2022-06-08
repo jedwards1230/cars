@@ -11,7 +11,7 @@ export function train(model, env, maxTimeSteps) {
 
         // update car
         env.update();
-        const action = model.brain.selectAction(observation, true);
+        const action = model.brain.selectAction(observation);
         env.traffic = model.update(env.traffic, env.road.borders, action);
 
         // observe environment

@@ -1,22 +1,24 @@
 import { lerp, getRandomInt } from "../utils/utils.js";
 
 export class Network {
-    constructor(car, env) {
-        this.env = env;
+    constructor(inputCount, outputCount, hiddenLayers=[], lr=0.001) {
         this.layers = [];
         this.memory = [];
         this.epsilon = 0.3;
         this.confidence = 0.5;
 
-        this.inputs = new Array(car.sensors[0].rayCount + 2);
-        this.outputs = new Array(2);;
+        this.inputs = new Array(inputCount);
+        this.outputs = new Array(outputCount);
 
         // +2 for inital inputs in car sensor data
-        let neurons = [this.inputs.length, 10, 10, this.outputs.length];
-        for(let i=0; i<neurons.length - 2; i++) {
-            this.layers.push(new Level(neurons[i], neurons[i+1], new Relu()));
+        let neurons = [inputCount, 10, 10, outputCount];
+        for(let i=0; i<neurons.length - 1; i++) {
+            if (i < neurons.length - 2) {
+                this.layers.push(new Level(neurons[i], neurons[i+1], lr, new Relu()));
+            } else {
+                this.layers.push(new Level(neurons[i], neurons[i+1], lr, new Sigmoid()));
+            }
         }
-        this.layers.push(new Level(neurons[neurons.length - 2], neurons[neurons.length - 1], new Sigmoid()));
     }
 
     forward(inputs, backprop=true) {
@@ -60,6 +62,8 @@ export class Network {
                 alpha[i] = actualValues[i] + delta[i];
             }
 
+            console.log("Action: ", action, "Error: ", totalError, "Reward", metrics.reward);
+            console.log("Alpha: ", alpha);
             this.backward(alpha);
 
             // epsilon decay
@@ -140,9 +144,9 @@ export class Network {
 }
 
 class Level {
-    constructor(inputs, outputs, activation=null) {
+    constructor(inputs, outputs, lr, activation=null) {
         this.activation = activation;
-        this.lr = 0.001;
+        this.lr = lr;
 
         this.backwardStoreIn = new Array(inputs);
         this.inputs = new Array(inputs);
