@@ -19,11 +19,14 @@ let episodeCounter = 0;
 let numEpisodes = 100;
 let maxTimeSteps = 200;
 
+let activeModel = "trainBrain"
+document.getElementById("activeModelName").innerHTML = activeModel;
+
 let env = new Environment(trafficCount, brainCount, carCanvas);
 const x = 100;
 const y = env.road.getLaneCenter(env.startLane)
 let model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-model.addBrain("fsd", env);
+model.addBrain("fsd", env, activeModel);
 
 let info;
 let episodes = [];
@@ -88,8 +91,8 @@ function beginTrain() {
 // Run training loop
 function episodeLoop() {
     // load training brain
-    if(localStorage.getItem("trainBrain")) {
-        model.brain.loadWeights(JSON.parse(localStorage.getItem("trainBrain")));
+    if(localStorage.getItem(activeModel)) {
+        model.brain.loadWeights(JSON.parse(localStorage.getItem(activeModel)));
     }
     // mutate less over time
     const mutateBrain = 1 / (5 * (episodeCounter + 1));
@@ -103,7 +106,7 @@ function episodeLoop() {
     info.distance = info.distance;
 
     updateTrainStats();
-    localStorage.setItem("trainBrain", JSON.stringify(info.brain));
+    localStorage.setItem(activeModel, JSON.stringify(info.brain));
 
     episodes.push(info);
     reset();
@@ -282,15 +285,15 @@ function reset() {
     const x = 100;
     const y = env.road.getLaneCenter(env.startLane)
     model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-    model.addBrain("fsd", env);
+    model.addBrain("fsd", env, activeModel);
 }
 
 function save() {
-    localStorage.setItem("trainBrain", JSON.stringify(model.brain.save()));
+    localStorage.setItem(activeModel, JSON.stringify(model.brain.save()));
 }
 
 function destroy() {
-    localStorage.removeItem("trainBrain");
+    localStorage.removeItem(activeModel);
 }
 
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')

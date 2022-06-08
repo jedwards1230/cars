@@ -7,11 +7,13 @@ export class Network {
         this.epsilon = 0.3;
         this.confidence = 0.5;
 
+        this.lossFunction = MSE;
+
         this.inputs = new Array(inputCount);
         this.outputs = new Array(outputCount);
 
         // +2 for inital inputs in car sensor data
-        let neurons = [inputCount, 10, 10, outputCount];
+        let neurons = [inputCount, 15, 10, outputCount];
         for(let i=0; i<neurons.length - 1; i++) {
             if (i < neurons.length - 2) {
                 this.layers.push(new Level(neurons[i], neurons[i+1], lr, new Relu()));
@@ -53,8 +55,7 @@ export class Network {
 
             const delta = this.getGradient(metrics.reward, actualValues, action, nextAction);
 
-            const error = this.getErrorGradient(actualValues, delta);
-            const totalError = error.reduce((a, b) => a + b);
+            const totalError = this.lossFunction(actualValues, delta);
             avgLoss += totalError;
 
             let alpha = new Array(actualValues.length).fill(0);
@@ -62,8 +63,8 @@ export class Network {
                 alpha[i] = actualValues[i] + delta[i];
             }
 
-            console.log("Action: ", action, "Error: ", totalError, "Reward", metrics.reward);
-            console.log("Alpha: ", alpha);
+            //console.log("Action: ", action, "Error: ", totalError, "Reward", metrics.reward);
+            //console.log("Alpha: ", alpha);
             this.backward(alpha);
 
             // epsilon decay
@@ -77,21 +78,12 @@ export class Network {
         return avgLoss / batchSize;
     }
 
-    getErrorGradient(predicted, expected) {
-        let error = [];
-        for(let i=0; i<predicted.length; i++) {
-            error[i] = (predicted[i] - expected[i]) ** 2;
-        }
-        return error;
-    }
-
     getGradient(reward, actionValues, action, next) {
         const gamma = 0.995;
         let gradient = new Array(actionValues.length).fill(0);
         for(let i=0; i<actionValues.length; i++) {
-            const expected = reward + (gamma * next) - actionValues[action];
-            const delta = -reward * MSE(expected, actionValues[i]);
-            gradient[i] = delta / actionValues.length;
+            const expected = -reward + (gamma * next) - actionValues[action];
+            gradient[i] = expected / actionValues.length;
         }
         gradient[action] *= -1;
         return gradient;
@@ -200,8 +192,8 @@ class Level {
 
         for(let i=0; i<x.length; i++) {
             for(let j=0; j<y.length; j++) {
-                const d = lr * x[i] * delta[j];
-                weights[i][j] -= d;
+                const d = -lr * x[i] * delta[j];
+                weights[i][j] += d;
             }
         }
 
@@ -216,6 +208,10 @@ class Level {
     }
 
     loadWeights(weights) {
+        if (weights.length !== this.weights.length) return
+        for(let i=0; i<this.weights.length; i++) {
+            if (weights[i].length !== this.weights[i].length) return
+        }
         for(let i=0; i<this.weights.length; i++) {
             for(let j=0; j<this.weights[i].length; j++) {
                 this.weights[i][j] = weights[i][j];
@@ -238,35 +234,17 @@ class Level {
     }
 }
 
-// function to find mean squared error between two values
-function MSE(expected, actual) {
-    return Math.pow(actual - expected, 2);
+// Mean squared error
+function MSE(actual, expected) {
+    let error = new Array(actual.length);
+    for(let i=0; i<actual.length; i++) {
+        error[i] = (actual[i] - expected[i]) ** 2;
+    }
+    return error.reduce((a, b) => a + b);
 }
 
 function sigmoid(x) {
     return 1 / (1 + Math.exp(-x));
-}
-
-function multiplyGradients(a,b) {
-	return a.map(function(x,i) {
-		return transpose(b).map(function(y,k) {
-			return dotproduct(x, y)
-		});
-	});
-}
-
-function dotproduct(a,b) {
-	return a.map( (x,i) => {
-		return a[i] * b[i];
-	}).reduce( (m,n) => { return m + n; });
-}
-
-function transpose(a) {
-	return a[0].map(function(x,i) {
-		return a.map(function(y,k) {
-			return y[i];
-		})
-	});
 }
 
 class Sigmoid {

@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 
 <head>
-    <title>Miles' Adventure</title>
+    <title>Miles' Driving School</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <nav id="nav" class="navbar px-3 navbar-expand bg-light">
-        <a class="navbar-brand" href="index.html">Miles' Adventure</a>
+        <a class="navbar-brand" href="index.html">Miles' Driving School</a>
         <div class="ms-auto">
+            <p id="activeModel" class="my-auto px-2 me-auto navbar-text" >
+                Model: <span id="activeModelName" class=""></span>
+            </p>
             <button id="destroyBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Discard Weights" class="btn btn-outline-danger">🗑️</button>
             <button id="resetBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Break Loop" class="btn btn-outline-success">♻️</button>
             <button id="toggleView" data-bs-toggle="tooltip" data-bs-placement="bottom" title="" class="btn btn-outline-primary">Switch View</button>
@@ -18,7 +21,7 @@
 
     <div id="mainView">
         <div id="welcome" class="text-center text-bg-light p-3">
-            <h5>Welcome to Miles' Adventure</h5>
+            <h5>Welcome to Miles' Driving School</h5>
             <div>
                 <button id="startTrain" class="btn btn-dark">Train</button>
                 <button id="startPlay" class="btn btn-dark">Play</button>

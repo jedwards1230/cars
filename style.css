@@ -52,6 +52,10 @@ body {
     flex-direction: column;
 }
 
+#activeModel {
+    display: inline-block
+}
+
 button {
     border: none;
     border-radius: 5px;

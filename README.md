@@ -1,6 +1,21 @@
-# cars
+# Miles' Driving School
  
 Inspired by [this](https://www.youtube.com/watch?v=Rs_rAxEsAvI).
+
+## Model
+
+#### Input: 7
+Adjust these in car.js, sensor.js, and network.js
+* speed / acceleration
+* if it's moving in the correct direction (needs tweaking)
+* 5 inputs from its forward rays
+  * 0: no obstacles detected
+  * 1: collision
+
+#### Output: 2
+Adjust these in car.js and network.js
+* 0: move forward
+* 1: move backward
 
 ## Todo
 ### UI
@@ -14,9 +29,7 @@ Inspired by [this](https://www.youtube.com/watch?v=Rs_rAxEsAvI).
 * view model metrics while animating (speed, distance)
 
 ### Network
-* swappable loss functions
-* weights decay into null or NaN after a few training loops
-  * training basically doesnt work yet
 * optimize how rewards/expected values are calculated
-* better process for adding layer
-  * gotta init with default in/out but also read config from ui for flexible building
+  * training favors -distance
+* better process for adding layers
+  * init with default ins/outs but also read config from ui for flexible building
