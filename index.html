@@ -9,7 +9,11 @@
 <body>
     <nav id="nav" class="navbar px-3 navbar-expand bg-light">
         <a class="navbar-brand" href="index.html">Miles' Adventure</a>
-        <button id="toggleView" class="btn ms-auto btn-outline-success">Switch View</button>
+        <div class="ms-auto">
+            <button id="destroyBtn" class="btn btn-outline-danger">🗑️</button>
+            <button id="resetBtn" class="btn btn-outline-success">♻️</button>
+            <button id="toggleView" class="btn btn-outline-primary">Switch View</button>    
+        </div>
     </nav>
 
     <div id="mainView">
@@ -23,9 +27,7 @@
 
         <div id="play" class="container">
             <div id="confBtns">
-                <button id="resetBtn" class="btn btn-light">♻️</button>
                 <button id="saveBtn" class="btn btn-light">💾</button>
-                <button id="destroyBtn" class="btn btn-light">🗑️</button>
                 </ br>
                 <button id="endBtn" class="btn btn-light">End</button>
             </div>
