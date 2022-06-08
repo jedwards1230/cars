@@ -96,15 +96,15 @@ export class Visualizer{
             ctx.fillStyle=getRGBA(outputs[i]);
             ctx.fill();
 
-            ctx.beginPath();
+            /* ctx.beginPath();
             ctx.lineWidth=2;
             ctx.arc(right,y,nodeRadius*0.8,0,Math.PI*2);
             ctx.strokeStyle=getRGBA(biases[i]);
             ctx.setLineDash([3,3]);
             ctx.stroke();
-            ctx.setLineDash([]);
+            ctx.setLineDash([]); */
 
-            if(outputLabels[i]){
+            if(outputLabels[i] && outputs[i] == 1){
                 ctx.beginPath();
                 ctx.textAlign="center";
                 ctx.textBaseline="middle";

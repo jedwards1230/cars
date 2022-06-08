@@ -17,6 +17,7 @@ export class Car {
         this.maxSpeed = maxspeed;
         this.acceleration = 0.2;
         this.friction = 0.05;
+        this.onTrack = 1;
 
         this.distance = 0;
         this.damaged = false;
@@ -61,7 +62,9 @@ export class Car {
 
         if(!this.damaged) {
             this.polygon = this.#createPolygon();
+            const prev_distance = this.distance;
             this.distance += this.speed;
+            this.onTrack = (this.distance > prev_distance) ? 1 : 0;
             traffic = this.#checkDamage(borders, traffic);
         }
         //if(this.distance <= -10) this.damaged = true;
@@ -99,6 +102,30 @@ export class Car {
             sensorOffsets = sensorOffsets.concat(offsets)
         }
         return sensorOffsets
+    }
+
+    getObservation(borders, traffic) {
+        const sensorOffsets = this.getSensorData(borders, traffic)
+        const observation = [this.speed / this.maxSpeed, this.onTrack].concat(sensorOffsets);
+        const reward = this.getReward(sensorOffsets);
+        const metrics = {
+            damaged: this.damaged,
+            reward: reward,
+        }
+        return [observation, metrics]
+    }
+
+    getReward(sensorOffsets) {
+        let mOffset = Math.max(...sensorOffsets);
+
+        if(this.damaged) return -3;
+        if(this.speed < 0 || this.distance < 1) return -1;
+        if(!this.onTrack) return -1;
+        if(mOffset >= 0.5) return -0.5;
+
+        let reward = 1 - mOffset;
+        if(this.speed > 0) reward += 0.5;
+        return reward;
     }
 
     #checkDamage(roadBorders, traffic) {

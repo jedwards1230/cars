@@ -57,10 +57,7 @@ export class Environment {
             if(this.traffic[i].model != "fsd") {
                 let action = null;
                 if(this.traffic[i].sensors.length > 0) {
-                    const offSets = this.traffic[i].getSensorData(this.road.borders, this.traffic);
-                    let observation = [model.speed / model.maxSpeed].concat(offSets);
-                    //observation = offSets;
-
+                    const [observation, metrics] = this.traffic[i].getObservation(this.road.borders, this.traffic);
                     action = this.traffic[i].brain.selectAction(observation);
                 }
                 this.traffic = this.traffic[i].update(this.traffic, this.road.borders, action);

@@ -8,14 +8,15 @@ export class Network {
         this.epsilon = 0.3;
         this.confidence = 0.5;
 
-        this.inputs = new Array(car.sensors[0].rayCount + 1);
+        this.inputs = new Array(car.sensors[0].rayCount + 2);
         this.outputs = new Array(2);;
 
         // +2 for inital inputs in car sensor data
         let neurons = [this.inputs.length, 10, 10, this.outputs.length];
-        for(let i=0; i<neurons.length - 1; i++) {
-            this.layers.push(new Level(neurons[i], neurons[i+1], new Sigmoid()));
+        for(let i=0; i<neurons.length - 2; i++) {
+            this.layers.push(new Level(neurons[i], neurons[i+1], new Relu()));
         }
+        this.layers.push(new Level(neurons[neurons.length - 2], neurons[neurons.length - 1], new Sigmoid()));
     }
 
     forward(inputs, backprop=true) {
@@ -30,18 +31,6 @@ export class Network {
         for(let i=this.layers.length-1; i>=0; i--) {
             delta = this.layers[i].backward(delta);
         }
-    }
-
-    reward(m) {
-        let mOffset = Math.max(...m.sensorOffsets);
-
-        if(m.damaged) return -2;
-        if(m.speeds[m.speeds.length - 1] < 0 || m.distances[m.distances.length - 2] - 1 < 0 || m.distances[m.distances.length - 1] < 1) return -1;
-        if(mOffset >= 0.5) return -1;
-
-        let reward = 1 - mOffset + 1;
-        if(m.prev_distance < m.next_distance) reward += 0.5;
-        return reward;
     }
 
     experienceReplay(batchSize=30, damaged=false) {
@@ -137,13 +126,6 @@ export class Network {
 
     mutate(amount=1) {
         this.layers.forEach(level => {
-            for(let i=0; i<level.biases.length; i++) {
-                level.biases[i] = lerp(
-                    level.biases[i],
-                    Math.random()*2-1,
-                    amount,
-                )
-                }
             for(let i=0; i<level.inputs.length; i++) {
                 for(let j=0; j<level.outputs.length; j++) {
                     level.weights[i][j] = lerp(
@@ -163,16 +145,14 @@ class Level {
         this.lr = 0.001;
 
         this.backwardStoreIn = new Array(inputs);
-        this.backwardStoreOut = new Array(outputs);
-
         this.inputs = new Array(inputs);
         this.weights = new Array(inputs);
         for (let i = 0; i < inputs; i++) {
             this.weights[i] = new Array(outputs).fill(0);
         }
 
+        this.backwardStoreOut = new Array(outputs);
         this.outputs = new Array(outputs);
-        this.biases = new Array(outputs);
 
         this.#randomize();
     }
@@ -180,7 +160,6 @@ class Level {
     // speed + sensors
     forward(inputs, backprop=true) {
         const m = this.weights;
-        const b = this.biases;
 
         const x = inputs;
 
@@ -210,21 +189,22 @@ class Level {
     }
 
     backward(delta) {
-        const a = this.lr;
-        const m = this.weights;
+        const lr = this.lr;
+        const weights = this.weights;
         const x = this.inputs;
         const y = this.backwardStoreOut;
 
         for(let i=0; i<x.length; i++) {
             for(let j=0; j<y.length; j++) {
-                m[i][j] -= a * x[i] * delta[j];
+                const d = lr * x[i] * delta[j];
+                weights[i][j] -= d;
             }
         }
 
         let nextDelta = new Array(x.length).fill(0);
         for(let i=0; i<x.length; i++) {
             for(let j=0; j<y.length; j++) {
-                nextDelta[i] += delta[j] * m[i][j] * y[j];
+                nextDelta[i] += delta[j] * weights[i][j] * y[j];
             }
         }
         
@@ -245,21 +225,11 @@ class Level {
         }
     }
 
-    updateBiases(gradient) {
-        for(let i=0; i<this.biases.length; i++) {
-            this.biases[i] -= gradient[i] * this.lr;
-        }
-    }
-
     #randomize() {
         for(let i=0; i<this.inputs.length; i++) {
             for(let j=0; j<this.outputs.length; j++) {
                 this.weights[i][j] = Math.random() * 2 - 1;
             }
-        }
-
-        for(let i=0; i<this.biases.length; i++) {
-            this.biases[i] = Math.random() * 2 - 1;
         }
     }
 }
