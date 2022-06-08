@@ -1,13 +1,13 @@
 import {Environment} from "./utils/environment.js";
 import {Visualizer} from "./utils/visualizer.js";
 import {Car} from "./car/car.js";
-import {train} from "./train.js";
+import {train} from "./network/train.js";
 
 const carCanvas = document.getElementById("carCanvas");
 const networkCanvas = document.getElementById("networkCanvas");
 
-carCanvas.width = 300;
-networkCanvas.width = 450;
+carCanvas.height = 300;
+networkCanvas.height = 450;
 
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
@@ -16,19 +16,17 @@ const trafficCount = 100;
 const brainCount = 1;
 
 let episodeCounter = 0;
-let numEpisodes = 1;
-let maxTimeSteps = 21;
+let numEpisodes = 100;
+let maxTimeSteps = 200;
 
 let env = new Environment(trafficCount, brainCount, carCanvas);
-let model = new Car(-1, env.road.getLaneCenter(env.startLane), 100, env.driverSpeed + 1, "network", "red");
+const x = 100;
+const y = env.road.getLaneCenter(env.startLane)
+let model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
 model.addBrain("fsd", env);
 
 let info;
 let episodes = [];
-let distances = [];
-let speeds = [];
-let times = []
-
 
 let anim = true;
 let animFrame;
@@ -55,15 +53,15 @@ function setTrainView() {
     document.getElementById("episodeCountInput").value = numEpisodes;
     document.getElementById("timeLimitInput").value = maxTimeSteps;
 
-    document.getElementById("inputNeuronsInput").value = model.brain.inputs.length;
-    document.getElementById("inputNeuronsInput").disabled = true;
+    //document.getElementById("inputNeuronsInput").value = model.brain.inputs.length;
+    //document.getElementById("inputNeuronsInput").disabled = true;
 }
 
 // prepare for training
 function beginTrain() {
     document.body.style.overflow = "hidden";
     document.getElementById("trainTableBody").replaceChildren();
-    numEpisodes = document.getElementById("episodeCountInput").value;
+    numEpisodes = document.getElementById("episodeCountInput").value - 1;
     maxTimeSteps = document.getElementById("timeLimitInput").value;
     let progress = document.getElementById("trainProgress");
 
@@ -87,8 +85,10 @@ function beginTrain() {
 function episodeLoop() {
     // load training brain
     if(localStorage.getItem("trainBrain")) {
-        model.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
+        model.brain.loadWeights(JSON.parse(localStorage.getItem("trainBrain")));
     }
+    // mutate less over time
+    model.brain.mutate(1 / 2 * (episodeCounter + 1));
 
     // collect episode info
     info = train(model, env, parseInt(maxTimeSteps));
@@ -106,7 +106,15 @@ function episodeLoop() {
     episodeCounter++;
 
     //animFrame = requestAnimationFrame(episodeLoop);
-    if(episodeCounter <= numEpisodes) setTimeout(episodeLoop, 0);
+    if(episodeCounter <= numEpisodes) {
+        setTimeout(episodeLoop, 0);
+    } else {
+        console.log("training complete");
+        console.log("biases");
+        console.table(info.brain.biases);
+        console.log("weights");
+        console.table(info.brain.weights);
+    }
 }
 
 function updateTrainStats() {
@@ -124,7 +132,7 @@ function updateTrainStats() {
     const survived = episodes.filter(episode => !episode.damaged).length;
     survivedBar.style.width = `${(survived / episodes.length) * 100}%`;
     survivedBar.ariaValueNow = survived;
-    document.getElementById("survivedCount").innerHTML = `Models Survived: ${survived}/${episodes.length}`;
+    document.getElementById("survivedCount").innerHTML = `Models Survived: ${survived}/${episodes.length + 1}`;
 
 
     // find min, max, and avg distance of all episodes
@@ -146,12 +154,12 @@ function updateTrainStats() {
     const speedAvg = episodes.reduce((a, e) => a + e.speed, 0) / episodes.length;
 
     // update trainStatsTable
+    document.getElementById("timeMax").innerHTML = timeMax.toFixed(0);
+    document.getElementById("timeMin").innerHTML = timeMin.toFixed(0);
+    document.getElementById("timeAvg").innerHTML = timeAvg.toFixed(0);
     document.getElementById("distanceMax").innerHTML = distanceMax.toFixed(0);
     document.getElementById("distanceMin").innerHTML = distanceMin.toFixed(0);
     document.getElementById("distanceAvg").innerHTML = distanceAvg.toFixed(0);
-    document.getElementById("timeMax").innerHTML = timeMax.toFixed(2);
-    document.getElementById("timeMin").innerHTML = timeMin.toFixed(2);
-    document.getElementById("timeAvg").innerHTML = timeAvg.toFixed(2);
     document.getElementById("speedMax").innerHTML = speedMax.toFixed(2);
     document.getElementById("speedMin").innerHTML = speedMin.toFixed(2);
     document.getElementById("speedAvg").innerHTML = speedAvg.toFixed(2);
@@ -236,10 +244,11 @@ function animate(time) {
     // update cars
     env.update();
     if(!model.damaged) {
-        const observation = model.getSensorData(env.road.borders, env.traffic);
+        const sensorOffsets = model.getSensorData(env.road.borders, env.traffic);
+        let observation = [model.speed / model.maxSpeed].concat(sensorOffsets);
+        //observation = sensorOffsets;
         const action = model.brain.selectAction(observation, true);
-        model.updateControls(action);
-        env.traffic = model.update(env.road.borders, env.traffic);
+        env.traffic = model.update(env.traffic, env.road.borders, action);
     }
 
     // draw cars
@@ -251,7 +260,7 @@ function animate(time) {
 
 function drawCars() {
     carCtx.save();
-    carCtx.translate(0, carCanvas.height * 0.7 - model.y);
+    carCtx.translate(carCanvas.height * 0.7 - model.x, 0);
     env.road.draw(carCtx);
     for(let i=0; i<env.traffic.length; i++) {
         env.traffic[i].draw(carCtx);
@@ -281,7 +290,9 @@ function reset() {
     carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 
     env = new Environment(trafficCount, brainCount, carCanvas);
-    model = new Car(-1, env.road.getLaneCenter(env.startLane), 100, env.driverSpeed + 1, "network", "red");
+    const x = 100;
+    const y = env.road.getLaneCenter(env.startLane)
+    model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
     model.addBrain("fsd", env);
 }
 

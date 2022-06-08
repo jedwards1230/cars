@@ -1,5 +1,3 @@
-
-
 export function train(model, env, maxTimeSteps) {
     let speed = 0;
     let rewards = 0;
@@ -14,7 +12,7 @@ export function train(model, env, maxTimeSteps) {
         reward: 0,
     }
 
-    let observation = [model.speed, model.distance].concat(metrics.sensorOffsets);
+    let observation = [model.speed / model.maxSpeed].concat(metrics.sensorOffsets);
     
     for(let i=0; i<maxTimeSteps; i++) {
         // store previous data
@@ -23,9 +21,7 @@ export function train(model, env, maxTimeSteps) {
         // update car
         env.update();
         const action = model.brain.selectAction(observation, true);
-        model.updateControls(action);
-        env.traffic = model.update(env.road.borders, env.traffic);
-        model.damaged = model.distance <= -10 ? true : model.damaged;
+        env.traffic = model.update(env.traffic, env.road.borders, action);
 
         // update metrics
         metrics.sensorOffsets = model.getSensorData(env.road.borders, env.traffic);
@@ -37,14 +33,13 @@ export function train(model, env, maxTimeSteps) {
         metrics.reward = model.brain.reward(metrics);
 
         // observe environment
-        observation = [model.speed, model.distance].concat(metrics.sensorOffsets);
+        observation = [model.speed / model.maxSpeed].concat(metrics.sensorOffsets);
+        //observation = metrics.sensorOffsets;
+        const metricsMem = JSON.parse(JSON.stringify(metrics));
 
-        // remember this state
-        if(i % 5 == 0 || model.damaged || Math.max(metrics.sensorOffsets) > 0.3) {
-            model.brain.remember(metrics, action, observation, prev_observation);
-        } 
-        //model.brain.remember(metrics, action, observation, prev_observation);
-        model.brain.experienceReplay(20, model.damaged);
+        model.brain.remember(metricsMem, action, observation, prev_observation);
+        const loss = model.brain.experienceReplay(20, model.damaged);
+        if (loss != null) console.log("Loss: " + loss);
 
         // update return info
         rewards += metrics.reward;

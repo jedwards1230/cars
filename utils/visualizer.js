@@ -3,12 +3,10 @@ import { getRGBA, lerp } from "./utils.js";
 export class Visualizer{
     static drawNetwork(ctx,network){
         const margin=50;
-        const left=margin;
-        const top=margin;
         const width=ctx.canvas.width-margin*2;
         const height=ctx.canvas.height-margin*2;
 
-        const levelHeight=height/network.layers.length;
+        const levelWidth=width/network.layers.length;
 
         const last = network.layers.length-1;
         let actionValues = network.layers[last].outputs;
@@ -23,10 +21,10 @@ export class Visualizer{
         network.layers[last].outputs = actionValues;
 
         for(let i=network.layers.length-1;i>=0;i--){
-            const levelTop=top+
+            const levelEnd=margin+
                 lerp(
-                    height-levelHeight,
                     0,
+                    width-levelWidth,
                     network.layers.length==1
                         ?0.5
                         :i/(network.layers.length-1)
@@ -34,69 +32,73 @@ export class Visualizer{
 
             ctx.setLineDash([7,3]);
             Visualizer.drawLevel(ctx,network.layers[i],
-                left,levelTop,
-                width,levelHeight,
+                margin,levelEnd,
+                levelWidth,height,
                 i==network.layers.length-1
                     // up, down, left, right
                     ?['\u290a','\u290b','\u21da','\u21db']
                     :[]
             );
         }
+        ctx.scale(-1, 1);
     }
 
-    static drawLevel(ctx,level,left,top,width,height,outputLabels){
-        const right=left+width;
-        const bottom=top+height;
+    static drawLevel(ctx,level,margin,levelLimit,width,height,outputLabels){
+        const right=levelLimit+width;
+        const bottom=margin+height;
 
         const inputs = level.inputs;
         const outputs = level.outputs;
         const weights = level.weights;
         const biases = level.biases;
 
+        // drawn lines for weights * biases
         for(let i=0;i<inputs.length;i++){
             for(let j=0;j<outputs.length;j++){
                 ctx.beginPath();
                 ctx.moveTo(
-                    Visualizer.#getNodeX(inputs,i,left,right),
-                    bottom
+                    levelLimit,
+                    Visualizer.#getNodeY(inputs,i,bottom, margin)
                 );
                 ctx.lineTo(
-                    Visualizer.#getNodeX(outputs,j,left,right),
-                    top
+                    right,
+                    Visualizer.#getNodeY(outputs,j,bottom, margin)
                 );
                 ctx.lineWidth=2;
-                ctx.strokeStyle=getRGBA(weights[i] * inputs[i]);
+                ctx.strokeStyle=getRGBA(weights[i][j] * inputs[i]);
                 ctx.stroke();
             }
         }
 
+        // draw input nodes
         const nodeRadius=18;
         for(let i=0;i<inputs.length;i++){
-            const x=Visualizer.#getNodeX(inputs,i,left,right);
+            const y=Visualizer.#getNodeY(inputs,i,bottom, margin);
             ctx.beginPath();
-            ctx.arc(x,bottom,nodeRadius,0,Math.PI*2);
+            ctx.arc(levelLimit,y,nodeRadius,0,Math.PI*2);
             ctx.fillStyle="black";
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(x,bottom,nodeRadius*0.6,0,Math.PI*2);
+            ctx.arc(levelLimit,y,nodeRadius*0.6,0,Math.PI*2);
             ctx.fillStyle=getRGBA(inputs[i]);
             ctx.fill();
         }
         
+        // draw output nodes
         for(let i=0;i<outputs.length;i++){
-            const x=Visualizer.#getNodeX(outputs,i,left,right);
+            const y=Visualizer.#getNodeY(outputs,i,bottom, margin);
             ctx.beginPath();
-            ctx.arc(x,top,nodeRadius,0,Math.PI*2);
+            ctx.arc(right,y,nodeRadius,0,Math.PI*2);
             ctx.fillStyle="black";
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(x,top,nodeRadius*0.6,0,Math.PI*2);
+            ctx.arc(right, y,nodeRadius*0.6,0,Math.PI*2);
             ctx.fillStyle=getRGBA(outputs[i]);
             ctx.fill();
 
             ctx.beginPath();
             ctx.lineWidth=2;
-            ctx.arc(x,top,nodeRadius*0.8,0,Math.PI*2);
+            ctx.arc(right,y,nodeRadius*0.8,0,Math.PI*2);
             ctx.strokeStyle=getRGBA(biases[i]);
             ctx.setLineDash([3,3]);
             ctx.stroke();
@@ -109,17 +111,17 @@ export class Visualizer{
                 ctx.fillStyle="black";
                 ctx.strokeStyle="white";
                 ctx.font=(nodeRadius*1.5)+"px Arial";
-                ctx.fillText(outputLabels[i],x,top+nodeRadius*0.1);
+                ctx.fillText(outputLabels[i],right,y+nodeRadius*0.1);
                 ctx.lineWidth=0.5;
-                ctx.strokeText(outputLabels[i],x,top+nodeRadius*0.1);
+                ctx.strokeText(outputLabels[i],right,y+nodeRadius*0.1);
             }
         }
     }
 
-    static #getNodeX(nodes,index,left,right){
+    static #getNodeY(nodes,index,bottom,top){
         return lerp(
-            left,
-            right,
+            top,
+            bottom,
             nodes.length==1
                 ?0.5
                 :index/(nodes.length-1)

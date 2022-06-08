@@ -4,8 +4,8 @@ export class Sensor {
     constructor(car, rays, direction) {
         this.car = car;
         this.rayCount = rays;
-        this.rayLength = 150;
-        this.raySpread = Math.PI / 3;
+        this.rayLength = 175;
+        this.raySpread = Math.PI / 4;
 
         this.direction = direction;
 
@@ -89,25 +89,25 @@ export class Sensor {
             const start = {x:this.car.x, y:this.car.y};
             let end = {}
             switch(this.direction) {
-                case "forward":
+                case "left":
                     end = {
                         x: this.car.x - Math.sin(rayAngle) * this.rayLength,
                         y: this.car.y - Math.cos(rayAngle) * this.rayLength,
                     }
                     break;
-                case "backward":
+                case "right":
                     end = {
                         x: this.car.x - Math.sin(rayAngle) * this.rayLength * -1,
                         y: this.car.y - Math.cos(rayAngle) * this.rayLength * -1,
                     }
                     break;
-                case "left":
+                case "backward":
                     end = {
                         x: this.car.x - Math.cos(rayAngle) * this.rayLength,
                         y: this.car.y - Math.sin(rayAngle) * this.rayLength,
                     }
                     break;
-                case "right":
+                case "forward":
                     end = {
                         x: this.car.x - Math.cos(rayAngle) * this.rayLength * -1,
                         y: this.car.y - Math.sin(rayAngle) * this.rayLength * -1,
@@ -128,7 +128,7 @@ export class Sensor {
 
             ctx.beginPath();
             ctx.lineWidth = 2;
-            ctx.strokeStyle = 'yellow';
+            ctx.strokeStyle = 'teal';
             ctx.moveTo(
                 this.rays[i][0].x,
                 this.rays[i][0].y,

@@ -13,7 +13,7 @@ export class Environment {
 
         this.done = false;
 
-        this.road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, this.laneCount);
+        this.road = new Road(carCanvas.height / 2, carCanvas.height * 0.9, this.laneCount);
 
         this.traffic = this.generateTraffic(this.trafficCount);
     }
@@ -48,39 +48,40 @@ export class Environment {
 
         // update dimensions
         playView.style.top = navbarHeight + "px";
-        carCanvas.height = window.innerHeight - navbarHeight;
-        networkCanvas.height = window.innerHeight - navbarHeight;
+        carCanvas.width = window.innerWidth;
+        networkCanvas.width = window.innerWidth;
     }
 
     update() {
         for(let i=0; i<this.traffic.length; i++) {
             if(this.traffic[i].model != "fsd") {
-                this.traffic[i].update(this.road.borders, this.traffic);
+                let action = null;
                 if(this.traffic[i].sensors.length > 0) {
-                    const inputs = this.traffic[i].getSensorData(this.road.borders, this.traffic);
-                    const chosen = this.traffic[i].brain.selectAction(observation);
-                    if(this.traffic[i].useBrain) {
-                        this.traffic[i].updateControls(chosen);
-                    }
+                    const offSets = this.traffic[i].getSensorData(this.road.borders, this.traffic);
+                    let observation = [model.speed / model.maxSpeed].concat(offSets);
+                    //observation = offSets;
+
+                    action = this.traffic[i].brain.selectAction(observation);
                 }
+                this.traffic = this.traffic[i].update(this.traffic, this.road.borders, action);
             }
         }
     }
     
     generateTraffic(N) {
         const cars = [];
-        const placed = [];
-        for(let i=0; i<this.road.laneCount; i++) {
-            placed.push(100);
-        }
+        const placed = new Array(this.road.laneCount).fill(100);
     
         for(let i=0; i<N; i++) {
             // randomize lane
             const lane = getRandomInt(0,this.road.laneCount-1);
             const nextLane = placed[lane - 1] ? lane - 1 : lane + 1;
-            placed[lane] = placed[lane] - getRandomInt(150, 250);
+            placed[lane] = placed[lane] + getRandomInt(150, 250);
+            const idx = i+this.brainCount;
+            const x = placed[lane];
+            const y = this.road.getLaneCenter(lane);
             
-            let car = new Car(i+this.brainCount, this.road.getLaneCenter(lane), placed[lane], getRandomInt(2,2), "dummy");
+            let car = new Car(idx, x, y, getRandomInt(2,2), "dummy");
             //let car = new Car(i+this.brainCount, this.road.getLaneCenter(lane), placed[lane], getRandomInt(2,4), "network");
             //car.addBrain("forward", this);
             cars.push(car);

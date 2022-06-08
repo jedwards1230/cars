@@ -1,7 +1,7 @@
 import {polysIntersect} from "../utils/utils.js";
 import {Controls} from "./controls.js";
 import {Sensor} from "./sensor.js";
-import {Network} from "../network.js";
+import {Network} from "../network/network.js";
 export class Car {
     constructor(id, x, y, maxspeed = 2, controller="dummy", color="blue", width=30, height=50) {
         this.id = id;
@@ -38,7 +38,7 @@ export class Car {
                 this.sensors.push(new Sensor(this, 5, "forward"));
                 this.brain = new Network(this, env)
                 if(localStorage.getItem("trainBrain")) {
-                    this.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
+                    this.brain.loadWeights(JSON.parse(localStorage.getItem("trainBrain")));
                 }
                 break;
 
@@ -47,7 +47,7 @@ export class Car {
                 // todo: calc raycount for all sensors
                 this.brain = new Network(this, env)
                 if(localStorage.getItem("trainBrain")) {
-                    this.brain.updateLevels(JSON.parse(localStorage.getItem("trainBrain")));
+                    this.brain.loadWeights(JSON.parse(localStorage.getItem("trainBrain")));
                 }
                 break;
         }
@@ -55,16 +55,17 @@ export class Car {
 
     // update car object
     // if damaged, only process slow down and sensors
-    update(roadBorders, traffic) {
+    update(traffic, borders, action=null) {
+        if(action != null) this.updateControls(action);
         this.#move();
 
         if(!this.damaged) {
             this.polygon = this.#createPolygon();
             this.distance += this.speed;
-            traffic = this.#checkDamage(roadBorders, traffic);
+            traffic = this.#checkDamage(borders, traffic);
         }
-
-        if(this.damaged) console.log("crashed at ", this.distance);
+        //if(this.distance <= -10) this.damaged = true;
+        //if(this.damaged) console.log("crashed at ", this.distance);
 
         return traffic;
     }
@@ -134,20 +135,20 @@ export class Car {
         const rad = Math.hypot(this.width, this.height) / 2;
         const alpha = Math.atan2(this.width, this.height);
         points.push({
-            x: this.x - Math.sin(this.angle - alpha) * rad,
-            y: this.y - Math.cos(this.angle - alpha) * rad,
+            x: this.x - Math.cos(this.angle - alpha) * rad,
+            y: this.y - Math.sin(this.angle - alpha) * rad,
         });
         points.push({
-            x: this.x - Math.sin(this.angle + alpha) * rad,
-            y: this.y - Math.cos(this.angle + alpha) * rad,
+            x: this.x - Math.cos(this.angle + alpha) * rad,
+            y: this.y - Math.sin(this.angle + alpha) * rad,
         });
         points.push({
-            x: this.x - Math.sin(Math.PI + this.angle - alpha) * rad,
-            y: this.y - Math.cos(Math.PI + this.angle - alpha) * rad,
+            x: this.x - Math.cos(Math.PI + this.angle - alpha) * rad,
+            y: this.y - Math.sin(Math.PI + this.angle - alpha) * rad,
         });
         points.push({
-            x: this.x - Math.sin(Math.PI + this.angle + alpha) * rad,
-            y: this.y - Math.cos(Math.PI + this.angle + alpha) * rad,
+            x: this.x - Math.cos(Math.PI + this.angle + alpha) * rad,
+            y: this.y - Math.sin(Math.PI + this.angle + alpha) * rad,
         });
         
         return points;
@@ -190,16 +191,16 @@ export class Car {
         
         this.speed = parseFloat(this.speed.toFixed(2));
 
-        this.x -= Math.sin(this.angle)*this.speed;
-        this.y -= Math.cos(this.angle)*this.speed;
+        this.x += Math.cos(this.angle)*this.speed;
+        this.y += Math.sin(this.angle)*this.speed;
     }
 
-    draw(ctx, drawSensors) {
+    draw(ctx, drawSensors=false) {
         if(this.damaged) {
             ctx.fillStyle = "gray";
         } else {
             ctx.fillStyle = this.color;
-            if(this.sensors[0] && drawSensors) {
+            if(this.sensors && drawSensors) {
                 this.sensors[0].draw(ctx);
             }
         }
