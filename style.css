@@ -60,10 +60,6 @@ button {
     cursor: pointer;
 }
 
-button:hover {
-    background: blue;
-}
-
 #train {
     width: 60%;
     margin: auto;

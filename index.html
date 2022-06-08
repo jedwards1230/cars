@@ -10,9 +10,9 @@
     <nav id="nav" class="navbar px-3 navbar-expand bg-light">
         <a class="navbar-brand" href="index.html">Miles' Adventure</a>
         <div class="ms-auto">
-            <button id="destroyBtn" class="btn btn-outline-danger">🗑️</button>
-            <button id="resetBtn" class="btn btn-outline-success">♻️</button>
-            <button id="toggleView" class="btn btn-outline-primary">Switch View</button>    
+            <button id="destroyBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Discard Weights" class="btn btn-outline-danger">🗑️</button>
+            <button id="resetBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Break Loop" class="btn btn-outline-success">♻️</button>
+            <button id="toggleView" data-bs-toggle="tooltip" data-bs-placement="bottom" title="" class="btn btn-outline-primary">Switch View</button>
         </div>
     </nav>
 
@@ -130,7 +130,7 @@
                         </thead>
                         <tbody id="trainStatsTable">
                             <tr>
-                                <th scope="row">Time</th>
+                                <th scope="row">Time Steps</th>
                                 <td id="timeMin"></td>
                                 <td id="timeAvg"></td>
                                 <td id="timeMax"></td>
@@ -167,7 +167,7 @@
                             <tr>
                                 <th scope="col">#</th>
                                 <th scope="col">Damaged</th>
-                                <th scope="col">Time</th>
+                                <th scope="col">Time Steps</th>
                                 <th scope="col">Distance</th>
                                 <th scope="col">Avg Speed</th>
                                 <th scope="col">Avg Loss</th>

@@ -14,6 +14,7 @@ const networkCtx = networkCanvas.getContext("2d");
 const trafficCount = 100;
 const brainCount = 1;
 
+let breakLoop = false;
 let episodeCounter = 0;
 let numEpisodes = 100;
 let maxTimeSteps = 200;
@@ -70,6 +71,7 @@ function beginTrain() {
 
     reset();
     console.log("beginning training");
+    breakLoop = false;
     episodeLoop();
 }
 
@@ -95,9 +97,10 @@ function episodeLoop() {
     episodes.push(info);
     reset();
     episodeCounter++;
+    if (episodeCounter > numEpisodes || episodeCounter < 0) breakLoop = true;
 
     //animFrame = requestAnimationFrame(episodeLoop);
-    if(episodeCounter <= numEpisodes) {
+    if(!breakLoop) {
         setTimeout(episodeLoop, 0);
     } else {
         console.log("training complete");
@@ -190,9 +193,9 @@ function updateTrainStats() {
     damaged.innerHTML = info.damaged;
     if(info.damaged) damaged.style.fontWeight="bold";
     if(info.damaged) {
-        damaged.style.backgroundColor = "red";
+        damaged.classList.add("bg-danger");
     } else {
-        damaged.style.backgroundColor = "green";
+        damaged.classList.add("bg-success");
     }
     row.appendChild(damaged);
 
@@ -262,6 +265,7 @@ function drawVisualizer(time) {
 
 function toggleView() {
     cancelAnimationFrame(animFrame);
+    breakLoop = true;
     if(anim) {
         setPlayView();
         reset();
@@ -289,6 +293,10 @@ function destroy() {
     localStorage.removeItem("trainBrain");
 }
 
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+// init buttons
 document.querySelector("#startTrain").addEventListener("click", function() {
     anim = false;
     setTrainView();
@@ -302,7 +310,10 @@ document.querySelector("#startPlay").addEventListener("click", function() {
 });
 document.querySelector("#saveBtn").addEventListener("click", save);
 document.querySelector("#destroyBtn").addEventListener("click", destroy);
-document.querySelector("#resetBtn").addEventListener("click", reset);
+document.querySelector("#resetBtn").addEventListener("click", function() {
+    breakLoop = true;
+    toggleView();
+});
 document.querySelector("#endBtn").addEventListener("click", function() {
     env.end();
 });
