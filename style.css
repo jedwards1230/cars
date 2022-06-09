@@ -1,11 +1,9 @@
-#mainView, body, html {
+body, html {
     height: 100%;
 }
 
 body {
     margin: 0;
-    overflow: hidden;
-    background: lightgreen;
     justify-content: center;
     align-items: center;
 }
@@ -14,12 +12,8 @@ body {
     height: 100%;
 }
 
-#nav, #carCanvas, #networkCanvas, #train, #trainStats {
+#nav, #carCanvas, #networkCanvas, #train, #trainStats, #tableTrainEntries {
     display: none;
-}
-
-#mainView {
-    position: relative;
 }
 
 #welcome {
@@ -40,14 +34,6 @@ body {
 
 #saveBtn {
     display: none;
-}
-
-button {
-    border: none;
-    border-radius: 5px;
-    padding: 7px;
-    margin: 2px;
-    cursor: pointer;
 }
 
 #train {

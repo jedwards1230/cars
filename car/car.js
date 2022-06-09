@@ -74,8 +74,6 @@ export class Car {
             this.onTrack = (this.distance > prev_distance) ? 1 : 0;
             traffic = this.#checkDamage(borders, traffic);
         }
-        //if(this.distance <= -10) this.damaged = true;
-        //if(this.damaged) console.log("crashed at ", this.distance);
 
         return traffic;
     }
@@ -113,7 +111,7 @@ export class Car {
 
     getObservation(borders, traffic) {
         const sensorOffsets = this.getSensorData(borders, traffic)
-        const observation = [this.speed / this.maxSpeed, this.onTrack].concat(sensorOffsets);
+        const observation = [this.speed / this.maxSpeed].concat(sensorOffsets);
         const reward = this.getReward(sensorOffsets);
         const metrics = {
             damaged: this.damaged,
@@ -123,17 +121,17 @@ export class Car {
     }
 
     getReward(sensorOffsets) {
-        let mOffset = Math.max(...sensorOffsets);
+        const mOffset = Math.max(...sensorOffsets);
 
         if(this.damaged) return -3;
-        if(!this.onTrack) {
-            if(this.speed < 0) return -2;
+        if(this.onTrack == 0) {
+            if(this.speed < 1) return -2;
             return -1;
         }
-        if(mOffset > 0.5) return -1;
+        //if(mOffset > 0.5) return (-mOffset * 2) - 1;
         
-        let reward = 1 - mOffset;
-        if(this.speed > 0) reward += 1;
+        let reward = (1 - mOffset) * 2;
+        //if(this.speed > 0) reward += 0.5;
         return reward;
     }
 
@@ -145,9 +143,10 @@ export class Car {
             }
         }
         for(let i=0; i < traffic.length; i++) {
-            if(traffic[i].id != this.id && traffic[i].model != "fsd") {
-                if(polysIntersect(this.polygon, traffic[i].polygon)) {
-                    damage = traffic[i].id;
+            const car = traffic[i];
+            if(car.id != this.id && car.model != "fsd") {
+                if(polysIntersect(this.polygon, car.polygon)) {
+                    damage = car.id;
                 }
             }
         }

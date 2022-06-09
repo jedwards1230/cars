@@ -1,7 +1,7 @@
 import { lerp, getRandomInt } from "../utils/utils.js";
 
 export class Network {
-    constructor(inputCount, outputCount, lr=0.001, hiddenLayers=[]) {
+    constructor(inputCount, outputCount, lr=0.01, hiddenLayers=[]) {
         this.layers = [];
         this.memory = [];
         this.epsilon = 0.3;
@@ -13,7 +13,7 @@ export class Network {
         this.outputs = new Array(outputCount);
 
         // +2 for inital inputs in car sensor data
-        let neurons = [inputCount, 15, 10, outputCount];
+        let neurons = [inputCount, 20, 15, 10, outputCount];
         for(let i=0; i<neurons.length - 1; i++) {
             if (i < neurons.length - 2) {
                 this.layers.push(new Level(neurons[i], neurons[i+1], lr, new Relu()));
@@ -37,7 +37,7 @@ export class Network {
         }
     }
 
-    experienceReplay(batchSize=30, damaged=false) {
+    async experienceReplay(batchSize=30, damaged=false) {
         if(this.memory.length <= batchSize) return null;
 
         let idx = getRandomInt(1, this.memory.length - batchSize - 1);
@@ -239,10 +239,6 @@ function MSE(actual, expected) {
         error[i] = (actual[i] - expected[i]) ** 2;
     }
     return error.reduce((a, b) => a + b);
-}
-
-function sigmoid(x) {
-    return 1 / (1 + Math.exp(-x));
 }
 
 class Sigmoid {

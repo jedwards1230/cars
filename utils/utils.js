@@ -54,3 +54,10 @@ export function getRandomInt(min, max) {
 function normalize(val, max, min) {
     return (val - min) / (max - min); 
 }
+
+export function checkGoodEntry(info) {
+    if(info.damaged) return false;
+    if(info.speed <= 0 || info.distance <= 0) return false;
+    if(info.distance < info.averageDistance) return false;
+    return true;
+}

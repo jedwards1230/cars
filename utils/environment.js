@@ -7,13 +7,13 @@ export class Environment {
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
 
-        this.startLane = 2;
         this.driverSpeed = 3;
         this.laneCount = 4;
 
         this.done = false;
 
         this.road = new Road(carCanvas.height / 2, carCanvas.height * 0.9, this.laneCount);
+        this.startLane = getRandomInt(0,this.road.laneCount-1);
 
         this.traffic = this.generateTraffic(this.trafficCount);
     }

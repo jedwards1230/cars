@@ -6,20 +6,27 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="bg-light">
     <nav id="nav" class="navbar px-3 navbar-expand bg-light">
         <a class="navbar-brand" href="index.html">Miles' Driving School</a>
-        <div class="ms-auto">
-            <p id="activeModel" class="my-auto px-2 me-auto navbar-text">
-                Model: <span id="activeModelName" class=""></span>
-            </p>
-            <button id="saveBtn" class="btn btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Save Weights"">💾</button>
+        <div class="ms-auto navbar-text">
+            <span id="activeModel" class="px-2 me-auto navbar-text">
+                model = "<span id="activeModelName" class=""></span>"
+            </span>
+            <span id="activeSpeed" class="px-2 navbar-text">
+                speed = <span id="activeSpeedName" class=""></span>
+            </span>
+            <span id="activeDistance" class="px-2 navbar-text">
+                distance = <span id="activeDistanceName" class=""></span>
+            </span>
+            <button id="saveBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Save Weights"
+                class="btn btn-outline-primary">💾</button>
             <button id="destroyBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Discard Weights"
                 class="btn btn-outline-danger">🗑️</button>
             <button id="resetBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Break Loop"
                 class="btn btn-outline-success">♻️</button>
             <button id="toggleView" data-bs-toggle="tooltip" data-bs-placement="bottom" title=""
-                class="btn btn-outline-primary">Switch View</button>
+                class="btn btn-outline-primary">View</button>
         </div>
     </nav>
 
@@ -31,7 +38,7 @@
                 <button id="startPlay" class="btn btn-dark">Visualize</button>
             </div>
         </div>
-        
+
         <canvas id="carCanvas"></canvas>
         <canvas id="networkCanvas"></canvas>
 
@@ -115,10 +122,12 @@
                         <div class="progress col-8 my-auto px-0">
                             <div id="goodEntriesBar" class="progress-bar bg-success" role="progressbar"
                                 style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div id="badEntriesBar" class="progress-bar bg-danger" role="progressbar"
-                                style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div id="badEntriesBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%"
+                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
+
+                    <canvas id="lossChart" class="my-3"></canvas>
 
                     <!-- episode metrics -->
                     <table class="table table-borderless table-hover table-sm align-middle">
@@ -159,7 +168,7 @@
                     </table>
 
                     <!-- episode entries -->
-                    <table class="table table-borderless table-hover table-sm align-middle">
+                    <table id="tableTrainEntries" class="table table-borderless table-hover table-sm align-middle">
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
@@ -178,7 +187,7 @@
         </div>
     </div>
 
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="main.js"></script>
 </body>

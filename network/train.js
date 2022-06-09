@@ -1,4 +1,4 @@
-export function train(model, env, maxTimeSteps) {
+export async function train(model, env, maxTimeSteps, batchSize=20) {
     let speeds = [];
     let loss = [];
     let count = 0;
@@ -11,17 +11,18 @@ export function train(model, env, maxTimeSteps) {
 
         // update car
         env.update();
-        const action = model.brain.selectAction(observation);
+        const action = model.brain.selectAction(observation, true);
         env.traffic = model.update(env.traffic, env.road.borders, action);
 
         // observe environment
         [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
 
         model.brain.remember(metrics, action, observation, prev_observation);
-        const rLoss = model.brain.experienceReplay(20, model.damaged);
+        const rLoss = await model.brain.experienceReplay(batchSize, model.damaged);
         if (loss != null) {
             loss.push(rLoss);
-            if (i > maxTimeSteps / 2 && rLoss == 0) break;
+            const last = loss.length;
+            //if (loss[last] == 0 && loss[last-1] == 0 && loss[last-2] == 0) break;
         }
 
         // update return info
