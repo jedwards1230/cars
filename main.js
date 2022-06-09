@@ -11,7 +11,13 @@ import {
     train
 } from "./network/train.js";
 import {
-    checkGoodEntry
+    LossChart
+} from "./utils/lossChart.js";
+import {
+    checkGoodEntry,
+    save,
+    load,
+    destroy
 } from "./utils/utils.js";
 
 const carCanvas = document.getElementById("carCanvas");
@@ -25,53 +31,7 @@ const networkCtx = networkCanvas.getContext("2d");
 const trafficCount = 100;
 const brainCount = 1;
 
-const chartCtx = document.getElementById("lossChart").getContext("2d");
-const trainChart = new Chart(chartCtx, {
-    data: {
-        labels: [],
-        datasets: [{
-            type: 'line',
-            label: 'Loss',
-            data: [],
-            parsing: {
-                yAxisKey: 'loss'
-            },
-            fill: false,
-            borderColor: 'rgb(255, 75, 75)',
-            tension: 0.2
-        }, {
-            type: 'line',
-            label: 'Distance',
-            data: [],
-            parsing: {
-                yAxisKey: 'distance'
-            },
-            fill: false,
-            borderColor: 'rgb(75, 255, 75)',
-            tension: 0.2
-        }, {
-            type: 'line',
-            label: 'Time Steps',
-            data: [],
-            parsing: {
-                yAxisKey: 'time'
-            },
-            fill: false,
-            borderColor: 'rgb(75, 75, 75)',
-            tension: 0.2
-        }, {
-            type: 'line',
-            label: 'Average Speed',
-            data: [],
-            parsing: {
-                yAxisKey: 'speed'
-            },
-            fill: false,
-            borderColor: 'rgb(75, 75, 255)',
-            tension: 0.2
-        }]
-    }
-});
+const lossChart = new LossChart();
 
 let breakLoop = false;
 let episodeCounter = 0;
@@ -84,16 +44,21 @@ let env = new Environment(trafficCount, brainCount, carCanvas);
 const x = 0;
 const y = env.road.getLaneCenter(env.startLane)
 let model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-model.addBrain("fsd", env, activeModel);
+model.addBrain("fsd", env);
 
 let info;
 let episodes = [];
-let goodEntries = 0;
-let badEntries = 0;
 
 let renderTrainEntries = false;
 let visualizer = true;
 let animFrame;
+
+const modelData = load(activeModel);
+if (modelData) {
+    model.brain.loadWeights(modelData.brain);
+    episodes = modelData.episodes;
+    lossChart.chart.data = modelData.chartData;
+}
 
 // Set play view
 function setPlayView() {
@@ -109,7 +74,6 @@ function setTrainView() {
 
 // Prepare for training
 function beginTrain() {
-    //document.body.style.overflow = "hidden";
     document.getElementById("trainTableBody").replaceChildren();
     numEpisodes = document.getElementById("episodeCountInput").value - 1;
     maxTimeSteps = document.getElementById("timeLimitInput").value;
@@ -119,13 +83,10 @@ function beginTrain() {
 
     let goodEntriesBar = document.getElementById("goodEntriesBar");
     goodEntriesBar.style.width = "0%";
-    goodEntries = 0;
 
     let badEntriesBar = document.getElementById("badEntriesBar");
     badEntriesBar.style.width = "0%";
-    badEntries = 0;
 
-    episodes = [];
     episodeCounter = 0;
 
     reset();
@@ -136,17 +97,13 @@ function beginTrain() {
 
 // Run training loop
 async function episodeLoop() {
-    // load training brain
-    if (localStorage.getItem(activeModel)) {
-        model.brain.loadWeights(JSON.parse(localStorage.getItem(activeModel)));
-    }
     // mutate less over time
     const mutateBrain = 1 / (10 * (episodeCounter + 1));
     //model.brain.mutate(mutateBrain);
 
     // collect episode info
     info = await train(model, env, parseInt(maxTimeSteps));
-    info.episode = episodeCounter + 1;
+    info.episode = episodes.length + 1;
     // find average of all distances for each episode
     if (episodes.length > 0) {
         const distances = episodes.map(e => e.distance);
@@ -154,28 +111,25 @@ async function episodeLoop() {
     }
 
     info.goodEntry = checkGoodEntry(info);
-    if (info.goodEntry) {
-        goodEntries++;
-    } else {
-        badEntries++;
-    }
 
     updateTrainStats();
-    localStorage.setItem(activeModel, JSON.stringify(info.brain));
-
     episodes.push(info);
+    save(activeModel, model, episodes, lossChart.save());
+
     reset();
     episodeCounter++;
     if (episodeCounter > numEpisodes || episodeCounter < 0) breakLoop = true;
 
     //animFrame = requestAnimationFrame(episodeLoop);
     if (!breakLoop) {
-        setTimeout(episodeLoop, 0);
+        setTimeout(episodeLoop, 500);
+        //await episodeLoop();
     } else {
         console.log("training complete");
         console.log("weights");
-        for (let i = 0; i < info.brain.length; i++) {
-            console.table(info.brain[i]);
+        const brain = info.model
+        for (let i = 0; i < brain.length; i++) {
+            console.table(brain[i]);
         }
     }
 }
@@ -247,29 +201,16 @@ function updateTrainStats() {
     const badEntriesBar = document.getElementById("badEntriesBar");
     // get how many episodes survived
     // episode survived if !damaged
-    goodEntriesBar.style.width = `${(goodEntries / numEpisodes) * 100}%`;
+    const goodEntries = episodes.filter(e => e.goodEntry == true).length;
+    const badEntries = episodes.filter(e => e.goodEntry == false).length;
+    goodEntriesBar.style.width = `${(goodEntries / episodes.length) * 100}%`;
     //goodEntriesBar.ariaValueNow = goodEntries;
-    badEntriesBar.style.width = `${(badEntries / numEpisodes) * 100}%`;
+    badEntriesBar.style.width = `${(badEntries / episodes.length) * 100}%`;
     //badEntriesBar.ariaValueNow = badEntries;
     document.getElementById("survivedCount").innerHTML = `Good Models: ${goodEntries}/${episodes.length + 1}`;
 
     // update Loss Chart
-    const chartData = {
-        x: info.episode,
-        loss: info.loss,
-        distance: info.distance,
-        time: info.time,
-        speed: info.speed,
-    }
-    addData(trainChart, info.episode, chartData);
-}
-
-function addData(chart, label, data) {
-    chart.data.labels.push(label);
-    chart.data.datasets.forEach((dataset) => {
-        dataset.data.push(data);
-    });
-    chart.update();
+    lossChart.updateChart(info);
 }
 
 function drawCars() {
@@ -305,17 +246,14 @@ function reset() {
     const x = 0;
     const y = env.road.getLaneCenter(env.startLane)
     model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-    model.addBrain("fsd", env, activeModel);
+    model.addBrain("fsd", env);
+    const modelData = load(activeModel);
+    if (modelData) {
+        model.brain.loadWeights(modelData.brain);
+        episodes = modelData.episodes;
+    }
     cancelAnimationFrame(animFrame);
     animate();
-}
-
-function save() {
-    localStorage.setItem(activeModel, JSON.stringify(model.brain.save()));
-}
-
-function destroy() {
-    localStorage.removeItem(activeModel);
 }
 
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -333,8 +271,17 @@ document.querySelector("#startPlay").addEventListener("click", function () {
     setPlayView();
     setMainView()
 });
-document.querySelector("#saveBtn").addEventListener("click", save);
-document.querySelector("#destroyBtn").addEventListener("click", destroy);
+document.querySelector("#saveBtn").addEventListener("click", function () {
+    save(activeModel, model, episodes, lossChart.save());
+});
+document.querySelector("#destroyBtn").addEventListener("click", function () {
+    breakLoop = true;
+    destroy(activeModel);
+    episodes = [];
+    lossChart.reset();
+    document.getElementById("trainStats").style.display = "none";
+    reset();
+});
 document.querySelector("#resetBtn").addEventListener("click", function () {
     breakLoop = true;
     reset();

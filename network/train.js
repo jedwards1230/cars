@@ -1,3 +1,5 @@
+let model, env;
+
 export async function train(model, env, maxTimeSteps, batchSize = 20) {
     let speeds = [];
     let loss = [];
@@ -18,7 +20,8 @@ export async function train(model, env, maxTimeSteps, batchSize = 20) {
         [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
 
         model.brain.remember(metrics, action, observation, prev_observation);
-        const rLoss = await model.brain.experienceReplay(batchSize, model.damaged);
+        const rLoss = model.brain.experienceReplay(batchSize, model.damaged);
+        if (i % 10 * batchSize == 0) model.brain.memory = [];
         if (loss != null) {
             loss.push(rLoss);
             const last = loss.length;
@@ -40,6 +43,26 @@ export async function train(model, env, maxTimeSteps, batchSize = 20) {
         speed: Math.max(...speeds),
         distance: model.distance,
         damaged: model.damaged,
-        brain: model.brain.save(),
+        model: model.brain,
     };
+}
+
+// animate model
+function animate(time) {
+    // update cars
+    env.update();
+    if (!model.damaged) {
+        const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
+        const action = model.brain.selectAction(observation);
+        env.traffic = model.update(env.traffic, env.road.borders, action);
+    }
+
+    document.getElementById("activeSpeedName").innerHTML = model.speed.toFixed(2);
+    document.getElementById("activeDistanceName").innerHTML = model.distance.toFixed(0);
+
+    // draw cars
+    env.render();
+    drawCars();
+    drawVisualizer(time);
+    animFrame = requestAnimationFrame(animate);
 }

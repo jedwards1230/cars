@@ -1,3 +1,5 @@
+import { Car } from "../car/car.js";
+
 export function lerp(A, B, t) {
     return A + (B - A) * t;
 }
@@ -60,4 +62,34 @@ export function checkGoodEntry(info) {
     if (info.speed <= 0 || info.distance <= 0) return false;
     if (info.distance < info.averageDistance) return false;
     return true;
+}
+
+/**
+ * Loads brain and episodes from localStorage
+ * @param  {[string]} id Active model name
+ * @return {[object]}    Brain and Episodes
+ */
+export function load(id) {
+    return JSON.parse(localStorage.getItem(id));
+}
+
+/**
+ * Saves brain and episodes to localStorage
+ * @param  {[string]} id Active model name
+ * @param  {[Car]} model Car object
+ * @param  {[array]} episodes Episodes array
+ * @param  {[array]} chartData Chart data array
+ */
+export function save(id, model, episodes, chartData) {
+    const weights = model.brain.save();
+    const modelData = {
+        brain: weights,
+        episodes: episodes,
+        chartData: chartData,
+    }
+    localStorage.setItem(id, JSON.stringify(modelData));
+}
+
+export function destroy(id) {
+    localStorage.removeItem(id);
 }

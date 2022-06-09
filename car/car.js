@@ -1,5 +1,6 @@
 import {
-    polysIntersect
+    polysIntersect,
+    load
 } from "../utils/utils.js";
 import {
     Controls
@@ -40,7 +41,7 @@ export class Car {
         this.sensors = []
     }
 
-    addBrain(model, env, activeModel = "trainBrain") {
+    addBrain(model, env) {
         this.model = model;
         this.useBrain = true;
         let observation, metrics;
@@ -49,11 +50,7 @@ export class Car {
             case "fsd":
                 this.sensors.push(new Sensor(this, 5, "forward"));
                 [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
-
                 this.brain = new Network(observation.length, this.actionCount)
-                if (localStorage.getItem(activeModel)) {
-                    this.brain.loadWeights(JSON.parse(localStorage.getItem(activeModel)));
-                }
                 break;
 
             case "forward":
@@ -62,9 +59,6 @@ export class Car {
 
                 // todo: calc raycount for all sensors
                 this.brain = new Network(observation.length, this.actionCount)
-                if (localStorage.getItem(activeModel)) {
-                    this.brain.loadWeights(JSON.parse(localStorage.getItem(activeModel)));
-                }
                 break;
         }
     }
@@ -125,7 +119,7 @@ export class Car {
             damaged: this.damaged,
             reward: reward,
         }
-        return [observation, metrics]
+        return [sensorOffsets, metrics]
     }
 
     getReward(sensorOffsets) {
@@ -136,10 +130,10 @@ export class Car {
             if (this.speed < 1) return -2;
             return -1;
         }
-        //if(mOffset > 0.5) return (-mOffset * 2) - 1;
+        if (mOffset > 0.5) return -mOffset * 2;
 
         let reward = (1 - mOffset) * 2;
-        //if(this.speed > 0) reward += 0.5;
+        //if (this.speed > 0) reward += 0.5;
         return reward;
     }
 

@@ -15,11 +15,14 @@ export class Network {
         this.inputs = new Array(inputCount);
         this.outputs = new Array(outputCount);
 
-        // +2 for inital inputs in car sensor data
-        let neurons = [inputCount, 20, 15, 10, outputCount];
+        // generate levels
+        // todo: make this more flexible
+        let neurons = [inputCount, 15, 10, outputCount];
         for (let i = 0; i < neurons.length - 1; i++) {
-            if (i < neurons.length - 2) {
-                this.layers.push(new Level(neurons[i], neurons[i + 1], lr, new Relu()));
+            if (i == 0) {
+                this.layers.push(new Level(neurons[i], neurons[i + 1], lr, new LeakyRelu()));
+            } else if (i < neurons.length - 2) {
+                this.layers.push(new Level(neurons[i], neurons[i + 1], lr, new LeakyRelu()));
             } else {
                 this.layers.push(new Level(neurons[i], neurons[i + 1], lr, new Sigmoid()));
             }
@@ -40,7 +43,7 @@ export class Network {
         }
     }
 
-    async experienceReplay(batchSize = 30, damaged = false) {
+    experienceReplay(batchSize = 30, damaged = false) {
         if (this.memory.length <= batchSize) return null;
 
         let idx = getRandomInt(1, this.memory.length - batchSize - 1);
@@ -51,19 +54,21 @@ export class Network {
         let avgLoss = 0;
 
         for (let i = idx; i < batchSize; i++) {
-            let [metrics, action, new_observation, prev_observation] = this.memory[i];
+            const gamma = 0.99;
+            const [metrics, action, new_observation, prev_observation] = this.memory[i];
+
             const actualValues = this.forward(prev_observation);
             const nextActualValues = this.forward(new_observation, false);
             const nextAction = metrics.damaged ? 0 : Math.max(...nextActualValues);
+            //const delta = this.getDeltaGradient(metrics.reward, actualValues, action, nextAction);
+            const d = new Array(actualValues.length).fill(0);
+            d[action] -= -metrics.reward + (gamma * nextAction) - actualValues[action]
 
-            const delta = this.getDeltaGradient(metrics.reward, actualValues, action, nextAction);
-
-            const totalError = this.lossFunction(actualValues, delta);
-            avgLoss += totalError;
+            avgLoss += this.lossFunction(actualValues, d);
 
             let alpha = new Array(actualValues.length).fill(0);
             for (let i = 0; i < actualValues.length; i++) {
-                alpha[i] = actualValues[i] + delta[i];
+                alpha[i] = actualValues[i] - d[i];
             }
 
             this.backward(alpha);
@@ -80,7 +85,7 @@ export class Network {
     }
 
     getDeltaGradient(reward, actionValues, action, next) {
-        const gamma = 0.995;
+        const gamma = 0.99;
         let gradient = new Array(actionValues.length).fill(0);
         for (let i = 0; i < actionValues.length; i++) {
             const expected = reward + (gamma * next) - actionValues[action];
@@ -90,7 +95,7 @@ export class Network {
         return gradient;
     }
 
-    // as epsilon decays, the network will be more likely to explore
+    // epsilon greedy policy, the network will be more likely to explore early on
     selectAction(observation, randomChance = false) {
         const actionValues = this.forward(observation, false);
         const random = Math.random();
@@ -265,5 +270,13 @@ class Relu {
     constructor() {
         this.forward = x => Math.max(0, x);
         this.backward = x => x > 0 ? 1 : 0;
+    }
+}
+
+class LeakyRelu {
+    constructor(alpha = 0.01) {
+        this.alpha = alpha;
+        this.forward = x => x > 0 ? x : x * this.alpha;
+        this.backward = x => x > 0 ? 1 : this.alpha;
     }
 }
