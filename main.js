@@ -23,22 +23,25 @@ let activeModel = "trainBrain"
 document.getElementById("activeModelName").innerHTML = activeModel;
 
 let env = new Environment(trafficCount, brainCount, carCanvas);
-const x = 100;
+const x = 0;
 const y = env.road.getLaneCenter(env.startLane)
 let model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
 model.addBrain("fsd", env, activeModel);
 
 let info;
 let episodes = [];
+let goodEntries = 0;
+let badEntries = 0;
 
-let anim = true;
+let visualizer = true;
 let animFrame;
 
 // Set play view
 function setPlayView() {
     document.body.style.overflow = "hidden";
     document.getElementById("welcome").style.display = "none";
-    document.getElementById("play").style.display = "flex";
+    document.getElementById("carCanvas").style.display = "inline";
+    if(visualizer) document.getElementById("networkCanvas").style.display = "inline";
     document.getElementById("train").style.display = "none";
     document.getElementById("nav").style.display = "flex";
     document.getElementById("toggleView").innerHTML = "Train";
@@ -50,10 +53,11 @@ function setTrainView() {
         document.body.style.overflow = "scroll";
     }
     document.getElementById("welcome").style.display = "none";
-    document.getElementById("play").style.display = "none";
+    document.getElementById("carCanvas").style.display = "inline";
+    document.getElementById("networkCanvas").style.display = "none";
     document.getElementById("train").style.display = "block";
     document.getElementById("nav").style.display = "flex";
-    document.getElementById("toggleView").innerHTML = "Play";
+    document.getElementById("toggleView").innerHTML = "Visualize";
 
     document.getElementById("episodeCountInput").value = numEpisodes;
     document.getElementById("timeLimitInput").value = maxTimeSteps;
@@ -68,16 +72,14 @@ function beginTrain() {
     document.getElementById("trainTableBody").replaceChildren();
     numEpisodes = document.getElementById("episodeCountInput").value - 1;
     maxTimeSteps = document.getElementById("timeLimitInput").value;
-    let progress = document.getElementById("trainProgress");
 
-    progress.style.width = "0%";
-    progress.ariaValueNow = 0;
-    progress.ariaValueMax = numEpisodes;
+    let goodEntriesBar = document.getElementById("goodEntriesBar");
+    goodEntriesBar.style.width = "0%";
+    goodEntries = 0;
 
-    let survivedProgress = document.getElementById("survivedBar");
-    survivedProgress.style.width = "0%";
-    survivedProgress.ariaValueNow = 0;
-    survivedProgress.ariaValueMax = episodes.length;
+    let badEntriesBar = document.getElementById("badEntriesBar");
+    badEntriesBar.style.width = "0%";
+    badEntries = 0;
 
     episodes = [];
     episodeCounter = 0;
@@ -101,8 +103,6 @@ function episodeLoop() {
     // collect episode info
     info = train(model, env, parseInt(maxTimeSteps));
     info.episode = episodeCounter + 1;
-
-    info.speed = Math.max(...info.speeds);
     info.distance = info.distance;
 
     updateTrainStats();
@@ -144,22 +144,8 @@ function animate(time) {
 
 // Update training stats on page
 function updateTrainStats() {
+    let goodEntry = true;
     document.body.style.overflow = "scroll";
-
-    // style progress bar
-    const progress = document.getElementById("trainProgress");
-    progress.ariaValueNow = info.episode;
-    progress.style.width = `${(info.episode / numEpisodes) * 100}%`;
-
-    // update survivedBar
-    const survivedBar = document.getElementById("survivedBar");
-    // get how many episodes survived
-    // episode survived if !damaged
-    const survived = episodes.filter(episode => !episode.damaged).length;
-    survivedBar.style.width = `${(survived / episodes.length) * 100}%`;
-    survivedBar.ariaValueNow = survived;
-    document.getElementById("survivedCount").innerHTML = `Models Survived: ${survived}/${episodes.length + 1}`;
-
 
     // find min, max, and avg distance of all episodes
     const distanceMap = episodes.map(e => e.distance);
@@ -213,40 +199,78 @@ function updateTrainStats() {
         console.table(episodes[event.target.parentElement.id].brain.biases);
     });
 
-    // create header
-    let header = document.createElement("th");
-    header.scope = "row";
-    header.innerHTML = info.episode;
-    row.appendChild(header);
-
-    // create cells
+    // create damaged cell
     let damaged = document.createElement("td");
     damaged.innerHTML = info.damaged;
     if(info.damaged) damaged.style.fontWeight="bold";
     if(info.damaged) {
-        damaged.classList.add("bg-danger");
+        damaged.classList.add("table-danger");
+        goodEntry = false;
     } else {
-        damaged.classList.add("bg-success");
+        damaged.classList.add("table-success");
     }
-    row.appendChild(damaged);
 
+    // create time cell
     let time = document.createElement("td");
     time.innerHTML = info.time.toFixed(0);
-    row.appendChild(time);
 
+    // create distance cell
     let distance = document.createElement("td");
     distance.innerHTML = info.distance.toFixed(0);
-    row.appendChild(distance);
+    if(info.distance <= 0) {
+        distance.classList.add("table-danger");
+        goodEntry = false;
+    } else {
+        distance.classList.add("table-success");
+    }
 
+    // create speed cell
     let speed = document.createElement("td");
     speed.innerHTML = info.speed;
-    row.appendChild(speed);
+    if(info.speed <= 0) {
+        speed.classList.add("table-danger");
+        goodEntry = false;
+    } else {
+        speed.classList.add("table-success");
+    }
 
+    // create loss cell
     let loss = document.createElement("td");
     loss.innerHTML = info.loss.toFixed(4);
+
+    // create header
+    let header = document.createElement("th");
+    header.scope = "row";
+    header.innerHTML = info.episode;
+    if(!goodEntry) {
+        header.classList.add("table-danger");
+        badEntries++;
+    } else {
+        header.classList.add("table-success");
+        goodEntries++;
+    }
+
+    // add cells to row
+    row.appendChild(header);
+    row.appendChild(damaged);
+    row.appendChild(time);
+    row.appendChild(distance);
+    row.appendChild(speed);
     row.appendChild(loss);
 
+    // add row to table body
     body.appendChild(row);
+
+    // update survivedBar
+    const goodEntriesBar = document.getElementById("goodEntriesBar");
+    const badEntriesBar = document.getElementById("badEntriesBar");
+    // get how many episodes survived
+    // episode survived if !damaged
+    goodEntriesBar.style.width = `${(goodEntries / numEpisodes) * 100}%`;
+    //goodEntriesBar.ariaValueNow = goodEntries;
+    badEntriesBar.style.width = `${(badEntries / numEpisodes) * 100}%`;
+    //badEntriesBar.ariaValueNow = badEntries;
+    document.getElementById("survivedCount").innerHTML = `Good Models: ${goodEntries}/${episodes.length + 1}`;
 }
 
 function drawCars() {
@@ -267,25 +291,24 @@ function drawVisualizer(time) {
 }
 
 function toggleView() {
-    cancelAnimationFrame(animFrame);
     breakLoop = true;
-    if(anim) {
+    if(visualizer) {
         setPlayView();
-        reset();
-        animate();
     } else {
         setTrainView();
     }
 }
 
 function reset() {
+    cancelAnimationFrame(animFrame);
     carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 
     env = new Environment(trafficCount, brainCount, carCanvas);
-    const x = 100;
+    const x = 0;
     const y = env.road.getLaneCenter(env.startLane)
     model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
     model.addBrain("fsd", env, activeModel);
+    animate();
 }
 
 function save() {
@@ -301,12 +324,14 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
 
 // init buttons
 document.querySelector("#startTrain").addEventListener("click", function() {
-    anim = false;
+    visualizer = false;
     setTrainView();
+    reset();
+    animate();
 });
 document.querySelector("#trainBtn").addEventListener("click", beginTrain);
 document.querySelector("#startPlay").addEventListener("click", function() {
-    anim = true;
+    visualizer = true;
     setPlayView();
     reset();
     animate();
@@ -315,14 +340,11 @@ document.querySelector("#saveBtn").addEventListener("click", save);
 document.querySelector("#destroyBtn").addEventListener("click", destroy);
 document.querySelector("#resetBtn").addEventListener("click", function() {
     breakLoop = true;
-    toggleView();
-});
-document.querySelector("#endBtn").addEventListener("click", function() {
-    env.end();
+    reset();
 });
 
 document.querySelector("#toggleView").addEventListener("click", function() {
-    anim = !anim;
+    visualizer = !visualizer;
     episodeCounter = numEpisodes;
     toggleView();
 });

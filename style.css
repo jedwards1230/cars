@@ -14,7 +14,7 @@ body {
     height: 100%;
 }
 
-#nav, #play, #train, #trainStats {
+#nav, #carCanvas, #networkCanvas, #train, #trainStats {
     display: none;
 }
 
@@ -29,31 +29,17 @@ body {
     transform: translate(-50%, -50%);
 }
 
-#play {
-    justify-content: center;
-    width: 80%;
-    height: 100%;
-    margin: auto;
-}
-
 #homeBtns {
     display: flex;
     flex-direction: row;
 }
 
-#confBtns {
-    width: 5%;
-    float: left;
-    margin-top: 50%;
-}
-
-#confBtns button {
-    display: flex;
-    flex-direction: column;
-}
-
 #activeModel {
     display: inline-block
+}
+
+#saveBtn {
+    display: none;
 }
 
 button {
@@ -67,10 +53,6 @@ button {
 #train {
     width: 60%;
     margin: auto;
-}
-
-#playView {
-    margin-right: 5%;
 }
 
 #carCanvas {

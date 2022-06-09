@@ -43,11 +43,10 @@ export class Environment {
     render() {
         const carCanvas = document.getElementById("carCanvas");
         const networkCanvas = document.getElementById("networkCanvas");
-        const playView = document.getElementById("playView");
         const navbarHeight = document.getElementById("nav").offsetHeight;
 
         // update dimensions
-        playView.style.top = navbarHeight + "px";
+        carCanvas.style.top = navbarHeight + "px";
         carCanvas.width = window.innerWidth;
         networkCanvas.width = window.innerWidth;
     }

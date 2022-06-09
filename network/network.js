@@ -1,7 +1,7 @@
 import { lerp, getRandomInt } from "../utils/utils.js";
 
 export class Network {
-    constructor(inputCount, outputCount, hiddenLayers=[], lr=0.001) {
+    constructor(inputCount, outputCount, lr=0.001, hiddenLayers=[]) {
         this.layers = [];
         this.memory = [];
         this.epsilon = 0.3;
@@ -53,7 +53,7 @@ export class Network {
             const nextActualValues = this.forward(new_observation, false);
             const nextAction = metrics.damaged ? 0 : Math.max(...nextActualValues);
 
-            const delta = this.getGradient(metrics.reward, actualValues, action, nextAction);
+            const delta = this.getDeltaGradient(metrics.reward, actualValues, action, nextAction);
 
             const totalError = this.lossFunction(actualValues, delta);
             avgLoss += totalError;
@@ -63,8 +63,6 @@ export class Network {
                 alpha[i] = actualValues[i] + delta[i];
             }
 
-            //console.log("Action: ", action, "Error: ", totalError, "Reward", metrics.reward);
-            //console.log("Alpha: ", alpha);
             this.backward(alpha);
 
             // epsilon decay
@@ -78,7 +76,7 @@ export class Network {
         return avgLoss / batchSize;
     }
 
-    getGradient(reward, actionValues, action, next) {
+    getDeltaGradient(reward, actionValues, action, next) {
         const gamma = 0.995;
         let gradient = new Array(actionValues.length).fill(0);
         for(let i=0; i<actionValues.length; i++) {

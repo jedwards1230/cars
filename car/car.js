@@ -126,11 +126,14 @@ export class Car {
         let mOffset = Math.max(...sensorOffsets);
 
         if(this.damaged) return -3;
-        if(!this.onTrack) return -2;
-        if(this.speed < 0 || this.distance <= 0) return -1;
+        if(!this.onTrack) {
+            if(this.speed < 0) return -2;
+            return -1;
+        }
+        
 
         let reward = 1 - mOffset;
-        if(this.speed > 0) reward += 0.5;
+        if(this.speed > 0) reward += 1;
         return reward;
     }
 

@@ -36,7 +36,7 @@ export function train(model, env, maxTimeSteps) {
         metrics: metrics,
         time: count,
         loss: rLoss,
-        speeds: speeds,
+        speed: Math.max(...speeds),
         distance: model.distance,
         damaged: model.damaged,
         brain: model.brain.save(),
