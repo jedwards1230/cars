@@ -1,4 +1,7 @@
-import { getIntersection, lerp } from "../utils/utils.js";
+import {
+    getIntersection,
+    lerp
+} from "../utils/utils.js";
 
 export class Sensor {
     constructor(car, rays, direction) {
@@ -16,10 +19,10 @@ export class Sensor {
     update(roadBorders, traffic) {
         this.#castRays();
         this.readings = [];
-        for(let i = 0; i < this.rays.length; i++) {
+        for (let i = 0; i < this.rays.length; i++) {
             this.readings.push(
                 this.#getReading(
-                    this.rays[i], 
+                    this.rays[i],
                     roadBorders,
                     traffic,
                 ),
@@ -29,7 +32,7 @@ export class Sensor {
 
     getSensorOffsets() {
         return this.readings.map(
-            s=>s==null ? 0 : parseFloat((1 - s.offset).toFixed(4))
+            s => s == null ? 0 : parseFloat((1 - s.offset).toFixed(4))
         );
     }
 
@@ -37,30 +40,30 @@ export class Sensor {
         let touches = [];
 
         // check overlap with borders
-        for(let i = 0; i < roadBorders.length; i++) {
+        for (let i = 0; i < roadBorders.length; i++) {
             const touch = getIntersection(
                 ray[0],
                 ray[1],
                 roadBorders[i][0],
                 roadBorders[i][1],
             );
-            if(touch) {
+            if (touch) {
                 touches.push(touch);
             }
         };
 
         // check overlap with other traffic
-        for(let i=0; i<traffic.length; i++) {
+        for (let i = 0; i < traffic.length; i++) {
             const poly = traffic[i].polygon;
-            if(this.car.id != traffic[i].id && traffic[i].model != "fsd") {
-                for(let j=0; j<poly.length; j++) {
+            if (this.car.id != traffic[i].id && traffic[i].model != "fsd") {
+                for (let j = 0; j < poly.length; j++) {
                     const value = getIntersection(
                         ray[0],
                         ray[1],
                         poly[j],
-                        poly[(j+1)%poly.length],
+                        poly[(j + 1) % poly.length],
                     );
-                    if(value) {
+                    if (value) {
                         touches.push(value);
                     }
                 }
@@ -68,27 +71,30 @@ export class Sensor {
         }
 
         // no touches
-        if(touches.length == 0) {
+        if (touches.length == 0) {
             return null;
-        } 
-        
-        const offsets = touches.map(e=>e.offset);
+        }
+
+        const offsets = touches.map(e => e.offset);
         const minOffset = Math.min(...offsets);
-        return touches.find(e=>e.offset==minOffset);
+        return touches.find(e => e.offset == minOffset);
     }
 
     #castRays() {
         this.rays = [];
-        for(let i=0; i < this.rayCount; i++) {
+        for (let i = 0; i < this.rayCount; i++) {
             const rayAngle = lerp(
                 this.raySpread / 2,
                 -this.raySpread / 2,
-                this.rayCount==1 ? 0.5 : i/ (this.rayCount - 1),
+                this.rayCount == 1 ? 0.5 : i / (this.rayCount - 1),
             ) + this.car.angle;
 
-            const start = {x:this.car.x, y:this.car.y};
+            const start = {
+                x: this.car.x,
+                y: this.car.y
+            };
             let end = {}
-            switch(this.direction) {
+            switch (this.direction) {
                 case "left":
                     end = {
                         x: this.car.x - Math.sin(rayAngle) * this.rayLength,
@@ -114,15 +120,15 @@ export class Sensor {
                     }
                     break;
             }
-            
+
             this.rays.push([start, end]);
         }
     }
 
     draw(ctx) {
-        for(let i = 0; i < this.rayCount; i++) {
+        for (let i = 0; i < this.rayCount; i++) {
             let end = this.rays[i][1];
-            if(this.readings[i]) {
+            if (this.readings[i]) {
                 end = this.readings[i];
             }
 

@@ -78,11 +78,7 @@ let episodeCounter = 0;
 let numEpisodes = 100;
 let maxTimeSteps = 200;
 
-document.getElementById("episodeCountInput").value = numEpisodes;
-document.getElementById("timeLimitInput").value = maxTimeSteps;
-
 let activeModel = "trainBrain"
-document.getElementById("activeModelName").innerHTML = activeModel;
 
 let env = new Environment(trafficCount, brainCount, carCanvas);
 const x = 0;
@@ -119,7 +115,7 @@ function beginTrain() {
     maxTimeSteps = document.getElementById("timeLimitInput").value;
 
     document.getElementById("trainStats").style.display = "block";
-    if(renderTrainEntries) document.getElementById("tableTrainEntries").style.display = "block";
+    if (renderTrainEntries) document.getElementById("tableTrainEntries").style.display = "block";
 
     let goodEntriesBar = document.getElementById("goodEntriesBar");
     goodEntriesBar.style.width = "0%";
@@ -154,7 +150,7 @@ async function episodeLoop() {
     // find average of all distances for each episode
     if (episodes.length > 0) {
         const distances = episodes.map(e => e.distance);
-        info.averageDistance = distances.reduce((a, b) => a + b) / distances.length;    
+        info.averageDistance = distances.reduce((a, b) => a + b) / distances.length;
     }
 
     info.goodEntry = checkGoodEntry(info);
@@ -349,6 +345,11 @@ document.querySelector("#toggleView").addEventListener("click", function () {
     episodeCounter = numEpisodes;
     toggleView();
 });
+
+// init values
+document.getElementById("episodeCountInput").value = numEpisodes;
+document.getElementById("timeLimitInput").value = maxTimeSteps;
+document.getElementById("activeModelName").innerHTML = activeModel;
 
 function setMainView() {
     document.getElementById("carCanvas").style.display = "inline";

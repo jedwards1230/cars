@@ -1,11 +1,11 @@
-export async function train(model, env, maxTimeSteps, batchSize=20) {
+export async function train(model, env, maxTimeSteps, batchSize = 20) {
     let speeds = [];
     let loss = [];
     let count = 0;
 
     let [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
-    
-    for(let i=0; i<maxTimeSteps; i++) {
+
+    for (let i = 0; i < maxTimeSteps; i++) {
         // store previous data
         const prev_observation = observation;
 
@@ -29,7 +29,7 @@ export async function train(model, env, maxTimeSteps, batchSize=20) {
         speeds.push(model.speed);
         count++;
 
-        if(model.damaged || i >= maxTimeSteps) break;
+        if (model.damaged || i >= maxTimeSteps) break;
     }
     const avgLoss = loss.reduce((a, b) => a + b, 0) / loss.length;
     let rLoss = isFinite(avgLoss) ? avgLoss : 0;

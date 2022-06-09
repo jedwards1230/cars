@@ -5,7 +5,7 @@ export class Controls {
         this.left = false;
         this.right = false;
 
-        if(controller != "dummy") {
+        if (controller != "dummy") {
             this.#addKeyboardListeners();
         } else {
             this.forward = true;
@@ -13,8 +13,8 @@ export class Controls {
     }
 
     #addKeyboardListeners() {
-        document.onkeydown=(event)=>{
-            switch(event.key) {
+        document.onkeydown = (event) => {
+            switch (event.key) {
                 case "ArrowUp":
                     this.forward = true;
                     break;
@@ -29,8 +29,8 @@ export class Controls {
                     break;
             }
         }
-        document.onkeyup=(event)=>{
-            switch(event.key) {
+        document.onkeyup = (event) => {
+            switch (event.key) {
                 case "ArrowUp":
                     this.forward = false;
                     break;
