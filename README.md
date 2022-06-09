@@ -30,6 +30,5 @@ Adjust these in car.js and network.js
 
 ### Network
 * optimize how rewards/expected values are calculated
-  * training favors -distance
 * better process for adding layers
   * init with default ins/outs but also read config from ui for flexible building

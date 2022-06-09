@@ -80,7 +80,7 @@ export class Network {
         const gamma = 0.995;
         let gradient = new Array(actionValues.length).fill(0);
         for(let i=0; i<actionValues.length; i++) {
-            const expected = -reward + (gamma * next) - actionValues[action];
+            const expected = reward + (gamma * next) - actionValues[action];
             gradient[i] = expected / actionValues.length;
         }
         gradient[action] *= -1;

@@ -130,8 +130,8 @@ export class Car {
             if(this.speed < 0) return -2;
             return -1;
         }
+        if(mOffset > 0.5) return -1;
         
-
         let reward = 1 - mOffset;
         if(this.speed > 0) reward += 1;
         return reward;

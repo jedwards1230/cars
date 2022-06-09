@@ -21,7 +21,7 @@ export function train(model, env, maxTimeSteps) {
         const rLoss = model.brain.experienceReplay(20, model.damaged);
         if (loss != null) {
             loss.push(rLoss);
-            //if (i > maxTimeSteps / 2 && rLoss < 0.000001) break;
+            if (i > maxTimeSteps / 2 && rLoss == 0) break;
         }
 
         // update return info
