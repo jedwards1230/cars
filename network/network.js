@@ -17,12 +17,15 @@ export class Network {
 
         // generate levels
         // todo: make this more flexible
-        let neurons = [inputCount, 15, 10, outputCount];
+        let neurons = [inputCount, outputCount];
         for (let i = 0; i < neurons.length - 1; i++) {
+            // if first
             if (i == 0) {
                 this.layers.push(new Level(neurons[i], neurons[i + 1], lr, new LeakyRelu()));
+            // if middle
             } else if (i < neurons.length - 2) {
-                this.layers.push(new Level(neurons[i], neurons[i + 1], lr, new LeakyRelu()));
+                this.layers.push(new Level(neurons[i], neurons[i + 1], lr, new Relu()));
+            // if last
             } else {
                 this.layers.push(new Level(neurons[i], neurons[i + 1], lr, new Sigmoid()));
             }
@@ -61,14 +64,14 @@ export class Network {
             const nextActualValues = this.forward(new_observation, false);
             const nextAction = metrics.damaged ? 0 : Math.max(...nextActualValues);
             //const delta = this.getDeltaGradient(metrics.reward, actualValues, action, nextAction);
-            const d = new Array(actualValues.length).fill(0);
+            const d = JSON.parse(JSON.stringify(actualValues));
             d[action] -= -metrics.reward + (gamma * nextAction) - actualValues[action]
 
             avgLoss += this.lossFunction(actualValues, d);
 
             let alpha = new Array(actualValues.length).fill(0);
             for (let i = 0; i < actualValues.length; i++) {
-                alpha[i] = actualValues[i] - d[i];
+                alpha[i] = d[i] - actualValues[i];
             }
 
             this.backward(alpha);
@@ -162,16 +165,9 @@ class Level {
     // speed + sensors
     forward(inputs, backprop = true) {
         const m = this.weights;
-
         const x = inputs;
-
         this.inputs = x;
         if (backprop) this.backwardStoreIn = x;
-
-        let activatedInput = 0;
-        for (let j = 0; j < x.length; j++) {
-            activatedInput += x[j] * m[j];
-        }
 
         // output = input * weights + bias
         let y = new Array(this.outputs.length);

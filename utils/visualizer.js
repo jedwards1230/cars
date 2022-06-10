@@ -40,7 +40,8 @@ export class Visualizer {
                 i == network.layers.length - 1
                 // up, down, left, right
                 ?
-                ['\u290a', '\u290b', '\u21da', '\u21db'] :
+                //['\u290a', '\u290b', '\u21da', '\u21db'] :
+                ['\u21db', '\u21da', '\u290b', '\u290a'] :
                 []
             );
         }
@@ -137,8 +138,8 @@ export class Visualizer {
 
     static#getNodeY(nodes, index, bottom, top) {
         return lerp(
-            top,
             bottom,
+            top,
             nodes.length == 1 ?
             0.5 :
             index / (nodes.length - 1)

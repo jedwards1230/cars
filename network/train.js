@@ -13,28 +13,26 @@ export async function train(model, env, maxTimeSteps, batchSize = 20) {
 
         // update car
         env.update();
-        const action = model.brain.selectAction(observation, true);
+        const action = model.brain.selectAction(observation);
         env.traffic = model.update(env.traffic, env.road.borders, action);
+        speeds.push(model.speed);
 
         // observe environment
         [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
 
         model.brain.remember(metrics, action, observation, prev_observation);
         const rLoss = model.brain.experienceReplay(batchSize, model.damaged);
-        if (i % 10 * batchSize == 0) model.brain.memory = [];
-        if (loss != null) {
-            loss.push(rLoss);
-            const last = loss.length;
-            //if (loss[last] == 0 && loss[last-1] == 0 && loss[last-2] == 0) break;
-        }
 
-        // update return info
-        speeds.push(model.speed);
         count++;
+
+        if (rLoss != null) {
+            loss.push(rLoss);
+            if (rLoss == 0) break;
+        }
 
         if (model.damaged || i >= maxTimeSteps) break;
     }
-    const avgLoss = loss.reduce((a, b) => a + b, 0) / loss.length;
+    const avgLoss = loss.reduce((a, b) => a + b, 0);
     let rLoss = isFinite(avgLoss) ? avgLoss : 0;
     return {
         metrics: metrics,

@@ -48,17 +48,17 @@ export class Car {
 
         switch (model) {
             case "fsd":
-                this.sensors.push(new Sensor(this, 5, "forward"));
+                this.sensors.push(new Sensor(this, 1, "forward"));
                 [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
                 this.brain = new Network(observation.length, this.actionCount)
                 break;
 
             case "forward":
-                this.sensors.push(new Sensor(this, 5, "forward"));
-                [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
+                const sensorCount = 1;
+                this.sensors.push(new Sensor(this, sensorCount, "forward"));
 
                 // todo: calc raycount for all sensors
-                this.brain = new Network(observation.length, this.actionCount)
+                this.brain = new Network(sensorCount + 1, this.actionCount)
                 break;
         }
     }
@@ -68,6 +68,8 @@ export class Car {
     update(traffic, borders, action = null) {
         if (action != null) this.updateControls(action);
         this.#move();
+        if (this.speed < -2 && this.model != "forward") this.damaged = true;
+        if (this.speed <= 0 && this.model == "forward") this.speed = 0.5;
 
         if (!this.damaged) {
             this.polygon = this.#createPolygon();
@@ -112,6 +114,7 @@ export class Car {
     }
 
     getObservation(borders, traffic) {
+        if (!traffic) return;
         const sensorOffsets = this.getSensorData(borders, traffic)
         const observation = [this.speed / this.maxSpeed].concat(sensorOffsets);
         const reward = this.getReward(sensorOffsets);
@@ -125,15 +128,11 @@ export class Car {
     getReward(sensorOffsets) {
         const mOffset = Math.max(...sensorOffsets);
 
-        if (this.damaged) return -3;
-        if (this.onTrack == 0) {
-            if (this.speed < 1) return -2;
-            return -1;
-        }
-        if (mOffset > 0.5) return -mOffset * 2;
+        if (this.damaged) return -1;
+        //if (this.onTrack == 0) return -1;
+        if (this.speed <= 0.5) return 0;
 
-        let reward = (1 - mOffset) * 2;
-        //if (this.speed > 0) reward += 0.5;
+        let reward = 1 - mOffset;
         return reward;
     }
 

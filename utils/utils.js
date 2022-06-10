@@ -70,7 +70,17 @@ export function checkGoodEntry(info) {
  * @return {[object]}    Brain and Episodes
  */
 export function load(id) {
-    return JSON.parse(localStorage.getItem(id));
+    const brain = localStorage.getItem(id + "Weights");
+    const episodes = localStorage.getItem(id + "Episodes");
+    const chartData = localStorage.getItem(id + "ChartData");
+    if (brain && episodes && chartData) {
+        return {
+            brain: JSON.parse(brain),
+            episodes: JSON.parse(episodes),
+            chartData: JSON.parse(chartData),
+        };
+    } 
+    return null;
 }
 
 /**
@@ -80,16 +90,14 @@ export function load(id) {
  * @param  {[array]} episodes Episodes array
  * @param  {[array]} chartData Chart data array
  */
-export function save(id, model, episodes, chartData) {
-    const weights = model.brain.save();
-    const modelData = {
-        brain: weights,
-        episodes: episodes,
-        chartData: chartData,
-    }
-    localStorage.setItem(id, JSON.stringify(modelData));
+export function save(id, weights, episodes, chartData) {
+    localStorage.setItem(id + "Weights", JSON.stringify(weights));
+    localStorage.setItem(id + "Episodes", JSON.stringify(episodes));
+    localStorage.setItem(id + "ChartData", JSON.stringify(chartData));
 }
 
 export function destroy(id) {
-    localStorage.removeItem(id);
+    localStorage.removeItem(id + "Weights");
+    localStorage.removeItem(id + "Episodes");
+    localStorage.removeItem(id + "ChartData");
 }

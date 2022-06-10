@@ -2,7 +2,8 @@ import {
     Road
 } from "../utils/road.js";
 import {
-    getRandomInt
+    getRandomInt,
+    load
 } from "../utils/utils.js";
 import {
     Car
@@ -21,11 +22,11 @@ export class Environment {
         this.road = new Road(carCanvas.height / 2, carCanvas.height * 0.9, this.laneCount);
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
 
-        this.traffic = this.generateTraffic(this.trafficCount);
+        this.reset();
     }
 
     reset() {
-        this.traffic = this.generateTraffic(this.trafficCount);
+        this.traffic = this.generateTraffic(this.trafficCount, false);
     }
 
     end() {
@@ -60,17 +61,18 @@ export class Environment {
     update() {
         for (let i = 0; i < this.traffic.length; i++) {
             if (this.traffic[i].model != "fsd") {
+                const car = this.traffic[i];
                 let action = null;
-                if (this.traffic[i].sensors.length > 0) {
-                    const [observation, metrics] = this.traffic[i].getObservation(this.road.borders, this.traffic);
-                    action = this.traffic[i].brain.selectAction(observation);
+                if (car.sensors.length > 0) {
+                    const [observation, metrics] = car.getObservation(this.road.borders, this.traffic);
+                    action = car.brain.selectAction(observation);
                 }
-                this.traffic = this.traffic[i].update(this.traffic, this.road.borders, action);
+                this.traffic = car.update(this.traffic, this.road.borders, action);
             }
         }
     }
 
-    generateTraffic(N) {
+    generateTraffic(N, smart = false) {
         const cars = [];
         const placed = new Array(this.road.laneCount).fill(100);
 
@@ -83,9 +85,18 @@ export class Environment {
             const x = placed[lane];
             const y = this.road.getLaneCenter(lane);
 
-            let car = new Car(idx, x, y, getRandomInt(2, 2), "dummy");
-            //let car = new Car(i+this.brainCount, this.road.getLaneCenter(lane), placed[lane], getRandomInt(2,4), "network");
-            //car.addBrain("forward", this);
+            let car;
+            if (smart) {
+                car = new Car(idx, x, y, 3, "network");
+                car.addBrain("forward", this);
+                const modelData = load("trainBrain");
+                if (modelData) {
+                    car.brain.loadWeights(modelData.brain);
+                }
+            } else {
+                car = new Car(idx, x, y, getRandomInt(2, 2), "dummy");
+            }
+
             cars.push(car);
         }
         return cars

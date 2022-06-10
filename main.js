@@ -41,9 +41,8 @@ let maxTimeSteps = 200;
 let activeModel = "trainBrain"
 
 let env = new Environment(trafficCount, brainCount, carCanvas);
-const x = 0;
 const y = env.road.getLaneCenter(env.startLane)
-let model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
+let model = new Car(-1, 0, y, env.driverSpeed + 1, "network", "red");
 model.addBrain("fsd", env);
 
 let info;
@@ -98,8 +97,8 @@ function beginTrain() {
 // Run training loop
 async function episodeLoop() {
     // mutate less over time
-    const mutateBrain = 1 / (10 * (episodeCounter + 1));
-    //model.brain.mutate(mutateBrain);
+    let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.01 : 0.005;
+    model.brain.mutate(mutateBrain);
 
     // collect episode info
     info = await train(model, env, parseInt(maxTimeSteps));
@@ -114,7 +113,7 @@ async function episodeLoop() {
 
     updateTrainStats();
     episodes.push(info);
-    save(activeModel, model, episodes, lossChart.save());
+    save(activeModel, model.brain.save(), episodes, lossChart.save());
 
     reset();
     episodeCounter++;
@@ -122,7 +121,7 @@ async function episodeLoop() {
 
     //animFrame = requestAnimationFrame(episodeLoop);
     if (!breakLoop) {
-        setTimeout(episodeLoop, 500);
+        setTimeout(episodeLoop, 10);
         //await episodeLoop();
     } else {
         console.log("training complete");
@@ -272,7 +271,7 @@ document.querySelector("#startPlay").addEventListener("click", function () {
     setMainView()
 });
 document.querySelector("#saveBtn").addEventListener("click", function () {
-    save(activeModel, model, episodes, lossChart.save());
+    save(activeModel, model.brain.save(), episodes, lossChart.save());
 });
 document.querySelector("#destroyBtn").addEventListener("click", function () {
     breakLoop = true;
