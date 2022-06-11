@@ -46,10 +46,10 @@ export class Network {
     }
 
     /** Choose action based on confidence or with epsilon greedy */
-    makeChoice(outputValues, randomChance = false) {
+    makeChoice(outputValues, greedy = false) {
         // choose random
         const random = Math.random();
-        if (randomChance && random < this.epsilon) {
+        if (greedy && random < this.epsilon) {
             return Math.floor(Math.random() * outputValues.length);
         }
         // choose highest score

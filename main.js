@@ -103,6 +103,7 @@ async function episodeLoop() {
     // collect episode info
     info = await train(model, env, parseInt(maxTimeSteps));
     info.episode = episodes.length + 1;
+
     // find average of all distances for each episode
     if (episodes.length > 0) {
         const distances = episodes.map(e => e.distance);
@@ -110,18 +111,23 @@ async function episodeLoop() {
     }
 
     info.goodEntry = checkGoodEntry(info);
-
     updateTrainStats();
 
     const distanceAvg = episodes.reduce((a, e) => a + e.distance, 0) / episodes.length;
     episodes.push(info);
+
+    // save only if model is better than average
+    // todo: is this cheating or actually helpful?
     if (info.distance > distanceAvg) save(activeModel, model.brain.save(), episodes, lossChart.save());
 
     reset();
+
+    // reset environment with traffic using latest model
     /* if (episodeCounter % 10 == 0) {
         console.log("Smart traffic incoming...")
         env.reset(true)
     } */
+
     episodeCounter++;
     if (episodeCounter > numEpisodes || episodeCounter < 0) breakLoop = true;
 
@@ -129,11 +135,13 @@ async function episodeLoop() {
         setTimeout(episodeLoop);
     } else {
         console.log("training complete");
+        const brain = info.model.save();
         console.log("weights");
-        const brain = info.model
-        for (let i = 0; i < brain.length; i++) {
-            console.table(brain[i]);
+        for (let i = 0; i < brain.weights.length; i++) {
+            console.table(brain.weights[i]);
         }
+        console.log("biases");
+        console.table(brain.biases);
     }
 }
 

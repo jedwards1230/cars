@@ -1,7 +1,4 @@
-let model, env;
-
 export async function train(model, env, maxTimeSteps) {
-    const gamma = 0.99;
     let speeds = [];
     let loss = [];
     let count = 0;
@@ -24,15 +21,22 @@ export async function train(model, env, maxTimeSteps) {
         speeds.push(model.speed);
         count++;
 
+        // ex. expected = [0, 0, reward, 0]
+        // todo: not sure if this handles negative reward correctly
+        // maybe inverse values instead of zero encode? 
+        // but that will add positive action value to every single output instead of just desired
+        // so this should really have a positive value for the correct action
+        // todo: find correct action?
         const expected = new Array(actionValues.length).fill(0);
         expected[action] = reward;
 
+        // loss between expected and actual
         const rLoss = model.brain.lossFunction(actionValues, expected);
         if (rLoss != null) {
             loss.push(rLoss);
         }
 
-        // one hot the reward
+        // delta for backpropagation
         const d = JSON.parse(JSON.stringify(actionValues));
         for (let i = 0; i < actionValues.length; i++) {
             d[i] -= expected[i];
