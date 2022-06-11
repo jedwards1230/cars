@@ -12,11 +12,6 @@ import {
     Network
 } from "../network/network.js";
 
-/**
- * @class Car
- * @description
- * The Car class is the main class of the car. It handles the movement and the sensors.
- */
 export class Car {
     /** 
      * @param {number} id - The id of the car.
@@ -74,6 +69,7 @@ export class Car {
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
 
                 // todo: calc raycount for all sensors
+                // real todo: better abstraction for sensors to include speed and such 
                 this.brain = new Network(sensorCount + 1, this.actionCount)
                 break;
         }
@@ -102,6 +98,10 @@ export class Car {
         return traffic;
     }
 
+    /**
+     * Update car controls
+     * @param {number} a 0: forward, 1: backward, 2: left, 3: right
+     */
     updateControls(a) {
         switch (a) {
             /* case 0:
@@ -119,8 +119,19 @@ export class Car {
                 this.controls.forward = false;
                 this.controls.backward = true;
                 break;
+            case 2:
+                //console.log("left")
+                this.controls.left = true;
+                this.controls.right = false;
+                break;
+            case 3:
+                //console.log("right")
+                this.controls.left = false;
+                this.controls.right = true;
+                break;
         }
     }
+
 
     getSensorData(roadBorders, traffic) {
         let sensorOffsets = [];
@@ -133,6 +144,7 @@ export class Car {
         return sensorOffsets
     }
 
+    /** Get observation of environment */
     getObservation(borders, traffic) {
         if (!traffic) return;
         const sensorOffsets = this.getSensorData(borders, traffic)
@@ -145,6 +157,7 @@ export class Car {
         return [sensorOffsets, metrics]
     }
 
+    /** Get reward for current state */
     getReward(sensorOffsets) {
         const mOffset = Math.max(...sensorOffsets);
 
@@ -157,11 +170,13 @@ export class Car {
 
     #checkDamage(roadBorders, traffic) {
         let damage = null;
+        // check collision with road borders
         for (let i = 0; i < roadBorders.length; i++) {
             if (polysIntersect(this.polygon, roadBorders[i])) {
                 damage = this.id;
             }
         }
+        // check collision with traffic
         for (let i = 0; i < traffic.length; i++) {
             const car = traffic[i];
             if (car.id != this.id && car.model != "fsd") {
@@ -171,6 +186,7 @@ export class Car {
             }
         }
 
+        // set values if car or any traffic are damaged
         if (damage == this.id) {
             this.damaged = true;
             this.speed = 0;

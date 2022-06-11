@@ -132,6 +132,7 @@ async function episodeLoop() {
     if (episodeCounter > numEpisodes || episodeCounter < 0) breakLoop = true;
 
     if (!breakLoop) {
+        // set timeout to avoid stack overflow
         setTimeout(episodeLoop);
     } else {
         console.log("training complete");
