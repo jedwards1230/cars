@@ -49,6 +49,9 @@ export class LossChart {
                     borderColor: 'rgb(75, 75, 255)',
                     tension: 0.3
                 }]
+            },
+            options: {
+                normalized: true
             }
         });
     }

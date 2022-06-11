@@ -28,7 +28,7 @@ networkCanvas.height = 450;
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
 
-const trafficCount = 100;
+const trafficCount = 50;
 const brainCount = 1;
 
 const lossChart = new LossChart();
@@ -54,7 +54,7 @@ let animFrame;
 
 const modelData = load(activeModel);
 if (modelData) {
-    model.brain.loadWeights(modelData.brain);
+    model.brain.loadBrain(modelData.brain);
     episodes = modelData.episodes;
     lossChart.chart.data = modelData.chartData;
 }
@@ -97,8 +97,8 @@ function beginTrain() {
 // Run training loop
 async function episodeLoop() {
     // mutate less over time
-    let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.01 : 0.005;
-    model.brain.mutate(mutateBrain);
+    let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.005 : 0.001;
+    //model.brain.mutate(mutateBrain);
 
     // collect episode info
     info = await train(model, env, parseInt(maxTimeSteps));
@@ -112,17 +112,21 @@ async function episodeLoop() {
     info.goodEntry = checkGoodEntry(info);
 
     updateTrainStats();
+
+    const distanceAvg = episodes.reduce((a, e) => a + e.distance, 0) / episodes.length;
     episodes.push(info);
-    save(activeModel, model.brain.save(), episodes, lossChart.save());
+    if (info.distance > distanceAvg) save(activeModel, model.brain.save(), episodes, lossChart.save());
 
     reset();
+    /* if (episodeCounter % 10 == 0) {
+        console.log("Smart traffic incoming...")
+        env.reset(true)
+    } */
     episodeCounter++;
     if (episodeCounter > numEpisodes || episodeCounter < 0) breakLoop = true;
 
-    //animFrame = requestAnimationFrame(episodeLoop);
     if (!breakLoop) {
-        setTimeout(episodeLoop, 10);
-        //await episodeLoop();
+        setTimeout(episodeLoop);
     } else {
         console.log("training complete");
         console.log("weights");
@@ -139,7 +143,8 @@ function animate(time) {
     env.update();
     if (!model.damaged) {
         const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
-        const action = model.brain.selectAction(observation);
+        const actionValues = model.brain.forward(observation);
+        const action = model.brain.makeChoice(actionValues, true);
         env.traffic = model.update(env.traffic, env.road.borders, action);
     }
 
@@ -248,7 +253,7 @@ function reset() {
     model.addBrain("fsd", env);
     const modelData = load(activeModel);
     if (modelData) {
-        model.brain.loadWeights(modelData.brain);
+        model.brain.loadBrain(modelData.brain);
         episodes = modelData.episodes;
     }
     cancelAnimationFrame(animFrame);

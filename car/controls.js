@@ -5,7 +5,7 @@ export class Controls {
         this.left = false;
         this.right = false;
 
-        if (controller != "dummy") {
+        if (controller == "player") {
             this.#addKeyboardListeners();
         } else {
             this.forward = true;

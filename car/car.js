@@ -11,7 +11,23 @@ import {
 import {
     Network
 } from "../network/network.js";
+
+/**
+ * @class Car
+ * @description
+ * The Car class is the main class of the car. It handles the movement and the sensors.
+ */
 export class Car {
+    /** 
+     * @param {number} id - The id of the car.
+     * @param {number} x - The x coordinate of the car.
+     * @param {number} y - The y coordinate of the car.
+     * @param {number} maxSpeed - The maximum speed of the car.
+     * @param {string} controller - dummy, network, or player
+     * @param {string} color - The color of the car.
+     * @param {number} width - The width of the car.
+     * @param {number} height - The height of the car.
+     */
     constructor(id, x, y, maxspeed = 2, controller = "dummy", color = "blue", width = 30, height = 50) {
         this.id = id;
         this.x = x;
@@ -68,8 +84,12 @@ export class Car {
     update(traffic, borders, action = null) {
         if (action != null) this.updateControls(action);
         this.#move();
-        if (this.speed < -2 && this.model != "forward") this.damaged = true;
-        if (this.speed <= 0 && this.model == "forward") this.speed = 0.5;
+        //if (this.speed < -3 && this.model != "forward") this.damaged = true;
+        if (this.speed < 0.5 && this.model == "forward") {
+            this.speed = 0.5;
+            this.forward = true;
+            this.backward = false;
+        }
 
         if (!this.damaged) {
             this.polygon = this.#createPolygon();
@@ -129,11 +149,10 @@ export class Car {
         const mOffset = Math.max(...sensorOffsets);
 
         if (this.damaged) return -1;
-        //if (this.onTrack == 0) return -1;
-        if (this.speed <= 0.5) return 0;
+        if (this.speed < 0) return -0.5;
+        if (this.distance < 0) return -1;
 
-        let reward = 1 - mOffset;
-        return reward;
+        return 1 - mOffset;
     }
 
     #checkDamage(roadBorders, traffic) {

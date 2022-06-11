@@ -1,4 +1,6 @@
-import { Car } from "../car/car.js";
+import {
+    Car
+} from "../car/car.js";
 
 export function lerp(A, B, t) {
     return A + (B - A) * t;
@@ -64,13 +66,25 @@ export function checkGoodEntry(info) {
     return true;
 }
 
+// dot product of two arrays
+export function dotProduct(A, B) {
+    return A.reduce((acc, cur, i) => acc + cur * B[i], 0);
+}
+
+// Mean squared error
+export function MSE(actual, expected) {
+    let error = new Array(actual.length);
+    for (let i = 0; i < actual.length; i++) {
+        error[i] = (actual[i] - expected[i]) ** 2;
+    }
+    return error.reduce((a, b) => a + b);
+}
+
 /**
  * Loads brain and episodes from localStorage
- * @param  {[string]} id Active model name
- * @return {[object]}    Brain and Episodes
  */
 export function load(id) {
-    const brain = localStorage.getItem(id + "Weights");
+    const brain = localStorage.getItem(id);
     const episodes = localStorage.getItem(id + "Episodes");
     const chartData = localStorage.getItem(id + "ChartData");
     if (brain && episodes && chartData) {
@@ -79,19 +93,19 @@ export function load(id) {
             episodes: JSON.parse(episodes),
             chartData: JSON.parse(chartData),
         };
-    } 
+    }
     return null;
 }
 
 /**
  * Saves brain and episodes to localStorage
- * @param  {[string]} id Active model name
- * @param  {[Car]} model Car object
- * @param  {[array]} episodes Episodes array
- * @param  {[array]} chartData Chart data array
+ * @param  {string} id Active model name
+ * @param  {array} weights weights
+ * @param  {array} episodes Episodes array
+ * @param  {array} chartData Chart data array
  */
 export function save(id, weights, episodes, chartData) {
-    localStorage.setItem(id + "Weights", JSON.stringify(weights));
+    localStorage.setItem(id, JSON.stringify(weights));
     localStorage.setItem(id + "Episodes", JSON.stringify(episodes));
     localStorage.setItem(id + "ChartData", JSON.stringify(chartData));
 }

@@ -70,7 +70,7 @@ export class Visualizer {
                     Visualizer.#getNodeY(outputs, j, bottom, top)
                 );
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = getRGBA(weights[i][j] * inputs[i]);
+                ctx.strokeStyle = getRGBA(weights[i][j] + biases[j]);
                 ctx.stroke();
             }
         }
@@ -89,21 +89,8 @@ export class Visualizer {
             ctx.fill();
         }
 
-        // calculate output activation 
-        const bias = level.weights.reduce(function (r, a) {
-            a.forEach(function (b, i) {
-                r[i] = (r[i] || 0) + b;
-            });
-            return r;
-        }, []);
-
         // draw output nodes
         for (let i = 0; i < outputs.length; i++) {
-            let b = 0;
-            for (let j = 0; j < inputs.length; j++) {
-                b += weights[j][i];
-            }
-
             const y = Visualizer.#getNodeY(outputs, i, bottom, top);
             ctx.beginPath();
             ctx.arc(right, y, nodeRadius, 0, Math.PI * 2);
@@ -117,7 +104,7 @@ export class Visualizer {
             ctx.beginPath();
             ctx.lineWidth = 2;
             ctx.arc(right, y, nodeRadius * 0.8, 0, Math.PI * 2);
-            ctx.strokeStyle = getRGBA(b);
+            ctx.strokeStyle = getRGBA(biases[i]);
             ctx.setLineDash([3, 3]);
             ctx.stroke();
             ctx.setLineDash([]);

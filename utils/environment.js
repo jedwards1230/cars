@@ -25,8 +25,8 @@ export class Environment {
         this.reset();
     }
 
-    reset() {
-        this.traffic = this.generateTraffic(this.trafficCount, false);
+    reset(smart = false) {
+        this.traffic = this.generateTraffic(this.trafficCount, smart);
     }
 
     end() {
@@ -65,7 +65,7 @@ export class Environment {
                 let action = null;
                 if (car.sensors.length > 0) {
                     const [observation, metrics] = car.getObservation(this.road.borders, this.traffic);
-                    action = car.brain.selectAction(observation);
+                    action = car.brain.makeChoice(observation);
                 }
                 this.traffic = car.update(this.traffic, this.road.borders, action);
             }
@@ -91,7 +91,7 @@ export class Environment {
                 car.addBrain("forward", this);
                 const modelData = load("trainBrain");
                 if (modelData) {
-                    car.brain.loadWeights(modelData.brain);
+                    car.brain.loadBrain(modelData.brain);
                 }
             } else {
                 car = new Car(idx, x, y, getRandomInt(2, 2), "dummy");

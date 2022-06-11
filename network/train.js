@@ -1,41 +1,54 @@
 let model, env;
 
-export async function train(model, env, maxTimeSteps, batchSize = 20) {
+export async function train(model, env, maxTimeSteps) {
+    const gamma = 0.99;
     let speeds = [];
     let loss = [];
     let count = 0;
 
-    let [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
 
     for (let i = 0; i < maxTimeSteps; i++) {
-        // store previous data
-        const prev_observation = observation;
-
-        // update car
+        // update environment
         env.update();
-        const action = model.brain.selectAction(observation);
+        const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
+        const reward = metrics.reward;
+
+        // forward pass to get action
+        const actionValues = model.brain.forward(observation);
+        const action = model.brain.makeChoice(actionValues, true);
+
+        // apply action to model
         env.traffic = model.update(env.traffic, env.road.borders, action);
+
+        // metrics
         speeds.push(model.speed);
-
-        // observe environment
-        [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
-
-        model.brain.remember(metrics, action, observation, prev_observation);
-        const rLoss = model.brain.experienceReplay(batchSize, model.damaged);
-
         count++;
 
+        const expected = new Array(actionValues.length).fill(0);
+        expected[action] = reward;
+
+        const rLoss = model.brain.lossFunction(actionValues, expected);
         if (rLoss != null) {
             loss.push(rLoss);
-            if (rLoss == 0) break;
         }
 
-        if (model.damaged || i >= maxTimeSteps) break;
+        // one hot the reward
+        const d = JSON.parse(JSON.stringify(actionValues));
+        for (let i = 0; i < actionValues.length; i++) {
+            d[i] -= expected[i];
+        }
+
+        // backward pass to update weights
+        model.brain.backward(d);
+
+        if (model.distance < -10) model.damaged = true;
+        if (model.damaged) break;
     }
-    const avgLoss = loss.reduce((a, b) => a + b, 0);
-    let rLoss = isFinite(avgLoss) ? avgLoss : 0;
+
+    const avgLoss = loss.reduce((a, b) => a + b, 0) / loss.length;
+    const rLoss = isFinite(avgLoss) ? avgLoss : 0;
+
     return {
-        metrics: metrics,
         time: count,
         loss: rLoss,
         speed: Math.max(...speeds),
@@ -43,24 +56,4 @@ export async function train(model, env, maxTimeSteps, batchSize = 20) {
         damaged: model.damaged,
         model: model.brain,
     };
-}
-
-// animate model
-function animate(time) {
-    // update cars
-    env.update();
-    if (!model.damaged) {
-        const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
-        const action = model.brain.selectAction(observation);
-        env.traffic = model.update(env.traffic, env.road.borders, action);
-    }
-
-    document.getElementById("activeSpeedName").innerHTML = model.speed.toFixed(2);
-    document.getElementById("activeDistanceName").innerHTML = model.distance.toFixed(0);
-
-    // draw cars
-    env.render();
-    drawCars();
-    drawVisualizer(time);
-    animFrame = requestAnimationFrame(animate);
 }
