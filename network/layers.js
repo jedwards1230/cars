@@ -115,9 +115,9 @@ class Layer {
                 this.weights[i][j] = Math.random() * 2 - 1;
             }
         }
-        /* for (let i = 0; i < this.outputs.length; i++) {
+        for (let i = 0; i < this.outputs.length; i++) {
             this.biases[i] = Math.random() * 2 - 1;
-        } */
+        }
     }
 }
 
