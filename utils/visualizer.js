@@ -70,7 +70,7 @@ export class Visualizer {
                     Visualizer.#getNodeY(outputs, j, bottom, top)
                 );
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = getRGBA(weights[i][j] + biases[j]);
+                ctx.strokeStyle = getRGBA(weights[i][j]);
                 ctx.stroke();
             }
         }
