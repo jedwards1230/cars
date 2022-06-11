@@ -98,7 +98,7 @@ function beginTrain() {
 async function episodeLoop() {
     // mutate less over time
     let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.005 : 0.001;
-    //model.brain.mutate(mutateBrain);
+    model.brain.mutate(mutateBrain);
 
     // collect episode info
     info = await train(model, env, parseInt(maxTimeSteps));
@@ -113,12 +113,14 @@ async function episodeLoop() {
     info.goodEntry = checkGoodEntry(info);
     updateTrainStats();
 
-    const distanceAvg = episodes.reduce((a, e) => a + e.distance, 0) / episodes.length;
+    const distanceMap = episodes.map(e => e.distance);
+    const distanceMax = Math.max(...distanceMap);
+
     episodes.push(info);
 
     // save only if model is better than average
     // todo: is this cheating or actually helpful?
-    if (info.distance > distanceAvg) save(activeModel, model.brain.save(), episodes, lossChart.save());
+    if (info.distance > info.averageDistance) save(activeModel, model.brain.save(), episodes, lossChart.save());
 
     reset();
 
