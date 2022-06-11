@@ -61,8 +61,8 @@ function normalize(val, max, min) {
 
 export function checkGoodEntry(info) {
     if (info.damaged) return false;
-    if (info.speed <= 0 || info.distance <= 0) return false;
-    if (info.distance < info.averageDistance) return false;
+    if (info.speed <= 0) return false;
+    if (info.distance < 1000) return false;
     return true;
 }
 

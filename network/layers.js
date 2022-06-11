@@ -22,10 +22,10 @@ class Layer {
         const bias = this.biases;
         this.inputs = x;
 
-        // input * weight
         let preActive = new Array(this.outputs.length);
         for (let i = 0; i < this.outputs.length; i++) {
             let sum = 0;
+            // input * weight
             for (let j = 0; j < this.inputs.length; j++) {
                 sum += x[j] * m[j][i];
             }

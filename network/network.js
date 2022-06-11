@@ -24,8 +24,8 @@ export class Network {
         this.outputs = new Array(outputCount);
 
         this.layers = [
-            new LeakyRelu(inputCount, 2, lr),
-            new Sigmoid(2, outputCount, lr),
+            //new Linear(inputCount, 2, lr),
+            new Sigmoid(inputCount, outputCount, lr),
         ];
     }
 
