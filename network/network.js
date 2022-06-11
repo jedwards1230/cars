@@ -49,12 +49,15 @@ export class Network {
     makeChoice(outputValues, greedy = false) {
         // choose random
         const random = Math.random();
-        if (greedy && random < this.epsilon) {
-            return Math.floor(Math.random() * outputValues.length);
+        let choice;
+        if (greedy && (random < this.epsilon)) {
+            choice = Math.floor(Math.random() * outputValues.length);
+        } else {
+            const m = Math.max(...outputValues);
+            choice = outputValues.indexOf(m);
         }
-        // choose highest score
-        const m = Math.max(...outputValues);
-        return outputValues.indexOf(m);
+        this.decay();
+        return choice;
     }
 
     /** Load weights to each layer */
@@ -79,6 +82,16 @@ export class Network {
             weights: weights,
             biases: biases
         };
+    }
+
+    decay() {
+        // epsilon decay
+        if (this.epsilon > 0.01) this.epsilon *= 0.99;
+
+        // learning rate decay
+        for (let i = this.layers.length - 1; i >= 0; i--) {
+            this.layers[i].lr = this.layers[i].lr > 0.0001 ? this.layers[i].lr * 0.99 : 0.0001;
+        }
     }
 
     /** Slightly mutate weights for model

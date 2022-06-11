@@ -153,7 +153,7 @@ function animate(time) {
     if (!model.damaged) {
         const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
         const actionValues = model.brain.forward(observation);
-        const action = model.brain.makeChoice(actionValues, true);
+        const action = model.brain.makeChoice(actionValues);
         env.traffic = model.update(env.traffic, env.road.borders, action);
     }
 
