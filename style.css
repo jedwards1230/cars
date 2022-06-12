@@ -18,8 +18,7 @@ body {
 #networkCanvas,
 #train,
 #trainStats,
-#tableTrainEntries,
-#lossChart {
+#tableTrainEntries {
     display: none;
 }
 
@@ -43,7 +42,7 @@ body {
     display: none;
 }
 
-#train {
+#trainStats {
     width: 60%;
     margin: auto;
 }

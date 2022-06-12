@@ -73,7 +73,7 @@ export function dotProduct(A, B) {
 
 // Mean squared error
 export function MSE(actual, expected) {
-    return (actual - expected) ** 2;
+    return (expected - actual) ** 2;
 }
 
 /**

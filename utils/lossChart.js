@@ -1,12 +1,11 @@
 export class LossChart {
     constructor() {
-        this.chartCtx = document.getElementById("lossChart").getContext("2d");
         this.chart = this.#newChart();
-        document.getElementById("lossChart").style.display = "none";
     }
 
     #newChart() {
-        return new Chart(this.chartCtx, {
+        const chartCtx = document.getElementById("lossChart").getContext("2d");
+        return new Chart(chartCtx, {
             data: {
                 labels: [],
                 datasets: [{
@@ -58,17 +57,19 @@ export class LossChart {
     }
 
     draw(episodes) {
-        const d = new Array(episodes.length);
-        const l = new Array(episodes.length);
+        const d = [];
+        const l = [];
         for (let i = 0; i < episodes.length; i++) {
-            const episodeInfo = episodes[i];
-            l[i] = i;
-            d[i] = {
-                x: i,
-                loss: episodeInfo.loss,
-                distance: episodeInfo.distance,
-                time: episodeInfo.time,
-                speed: episodeInfo.speed,
+            if (i % 10 === 0) {
+                const episodeInfo = episodes[i];
+                l.push(i);
+                d.push({
+                    x: i,
+                    loss: episodeInfo.loss,
+                    distance: episodeInfo.distance,
+                    time: episodeInfo.time,
+                    speed: episodeInfo.speed,
+                });
             }
         }
         this.chart.data.labels = l;
@@ -76,7 +77,14 @@ export class LossChart {
             dataset.data = d;
         });
         this.chart.update();
+    }
+
+    show() {
         document.getElementById("lossChart").style.display = "block";
+    }
+
+    hide() {
+        document.getElementById("lossChart").style.display = "none";
     }
 
     reset() {

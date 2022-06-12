@@ -56,7 +56,7 @@ export class Car {
         this.model = model;
         this.useBrain = true;
         let observation, metrics;
-        const sensorCount = 3;
+        const sensorCount = 5;
 
         switch (model) {
             case "fsd":
@@ -154,7 +154,7 @@ export class Car {
             damaged: this.damaged,
             reward: reward,
         }
-        return [sensorOffsets, metrics]
+        return [observation, metrics]
     }
 
     /** Get reward for current state */
@@ -163,9 +163,10 @@ export class Car {
 
         if (this.damaged) return -1;
         if (this.distance < 0) return -1;
-        if (this.speed < 0) return -0.5;
+        if (this.speed < 0) return -1;
+        if (mOffset < 0.2) return 1;
 
-        return 1 - mOffset;
+        return 0.5 - mOffset;
     }
 
     #checkDamage(roadBorders, traffic) {

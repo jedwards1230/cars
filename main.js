@@ -35,8 +35,8 @@ const lossChart = new LossChart();
 
 let breakLoop = false;
 let episodeCounter = 0;
-let numEpisodes = 100;
-let maxTimeSteps = 1000;
+let numEpisodes = 200;
+let maxTimeSteps = 2000;
 
 let activeModel = "trainBrain"
 
@@ -62,12 +62,19 @@ if (modelData) {
 function setPlayView() {
     if (visualizer) document.getElementById("networkCanvas").style.display = "inline";
     document.getElementById("train").style.display = "none";
+    lossChart.hide();
 }
 
 // Set train view
 function setTrainView() {
     document.getElementById("networkCanvas").style.display = "none";
     document.getElementById("train").style.display = "block";
+    if (episodes.length > 0) {
+        lossChart.draw(episodes);
+        lossChart.show();
+    } else {
+        lossChart.hide();
+    }
 }
 
 // Prepare for training
@@ -97,7 +104,7 @@ function beginTrain() {
 async function episodeLoop() {
     // mutate less over time
     let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.005 : 0.001;
-    //model.brain.mutate(mutateBrain);
+    model.brain.mutate(mutateBrain);
 
     // collect episode info
     info = await train(model, env, parseInt(maxTimeSteps));
@@ -118,7 +125,7 @@ async function episodeLoop() {
     episodes.push(info);
 
     // save only if model is better than average
-    if (info.distance > (distanceMax - 100)) save(activeModel, model.brain.save(), episodes);
+    if (distanceMax > 0 && (info.distance > (distanceMax - 100))) save(activeModel, model.brain.save(), episodes);
 
     reset(true);
 
@@ -137,6 +144,7 @@ async function episodeLoop() {
     } else {
         // draw chart
         lossChart.draw(episodes);
+        lossChart.show();
         console.log("training complete");
         const brain = info.model.save();
         console.log("weights");
@@ -284,13 +292,14 @@ document.querySelector("#startPlay").addEventListener("click", function () {
     setMainView()
 });
 document.querySelector("#saveBtn").addEventListener("click", function () {
-    save(activeModel, model.brain.save(), episodes, lossChart.save());
+    save(activeModel, model.brain.save(), episodes);
 });
 document.querySelector("#destroyBtn").addEventListener("click", function () {
     breakLoop = true;
     destroy(activeModel);
     episodes = [];
     lossChart.reset();
+    document.getElementById("lossChart").style.display = "none";
     document.getElementById("trainStats").style.display = "none";
     reset();
 });

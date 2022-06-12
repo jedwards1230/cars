@@ -18,14 +18,21 @@ export class Network {
         this.epsilon = 0.4;
         this.confidence = 0.5;
 
-        this.lossFunction = MSE;
+        this.lossFunction = (outputs, targets) => {
+            let cost = 0
+            for (let i = 0; i < outputs.length; i++) {
+                cost += MSE(outputs[i], targets[i]);
+            }
+            return cost / outputs.length;
+        };
 
         this.inputs = new Array(inputCount);
         this.outputs = new Array(outputCount);
 
         this.layers = [
-            new Tanh(inputCount, 1, lr),
-            new Sigmoid(1, outputCount, lr),
+            new LeakyRelu(inputCount, 10, lr),
+            new LeakyRelu(10, 5, lr),
+            new Sigmoid(5, outputCount, lr),
         ];
     }
 
