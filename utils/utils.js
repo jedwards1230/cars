@@ -73,11 +73,7 @@ export function dotProduct(A, B) {
 
 // Mean squared error
 export function MSE(actual, expected) {
-    let error = new Array(actual.length);
-    for (let i = 0; i < actual.length; i++) {
-        error[i] = (actual[i] - expected[i]) ** 2;
-    }
-    return error.reduce((a, b) => a + b);
+    return (actual - expected) ** 2;
 }
 
 /**
