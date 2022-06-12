@@ -18,7 +18,8 @@ body {
 #networkCanvas,
 #train,
 #trainStats,
-#tableTrainEntries {
+#tableTrainEntries,
+#lossChart {
     display: none;
 }
 

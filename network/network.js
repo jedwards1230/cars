@@ -15,7 +15,7 @@ import {
 export class Network {
     constructor(inputCount, outputCount, lr = 0.001, hiddenLayers = []) {
         this.memory = [];
-        this.epsilon = 0.3;
+        this.epsilon = 0.4;
         this.confidence = 0.5;
 
         this.lossFunction = MSE;

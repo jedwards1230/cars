@@ -70,19 +70,6 @@
                 <div class="col">
                     <h5 class="p-3 text-center">Training Stats</h5>
 
-                    <!-- progress bar of how many models surived -->
-                    <div id="goodEntryBar" class="row">
-                        <h6 id="survivedCount" class="text-center my-auto col-3">Models Survived: 0</h6>
-                        <div class="progress col-8 my-auto px-0">
-                            <div id="goodEntriesBar" class="progress-bar bg-success" role="progressbar"
-                                style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            <div id="badEntriesBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%"
-                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-
-                    <canvas id="lossChart" class="my-3"></canvas>
-
                     <!-- episode metrics -->
                     <table class="table table-borderless table-hover table-sm text-center align-middle">
                         <thead>
@@ -120,6 +107,19 @@
                             </tr>
                         </tbody>
                     </table>
+
+                    <!-- progress bar of how many models survived -->
+                    <div id="goodEntryBar" class="row">
+                        <h6 id="survivedCount" class="text-center my-auto col-3">Models Survived: 0</h6>
+                        <div class="progress col-8 my-auto px-0">
+                            <div id="goodEntriesBar" class="progress-bar bg-success" role="progressbar"
+                                style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div id="badEntriesBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%"
+                                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+
+                    <canvas id="lossChart" class="my-3"></canvas>
 
                     <!-- episode entries -->
                     <table id="tableTrainEntries" class="table table-borderless table-hover table-sm align-middle">

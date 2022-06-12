@@ -56,16 +56,16 @@ export class Car {
         this.model = model;
         this.useBrain = true;
         let observation, metrics;
+        const sensorCount = 3;
 
         switch (model) {
             case "fsd":
-                this.sensors.push(new Sensor(this, 1, "forward"));
+                this.sensors.push(new Sensor(this, sensorCount, "forward"));
                 [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
                 this.brain = new Network(observation.length, this.actionCount)
                 break;
 
             case "forward":
-                const sensorCount = 1;
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
 
                 // todo: calc raycount for all sensors

@@ -62,7 +62,7 @@ function normalize(val, max, min) {
 export function checkGoodEntry(info) {
     if (info.damaged) return false;
     if (info.speed <= 0) return false;
-    if (info.distance < 1000) return false;
+    if (info.distance < 900) return false;
     return true;
 }
 
@@ -82,12 +82,10 @@ export function MSE(actual, expected) {
 export function load(id) {
     const brain = localStorage.getItem(id);
     const episodes = localStorage.getItem(id + "Episodes");
-    const chartData = localStorage.getItem(id + "ChartData");
-    if (brain && episodes && chartData) {
+    if (brain && episodes) {
         return {
             brain: JSON.parse(brain),
             episodes: JSON.parse(episodes),
-            chartData: JSON.parse(chartData),
         };
     }
     return null;
@@ -98,16 +96,13 @@ export function load(id) {
  * @param  {string} id Active model name
  * @param  {array} weights weights
  * @param  {array} episodes Episodes array
- * @param  {array} chartData Chart data array
  */
-export function save(id, weights, episodes, chartData) {
+export function save(id, weights, episodes) {
     localStorage.setItem(id, JSON.stringify(weights));
     localStorage.setItem(id + "Episodes", JSON.stringify(episodes));
-    localStorage.setItem(id + "ChartData", JSON.stringify(chartData));
 }
 
 export function destroy(id) {
     localStorage.removeItem(id + "Weights");
     localStorage.removeItem(id + "Episodes");
-    localStorage.removeItem(id + "ChartData");
 }

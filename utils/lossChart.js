@@ -2,6 +2,7 @@ export class LossChart {
     constructor() {
         this.chartCtx = document.getElementById("lossChart").getContext("2d");
         this.chart = this.#newChart();
+        document.getElementById("lossChart").style.display = "none";
     }
 
     #newChart() {
@@ -17,7 +18,7 @@ export class LossChart {
                     },
                     fill: false,
                     borderColor: 'rgb(255, 75, 75)',
-                    tension: 0.4
+                    tension: 0.2
                 }, {
                     type: 'line',
                     label: 'Distance',
@@ -27,7 +28,7 @@ export class LossChart {
                     },
                     fill: false,
                     borderColor: 'rgb(75, 255, 75)',
-                    tension: 0.6
+                    tension: 0.2
                 }, {
                     type: 'line',
                     label: 'Time Steps',
@@ -37,7 +38,7 @@ export class LossChart {
                     },
                     fill: false,
                     borderColor: 'rgb(75, 75, 75)',
-                    tension: 0.6
+                    tension: 0.2
                 }, {
                     type: 'line',
                     label: 'Average Speed',
@@ -47,7 +48,7 @@ export class LossChart {
                     },
                     fill: false,
                     borderColor: 'rgb(75, 75, 255)',
-                    tension: 0.3
+                    tension: 0.2
                 }]
             },
             options: {
@@ -56,27 +57,26 @@ export class LossChart {
         });
     }
 
-    updateChart(episodeInfo) {
-        const chartEntry = {
-            x: episodeInfo.episode,
-            loss: episodeInfo.loss,
-            distance: episodeInfo.distance,
-            time: episodeInfo.time,
-            speed: episodeInfo.speed,
+    draw(episodes) {
+        const d = new Array(episodes.length);
+        const l = new Array(episodes.length);
+        for (let i = 0; i < episodes.length; i++) {
+            const episodeInfo = episodes[i];
+            l[i] = i;
+            d[i] = {
+                x: i,
+                loss: episodeInfo.loss,
+                distance: episodeInfo.distance,
+                time: episodeInfo.time,
+                speed: episodeInfo.speed,
+            }
         }
-        this.pushItem(episodeInfo.episode, chartEntry);
-    }
-
-    pushItem(label, data) {
-        this.chart.data.labels.push(label);
+        this.chart.data.labels = l;
         this.chart.data.datasets.forEach((dataset) => {
-            dataset.data.push(data);
+            dataset.data = d;
         });
         this.chart.update();
-    }
-
-    save() {
-        return this.chart.data;
+        document.getElementById("lossChart").style.display = "block";
     }
 
     reset() {

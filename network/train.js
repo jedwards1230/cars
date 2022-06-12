@@ -26,7 +26,7 @@ export async function train(model, env, maxTimeSteps) {
             if (i != action) {
                 d[i] = actionValues[i] - expected[i];
             } else {
-                d[i] = actionValues[i] + expected[i];
+                d[i] = actionValues[i] - expected[i];
             }
         }
 

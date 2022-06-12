@@ -36,7 +36,7 @@ const lossChart = new LossChart();
 let breakLoop = false;
 let episodeCounter = 0;
 let numEpisodes = 100;
-let maxTimeSteps = 200;
+let maxTimeSteps = 1000;
 
 let activeModel = "trainBrain"
 
@@ -56,7 +56,6 @@ const modelData = load(activeModel);
 if (modelData) {
     model.brain.loadBrain(modelData.brain);
     episodes = modelData.episodes;
-    lossChart.chart.data = modelData.chartData;
 }
 
 // Set play view
@@ -119,8 +118,7 @@ async function episodeLoop() {
     episodes.push(info);
 
     // save only if model is better than average
-    // todo: is this cheating or actually helpful?
-    if (info.distance > (distanceMax - 100)) save(activeModel, model.brain.save(), episodes, lossChart.save());
+    if (info.distance > (distanceMax - 100)) save(activeModel, model.brain.save(), episodes);
 
     reset(true);
 
@@ -137,6 +135,8 @@ async function episodeLoop() {
         // set timeout to avoid stack overflow
         setTimeout(episodeLoop);
     } else {
+        // draw chart
+        lossChart.draw(episodes);
         console.log("training complete");
         const brain = info.model.save();
         console.log("weights");
@@ -223,9 +223,6 @@ function updateTrainStats() {
     badEntriesBar.style.width = `${(badEntries / episodes.length) * 100}%`;
     //badEntriesBar.ariaValueNow = badEntries;
     document.getElementById("survivedCount").innerHTML = `Good Models: ${goodEntries}/${episodes.length + 1}`;
-
-    // update Loss Chart
-    lossChart.updateChart(info);
 }
 
 function drawCars() {
