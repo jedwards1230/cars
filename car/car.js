@@ -162,8 +162,8 @@ export class Car {
         const mOffset = Math.max(...sensorOffsets);
 
         if (this.damaged) return -1;
-        if (this.speed < 0) return -0.5;
         if (this.distance < 0) return -1;
+        if (this.speed < 0) return -0.5;
 
         return 1 - mOffset;
     }

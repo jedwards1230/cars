@@ -46,28 +46,32 @@ class Layer {
         const x = this.inputs;
         const y = this.outputs;
 
-        const deactivatedOutput = this.deactivation(y);
+        const dA = this.deactivation(y);
 
         // bias delta
-        const dB = JSON.parse(JSON.stringify(delta));
+        // dB = delta * derivate(y)
+        const dB = new Array(y.length);
+        for (let i = 0; i < y.length; i++) {
+            dB[i] = delta[i] * dA[i];
+        }
         this.updateBiases(dB);
 
         // layer delta
-        const dZ = new Array(x.length);
+        // dZ = delta * derivate(y) * weight
+        const dZ = new Array(x.length).fill(0);
         for (let i = 0; i < x.length; i++) {
-            let sum = 0;
             for (let j = 0; j < y.length; j++) {
-                sum += weights[i][j] * delta[j] * deactivatedOutput[j];
+                dZ[i] += weights[i][j] * dB[j];
             }
-            dZ[i] = sum;
         }
 
         // weight delta
+        // dW = delta * derivate(y) * input
         const dW = new Array(x.length);
         for (let i = 0; i < x.length; i++) {
             dW[i] = new Array(y.length).fill(0);
             for (let j = 0; j < y.length; j++) {
-                dW[i][j] = dZ[i] * x[i];
+                dW[i][j] = x[i] * dB[j];
             }
         }
 
@@ -115,9 +119,9 @@ class Layer {
                 this.weights[i][j] = Math.random() * 2 - 1;
             }
         }
-        for (let i = 0; i < this.outputs.length; i++) {
+        /* for (let i = 0; i < this.outputs.length; i++) {
             this.biases[i] = Math.random() * 2 - 1;
-        }
+        } */
     }
 }
 

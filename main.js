@@ -98,7 +98,7 @@ function beginTrain() {
 async function episodeLoop() {
     // mutate less over time
     let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.005 : 0.001;
-    model.brain.mutate(mutateBrain);
+    //model.brain.mutate(mutateBrain);
 
     // collect episode info
     info = await train(model, env, parseInt(maxTimeSteps));
@@ -120,9 +120,9 @@ async function episodeLoop() {
 
     // save only if model is better than average
     // todo: is this cheating or actually helpful?
-    if (info.distance > info.averageDistance) save(activeModel, model.brain.save(), episodes, lossChart.save());
+    if (info.distance > (distanceMax - 100)) save(activeModel, model.brain.save(), episodes, lossChart.save());
 
-    reset();
+    reset(true);
 
     // reset environment with traffic using latest model
     /* if (episodeCounter % 10 == 0) {
@@ -254,7 +254,7 @@ function toggleView() {
     }
 }
 
-function reset() {
+function reset(brainOnly = false) {
     carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 
     env = new Environment(trafficCount, brainCount, carCanvas);
@@ -265,7 +265,7 @@ function reset() {
     const modelData = load(activeModel);
     if (modelData) {
         model.brain.loadBrain(modelData.brain);
-        episodes = modelData.episodes;
+        if (!brainOnly) episodes = modelData.episodes;
     }
     cancelAnimationFrame(animFrame);
     animate();

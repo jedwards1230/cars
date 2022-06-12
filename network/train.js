@@ -6,25 +6,34 @@ export async function train(model, env, maxTimeSteps) {
     let actionValues, action, reward;
 
     const backprop = () => {
+        // create reward gradient
         const expected = new Array(actionValues.length).fill(0);
         expected[action] = reward;
 
-        // loss between expected and actual
-        const rLoss = model.brain.lossFunction(actionValues, expected);
-        if (rLoss != null) {
-            loss.push(rLoss);
+        // calculate loss gradient
+        const cost = new Array(actionValues.length);
+        for (let i = 0; i < actionValues.length; i++) {
+            cost[i] = model.brain.lossFunction(actionValues[i], expected[i]);
         }
 
-        // delta for backpropagation
-        const d = JSON.parse(JSON.stringify(actionValues));
+        // find average loss
+        const avgLoss = cost.reduce((acc, cur) => acc + cur, 0) / cost.length;
+        loss.push(avgLoss);
+
+        // derivate of loss function
+        const d = new Array(actionValues.length);
         for (let i = 0; i < actionValues.length; i++) {
-            d[i] -= expected[i];
+            if (i != action) {
+                d[i] = actionValues[i] - expected[i];
+            } else {
+                d[i] = actionValues[i] + expected[i];
+            }
         }
 
         // backward pass to update weights
         model.brain.backward(d);
 
-        return rLoss;
+        return avgLoss;
     }
 
     for (let i = 0; i < maxTimeSteps; i++) {
@@ -44,8 +53,9 @@ export async function train(model, env, maxTimeSteps) {
         speeds.push(model.speed);
         count++;
 
+        rLoss = backprop();
 
-        if (model.distance < -10) model.damaged = true;
+        //if (model.distance < -100) model.damaged = true;
         if (model.damaged) break;
     }
 
@@ -56,7 +66,6 @@ export async function train(model, env, maxTimeSteps) {
     // so this should really have a positive value for the correct action
     // todo: find correct action?
     
-    rLoss = backprop();
 
     return {
         time: count,

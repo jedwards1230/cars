@@ -13,7 +13,7 @@ import {
 } from "./layers.js";
 
 export class Network {
-    constructor(inputCount, outputCount, lr = 0.01, hiddenLayers = []) {
+    constructor(inputCount, outputCount, lr = 0.001, hiddenLayers = []) {
         this.memory = [];
         this.epsilon = 0.3;
         this.confidence = 0.5;
@@ -24,8 +24,8 @@ export class Network {
         this.outputs = new Array(outputCount);
 
         this.layers = [
-            //new Linear(inputCount, 2, lr),
-            new Sigmoid(inputCount, outputCount, lr),
+            new Tanh(inputCount, 1, lr),
+            new Sigmoid(1, outputCount, lr),
         ];
     }
 
@@ -108,6 +108,13 @@ export class Network {
                     )
                 }
             }
+            /* for (let i = 0; i < level.outputs.length; i++) {
+                level.biases[i] = lerp(
+                    level.biases[i],
+                    Math.random() * 2 - 1,
+                    amount,
+                )
+            } */
         });
     }
 }
