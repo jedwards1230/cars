@@ -1,7 +1,7 @@
 import {
     getIntersection,
     lerp
-} from "../utils/utils.js";
+} from "../utils.js";
 
 export class Sensor {
     constructor(car, rays, direction) {

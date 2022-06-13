@@ -1,7 +1,7 @@
 import {
     polysIntersect,
     load
-} from "../utils/utils.js";
+} from "../utils.js";
 import {
     Controls
 } from "./controls.js";
@@ -11,14 +11,6 @@ import {
 import {
     Network
 } from "../network/network.js";
-import {
-    Linear,
-    Sigmoid,
-    Relu,
-    LeakyRelu,
-    Tanh,
-    SoftMax
-} from "../network/layers.js";
 
 export class Car {
     /** 

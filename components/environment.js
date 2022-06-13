@@ -1,10 +1,10 @@
 import {
     Road
-} from "../utils/road.js";
+} from "./road.js";
 import {
     getRandomInt,
     load
-} from "../utils/utils.js";
+} from "../utils.js";
 import {
     Linear,
     Sigmoid,

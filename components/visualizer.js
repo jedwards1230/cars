@@ -1,9 +1,16 @@
 import {
     getRGBA,
     lerp
-} from "./utils.js";
+} from "../utils.js";
 
 export class Visualizer {
+    static draw(brain, time) {
+        const networkCtx = document.getElementById("networkCanvas").getContext("2d");
+
+        networkCtx.lineDashOffset = -time / 40;
+        Visualizer.drawNetwork(networkCtx, brain)
+    }
+
     static drawNetwork(ctx, network) {
         const margin = 50;
         const width = ctx.canvas.width - margin * 2;

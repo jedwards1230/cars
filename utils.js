@@ -1,6 +1,6 @@
 import {
     Car
-} from "../car/car.js";
+} from "./car/car.js";
 
 export function lerp(A, B, t) {
     return A + (B - A) * t;

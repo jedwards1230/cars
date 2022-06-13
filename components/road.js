@@ -1,6 +1,6 @@
 import {
     lerp
-} from "./utils.js";
+} from "../utils.js";
 
 export class Road {
     constructor(y, width, laneCount = 4) {

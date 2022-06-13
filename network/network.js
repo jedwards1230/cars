@@ -2,7 +2,7 @@ import {
     lerp,
     getRandomInt,
     MSE
-} from "../utils/utils.js";
+} from "../utils.js";
 import {
     Linear,
     Sigmoid,
