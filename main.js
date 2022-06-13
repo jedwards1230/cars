@@ -14,11 +14,18 @@ import {
     LossChart
 } from "./utils/lossChart.js";
 import {
-    checkGoodEntry,
     save,
     load,
     destroy
 } from "./utils/utils.js";
+import {
+    Linear,
+    Sigmoid,
+    Relu,
+    LeakyRelu,
+    Tanh,
+    SoftMax
+} from "../network/layers.js";
 
 const carCanvas = document.getElementById("carCanvas");
 const networkCanvas = document.getElementById("networkCanvas");
@@ -30,20 +37,27 @@ const networkCtx = networkCanvas.getContext("2d");
 
 const trafficCount = 50;
 const brainCount = 1;
+let smartTraffic = false;
 
 const lossChart = new LossChart();
 
 let breakLoop = false;
 let episodeCounter = 0;
-let numEpisodes = 200;
-let maxTimeSteps = 2000;
+let numEpisodes = 1000;
+let maxTimeSteps = 10000;
+
+let learningRate = 0.001;
+let epsilonDecay = 0.3;
 
 let activeModel = "trainBrain"
+const actionCount = 4;
+const activeLayers = [
+    new Tanh(6, 6),
+    new LeakyRelu(6, 5),
+    new Sigmoid(5, actionCount),
+];
 
-let env = new Environment(trafficCount, brainCount, carCanvas);
-const y = env.road.getLaneCenter(env.startLane)
-let model = new Car(-1, 0, y, env.driverSpeed + 1, "network", "red");
-model.addBrain("fsd", env);
+let env, model;
 
 let info;
 let episodes = [];
@@ -51,12 +65,6 @@ let episodes = [];
 let renderTrainEntries = false;
 let visualizer = true;
 let animFrame;
-
-const modelData = load(activeModel);
-if (modelData) {
-    model.brain.loadBrain(modelData.brain);
-    episodes = modelData.episodes;
-}
 
 // Set play view
 function setPlayView() {
@@ -94,7 +102,7 @@ function beginTrain() {
 
     episodeCounter = 0;
 
-    reset();
+    reset(true);
     console.log("beginning training");
     breakLoop = false;
     episodeLoop();
@@ -103,7 +111,8 @@ function beginTrain() {
 // Run training loop
 async function episodeLoop() {
     // mutate less over time
-    let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.005 : 0.001;
+    let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.1 : 0.01;
+    //mutateBrain = 0.01;
     model.brain.mutate(mutateBrain);
 
     // collect episode info
@@ -116,31 +125,43 @@ async function episodeLoop() {
         info.averageDistance = distances.reduce((a, b) => a + b) / distances.length;
     }
 
-    info.goodEntry = checkGoodEntry(info);
-    updateTrainStats();
+    const checkGoodEntry = () => {
+        if (info.speed <= 0) return false;
+        if (info.distance < 800) return false;
+        if (info.distance > (distanceMax * 0.9)) return true;
+        if (info.loss < 0.01) return true;
+        return false;
+    }
 
     const distanceMap = episodes.map(e => e.distance);
     const distanceMax = Math.max(...distanceMap);
+    const speedMap = episodes.map(e => e.speed);
+    let speedAvg;
+    if (speedMap.length > 0) {
+        speedAvg = speedMap.reduce((a, b) => a + b) / speedMap.length;
+    } else {
+        speedAvg = 0;
+    }
 
+    info.goodEntry = checkGoodEntry(info);
     episodes.push(info);
+    updateTrainStats();
 
     // save only if model is better than average
-    if (distanceMax > 0 && (info.distance > (distanceMax - 100))) save(activeModel, model.brain.save(), episodes);
+    if (distanceMax > 0 && info.goodEntry) {
+        save(activeModel, model.brain.save(), episodes);
+        reset();
+    } else {
+        reset(true);
+    }
 
-    reset(true);
-
-    // reset environment with traffic using latest model
-    /* if (episodeCounter % 10 == 0) {
-        console.log("Smart traffic incoming...")
-        env.reset(true)
-    } */
 
     episodeCounter++;
     if (episodeCounter > numEpisodes || episodeCounter < 0) breakLoop = true;
 
     if (!breakLoop) {
         // set timeout to avoid stack overflow
-        setTimeout(episodeLoop);
+        setTimeout(episodeLoop, 1);
     } else {
         // draw chart
         lossChart.draw(episodes);
@@ -227,9 +248,7 @@ function updateTrainStats() {
     const goodEntries = episodes.filter(e => e.goodEntry == true).length;
     const badEntries = episodes.filter(e => e.goodEntry == false).length;
     goodEntriesBar.style.width = `${(goodEntries / episodes.length) * 100}%`;
-    //goodEntriesBar.ariaValueNow = goodEntries;
     badEntriesBar.style.width = `${(badEntries / episodes.length) * 100}%`;
-    //badEntriesBar.ariaValueNow = badEntries;
     document.getElementById("survivedCount").innerHTML = `Good Models: ${goodEntries}/${episodes.length + 1}`;
 }
 
@@ -259,19 +278,24 @@ function toggleView() {
     }
 }
 
-function reset(brainOnly = false) {
+function reset(newCar = true) {
     carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 
-    env = new Environment(trafficCount, brainCount, carCanvas);
+    env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
     const x = 0;
     const y = env.road.getLaneCenter(env.startLane)
-    model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-    model.addBrain("fsd", env);
-    const modelData = load(activeModel);
-    if (modelData) {
-        model.brain.loadBrain(modelData.brain);
-        if (!brainOnly) episodes = modelData.episodes;
+    if (newCar) {
+        model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
+        model.addBrain("fsd", env, activeLayers);
+        const modelData = load(activeModel);
+        if (modelData) {
+            model.brain.loadBrain(modelData.brain);
+            episodes = modelData.episodes;
+        }
+    } else {
+        model.reset(x, y);
     }
+    
     cancelAnimationFrame(animFrame);
     animate();
 }
@@ -318,6 +342,8 @@ document.querySelector("#toggleView").addEventListener("click", function () {
 document.getElementById("episodeCountInput").value = numEpisodes;
 document.getElementById("timeLimitInput").value = maxTimeSteps;
 document.getElementById("activeModelName").innerHTML = activeModel;
+document.getElementById("epsilonDecayInput").value = epsilonDecay;
+document.getElementById("learningRateInput").value = learningRate;
 
 function setMainView() {
     document.getElementById("carCanvas").style.display = "inline";

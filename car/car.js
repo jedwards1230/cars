@@ -11,6 +11,14 @@ import {
 import {
     Network
 } from "../network/network.js";
+import {
+    Linear,
+    Sigmoid,
+    Relu,
+    LeakyRelu,
+    Tanh,
+    SoftMax
+} from "../network/layers.js";
 
 export class Car {
     /** 
@@ -23,12 +31,12 @@ export class Car {
      * @param {number} width - The width of the car.
      * @param {number} height - The height of the car.
      */
-    constructor(id, x, y, maxspeed = 2, controller = "dummy", color = "blue", width = 30, height = 50) {
+    constructor(id, x, y, maxspeed = 2, controller = "dummy", color = "blue", actionCount = 2) {
         this.id = id;
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
+        this.width = 30;
+        this.height = 50;
         this.color = color;
 
         this.angle = 0;
@@ -46,31 +54,50 @@ export class Car {
 
         this.controller = controller;
         this.controls = new Controls(controller);
-        this.actionCount = 2;
+        this.actionCount = actionCount;
 
         this.polygon = this.#createPolygon();
         this.sensors = []
     }
 
-    addBrain(model, env) {
+    reset(x, y) {
+        this.x = x;
+        this.y = y;
+        this.speed = 0;
+        this.distance = 0;
+        this.damaged = false;
+        this.angle = 0;
+        this.polygon = this.#createPolygon();
+    }
+
+    addBrain(model, env, layers) {
         this.model = model;
         this.useBrain = true;
-        let observation, metrics;
-        const sensorCount = 5;
+        let observation, metrics, modelData;
+        let sensorCount = 1;
 
         switch (model) {
             case "fsd":
+                sensorCount = 5;
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
                 [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
-                this.brain = new Network(observation.length, this.actionCount)
+
+                this.actionCount = 2;
+
+                this.brain = new Network(layers)
+                modelData = load("trainBrain");
+                if (modelData) this.brain.loadBrain(modelData.brain);
                 break;
 
             case "forward":
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
+                [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
 
-                // todo: calc raycount for all sensors
-                // real todo: better abstraction for sensors to include speed and such 
-                this.brain = new Network(sensorCount + 1, this.actionCount)
+                this.actionCount = 2;
+
+                this.brain = new Network(layers)
+                modelData = load("forwardBrain");
+                if (modelData) this.brain.loadBrain(modelData.brain);
                 break;
         }
     }
@@ -81,11 +108,11 @@ export class Car {
         if (action != null) this.updateControls(action);
         this.#move();
         //if (this.speed < -3 && this.model != "forward") this.damaged = true;
-        if (this.speed < 0.5 && this.model == "forward") {
+        /* if (this.speed < 0.5 && this.model == "forward") {
             this.speed = 0.5;
             this.forward = true;
             this.backward = false;
-        }
+        } */
 
         if (!this.damaged) {
             this.polygon = this.#createPolygon();
@@ -164,9 +191,9 @@ export class Car {
         if (this.damaged) return -1;
         if (this.distance < 0) return -1;
         if (this.speed < 0) return -1;
-        if (mOffset < 0.2) return 1;
+        if (mOffset > 0.3) return -mOffset;
 
-        return 0.5 - mOffset;
+        return 1 - mOffset;
     }
 
     #checkDamage(roadBorders, traffic) {
@@ -174,6 +201,9 @@ export class Car {
         // check collision with road borders
         for (let i = 0; i < roadBorders.length; i++) {
             if (polysIntersect(this.polygon, roadBorders[i])) {
+                if (this.model == "fsd") {
+                    console.log(this.id)
+                }
                 damage = this.id;
             }
         }
@@ -199,6 +229,8 @@ export class Car {
             this.damaged = true;
             this.speed = 0;
         }
+
+        //if (this.distance < -10) this.damaged = true;
         return traffic;
     }
 

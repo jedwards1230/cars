@@ -1,32 +1,30 @@
 export async function train(model, env, maxTimeSteps) {
     let speeds = [];
-    let loss = [];
     let rLoss = 1;
     let count = 0;
-    let actionValues, action, reward;
+    let output = [];
+    let action, reward;
+    let prevOutput, prevReward;
 
     const backprop = () => {
+        const gamma = 0.99;
         // create reward gradient
-        const expected = new Array(actionValues.length).fill(0);
-        expected[action] = reward;
+        const target = new Array(output.length).fill(0);
+        target[action] = reward;
 
         // find average loss
-        const avgLoss = model.brain.lossFunction(actionValues, expected);
-        loss.push(avgLoss);
+        rLoss = model.brain.lossFunction(target, output);
 
         // derivate of loss function
-        const d = new Array(actionValues.length);
-        for (let i = 0; i < actionValues.length; i++) {
-            d[i] = actionValues[i] - expected[i];
+        const d = new Array(output.length);
+        for (let i = 0; i < output.length; i++) {
+            d[i] = (target[i] - output[i]) * 2;
         }
 
         // backward pass to update weights
         model.brain.backward(d);
-
-        return avgLoss;
     }
 
-    // loop until max time steps or car damaged
     for (let i = 0; i < maxTimeSteps; i++) {
         // update environment
         env.update();
@@ -34,11 +32,15 @@ export async function train(model, env, maxTimeSteps) {
         reward = metrics.reward;
 
         // forward pass to get action
-        actionValues = model.brain.forward(observation);
-        action = model.brain.makeChoice(actionValues, true);
+        prevOutput = JSON.parse(JSON.stringify(output));
+        prevReward = reward;
+        output = model.brain.forward(observation);
+        const epsilonGreedy = true;
+        action = model.brain.makeChoice(output, epsilonGreedy);
 
         // maybe use for reward or input?
         const time = 1 - (1 / (i + 1));
+        const distance = 2 - (1 / (model.distance + 1));
 
         // apply action to model
         env.traffic = model.update(env.traffic, env.road.borders, action);
@@ -47,7 +49,7 @@ export async function train(model, env, maxTimeSteps) {
         speeds.push(model.speed);
         count++;
 
-        if (rLoss > 0.01 || model.damaged) rLoss = backprop();
+        if (prevOutput.length > 0 && (rLoss > 0.01 || model.damaged)) backprop();
 
         if (model.damaged) break;
     }
@@ -55,7 +57,7 @@ export async function train(model, env, maxTimeSteps) {
     return {
         time: count,
         loss: rLoss,
-        speed: Math.max(...speeds),
+        speed: speeds.reduce((a, b) => a + b, 0) / speeds.length,
         distance: model.distance,
         damaged: model.damaged,
         model: model.brain,

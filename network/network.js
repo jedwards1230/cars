@@ -13,27 +13,30 @@ import {
 } from "./layers.js";
 
 export class Network {
-    constructor(inputCount, outputCount, lr = 0.001, hiddenLayers = []) {
+    constructor(layers = [], lr = 0.001) {
+        let epsDecayRate = document.getElementById("epsilonDecayInput").value;
+        epsDecayRate = parseFloat(epsDecayRate);
+        //epsDecayRate = document.getElementById("epsilonDecayToggle").value;
+        lr = document.getElementById("learningRateInput").value;
+        lr = parseFloat(lr);
+
         this.memory = [];
-        this.epsilon = 0.4;
+        this.layers = [];
+        this.epsilon = epsDecayRate;
         this.confidence = 0.5;
 
-        this.lossFunction = (outputs, targets) => {
+        this.lossFunction = (targets, outputs) => {
             let cost = 0
             for (let i = 0; i < outputs.length; i++) {
-                cost += MSE(outputs[i], targets[i]);
+                cost += MSE(targets[i], outputs[i]);
             }
             return cost / outputs.length;
         };
 
-        this.inputs = new Array(inputCount);
-        this.outputs = new Array(outputCount);
-
-        this.layers = [
-            new LeakyRelu(inputCount, 10, lr),
-            new LeakyRelu(10, 5, lr),
-            new Sigmoid(5, outputCount, lr),
-        ];
+        for (let i = 0; i < layers.length; i++) {
+            layers[i].lr = lr;
+            this.layers.push(layers[i]);
+        }
     }
 
     /** Forward pass each layer */

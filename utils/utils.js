@@ -59,21 +59,18 @@ function normalize(val, max, min) {
     return (val - min) / (max - min);
 }
 
-export function checkGoodEntry(info) {
-    if (info.damaged) return false;
-    if (info.speed <= 0) return false;
-    if (info.distance < 900) return false;
-    return true;
-}
-
 // dot product of two arrays
 export function dotProduct(A, B) {
     return A.reduce((acc, cur, i) => acc + cur * B[i], 0);
 }
 
-// Mean squared error
-export function MSE(actual, expected) {
-    return (expected - actual) ** 2;
+/**
+ * (outputs - targets) ** 2
+ * @param {number} outputs 
+ * @param {number} targets 
+ */
+export function MSE(targets, outputs) {
+    return (targets - outputs) ** 2;
 }
 
 /**

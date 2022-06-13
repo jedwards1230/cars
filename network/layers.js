@@ -1,7 +1,5 @@
 class Layer {
-    constructor(inputs, outputs, lr) {
-        this.lr = lr;
-
+    constructor(inputs, outputs) {
         this.inputs = new Array(inputs);
         this.weights = new Array(inputs);
         for (let i = 0; i < inputs; i++) {
@@ -49,12 +47,11 @@ class Layer {
         const dA = this.deactivation(y);
 
         // bias delta
-        // dB = delta * derivate(y)
+        // dB = delta * derivative(y)
         const dB = new Array(y.length);
         for (let i = 0; i < y.length; i++) {
             dB[i] = delta[i] * dA[i];
         }
-        this.updateBiases(dB);
 
         // layer delta
         // dZ = delta * derivate(y) * weight
@@ -75,6 +72,7 @@ class Layer {
             }
         }
 
+        this.updateBiases(dB);
         this.updateWeights(dW);
 
         return dZ;

@@ -6,27 +6,38 @@ import {
     load
 } from "../utils/utils.js";
 import {
+    Linear,
+    Sigmoid,
+    Relu,
+    LeakyRelu,
+    Tanh,
+    SoftMax
+} from "../network/layers.js";
+import {
     Car
 } from "../car/car.js";
 
 export class Environment {
-    constructor(trafficCount, brainCount, carCanvas) {
+    constructor(trafficCount, brainCount, carCanvas, smart=false) {
+        this.canvas = carCanvas;
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
+        this.smart = smart;
+
+        const trafficInputs = 2;
+        const trafficOutputs = 2;
+
+        this.modelLayers = [
+            new Relu(trafficInputs, 5),
+            new Sigmoid(5, trafficOutputs),
+        ];
 
         this.driverSpeed = 3;
         this.laneCount = 4;
 
-        this.done = false;
-
-        this.road = new Road(carCanvas.height / 2, carCanvas.height * 0.9, this.laneCount);
+        this.road = new Road(this.canvas.height / 2, this.canvas.height * 0.9, this.laneCount);
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
-
-        this.reset();
-    }
-
-    reset(smart = false) {
-        this.traffic = this.generateTraffic(this.trafficCount, smart);
+        this.generateTraffic();
     }
 
     end() {
@@ -48,13 +59,12 @@ export class Environment {
     }
 
     render() {
-        const carCanvas = document.getElementById("carCanvas");
         const networkCanvas = document.getElementById("networkCanvas");
         const navbarHeight = document.getElementById("nav").offsetHeight;
 
         // update dimensions
-        carCanvas.style.top = navbarHeight + "px";
-        carCanvas.width = window.innerWidth;
+        this.canvas.style.top = navbarHeight + "px";
+        this.canvas.width = window.innerWidth;
         networkCanvas.width = window.innerWidth;
     }
 
@@ -72,33 +82,34 @@ export class Environment {
         }
     }
 
-    generateTraffic(N, smart = false) {
-        const cars = [];
-        const placed = new Array(this.road.laneCount).fill(100);
+    generateTraffic() {
+        const N = this.trafficCount;
+        this.traffic = [];
+        let placed = new Array(this.road.laneCount).fill(200);
 
-        for (let i = 0; i < N; i++) {
-            // randomize lane
+        // randomize lane
+        const getStartPosition = (i) => {
             const lane = getRandomInt(0, this.road.laneCount - 1);
             const nextLane = placed[lane - 1] ? lane - 1 : lane + 1;
-            placed[lane] = placed[lane] + getRandomInt(150, 250);
-            const idx = i + this.brainCount;
+            placed[lane] = placed[lane] + getRandomInt(200, 350);
             const x = placed[lane];
             const y = this.road.getLaneCenter(lane);
+            return [x, y]
+        }
 
-            let car;
-            if (smart) {
-                car = new Car(idx, x, y, 3, "network");
-                car.addBrain("forward", this);
-                const modelData = load("trainBrain");
-                if (modelData) {
-                    car.brain.loadBrain(modelData.brain);
-                }
+        let car;
+        for (let i = 0; i < N; i++) {
+            const idx = i + this.brainCount;
+            const [x, y] = getStartPosition(i);
+
+            if (this.smart) {
+                car = new Car(idx, x, y, getRandomInt(2, 4), "network");
+                car.addBrain("forward", this, this.modelLayers);
             } else {
                 car = new Car(idx, x, y, getRandomInt(2, 2), "dummy");
             }
 
-            cars.push(car);
+            this.traffic.push(car);
         }
-        return cars
     }
 }

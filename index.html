@@ -43,27 +43,40 @@
         <canvas id="networkCanvas"></canvas>
 
         <div id="train" class="py-3 container-fluid">
-            <div id="trainParams" class="row text-center text-bg-light">
-                <div class="col">
-                    <h5 class="p-3">Training Parameters</h5>
-                    <form>
-                        <div class="row pb-4 pt-2">
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label for="episodeCountInput" class="form-label">Episode Count</label>
-                                    <input type="number" class="form-control" id="episodeCountInput">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label for="timeLimitInput" class="form-label">Time Limit</label>
-                                    <input type="number" class="form-control" id="timeLimitInput">
-                                </div>
+            <div id="trainParams" class="container text-center text-bg-light">
+                <h5 class="p-3">Training Parameters</h5>
+                <form>
+                    <div class="row py-2">
+                        <div class="col">
+                            <div class="mb-3">
+                                <label for="episodeCountInput" class="form-label">Episode Count</label>
+                                <input type="number" class="form-control" id="episodeCountInput">
                             </div>
                         </div>
-                    </form>
-                    <button type="button" id="trainBtn" class="btn mb-3 mx-0 btn-primary">Start</button>
-                </div>
+                        <div class="col">
+                            <div class="mb-3">
+                                <label for="timeLimitInput" class="form-label">Time Limit</label>
+                                <input type="number" class="form-control" id="timeLimitInput">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- section for epsilon decay rate, toggle, and learning rate -->
+                    <div class="row pb-2">
+                        <div class="col">
+                            <label for="epsilonDecayInput" class="form-label">Epsilon Decay Rate</label>
+                            <div class="input-group mb-3">
+                                <input type="number" class="form-control" id="epsilonDecayInput">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="mb-3">
+                                <label for="learningRateInput" class="form-label">Learning Rate</label>
+                                <input type="number" class="form-control" id="learningRateInput">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <button type="button" id="trainBtn" class="btn mb-3 mx-0 btn-primary">Start</button>
             </div>
             <div id="trainStats" class="row py-2 my-2 bg-light">
                 <!-- section to view average, min, and max metrics for each item in the table -->

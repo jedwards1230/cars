@@ -60,7 +60,7 @@ export class LossChart {
         const d = [];
         const l = [];
         for (let i = 0; i < episodes.length; i++) {
-            if (i % 10 === 0) {
+            if (i % 5 === 0) {
                 const episodeInfo = episodes[i];
                 l.push(i);
                 d.push({
