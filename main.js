@@ -102,7 +102,7 @@ function beginTrain() {
 
     episodeCounter = 0;
 
-    reset(true);
+    reset();
     console.log("beginning training");
     breakLoop = false;
     episodeLoop();
@@ -150,10 +150,8 @@ async function episodeLoop() {
     // save only if model is better than average
     if (distanceMax > 0 && info.goodEntry) {
         save(trainForm.activeModel, model.brain.save(), episodes);
-        reset();
-    } else {
-        reset(true);
     }
+    reset();
 
 
     episodeCounter++;
@@ -235,22 +233,18 @@ function toggleView() {
     }
 }
 
-function reset(newCar = true) {
+function reset() {
     carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 
     env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
     const x = 0;
     const y = env.road.getLaneCenter(env.startLane)
-    if (newCar) {
-        model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
-        model.addBrain("fsd", env, activeLayers);
-        const modelData = load(trainForm.activeModel);
-        if (modelData) {
-            model.brain.loadBrain(modelData.brain);
-            episodes = modelData.episodes;
-        }
-    } else {
-        model.reset(x, y);
+    model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
+    model.addBrain("fsd", env, activeLayers);
+    const modelData = load(trainForm.activeModel);
+    if (modelData) {
+        model.brain.loadBrain(modelData.brain);
+        episodes = modelData.episodes;
     }
 
     cancelAnimationFrame(animFrame);

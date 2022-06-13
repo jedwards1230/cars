@@ -1,24 +1,13 @@
 import {
     lerp,
-    getRandomInt,
     MSE
 } from "../utils.js";
-import {
-    Linear,
-    Sigmoid,
-    Relu,
-    LeakyRelu,
-    Tanh,
-    SoftMax
-} from "./layers.js";
 
 export class Network {
     constructor(layers = [], lr = 0.001) {
         let epsDecayRate = document.getElementById("epsilonDecayInput").value;
         epsDecayRate = parseFloat(epsDecayRate);
-        //epsDecayRate = document.getElementById("epsilonDecayToggle").value;
-        lr = document.getElementById("learningRateInput").value;
-        lr = parseFloat(lr);
+        lr = parseFloat(document.getElementById("learningRateInput").value);
 
         this.memory = [];
         this.layers = [];
@@ -118,13 +107,6 @@ export class Network {
                     )
                 }
             }
-            /* for (let i = 0; i < level.outputs.length; i++) {
-                level.biases[i] = lerp(
-                    level.biases[i],
-                    Math.random() * 2 - 1,
-                    amount,
-                )
-            } */
         });
     }
 }

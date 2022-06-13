@@ -100,6 +100,6 @@ export function save(id, weights, episodes) {
 }
 
 export function destroy(id) {
-    localStorage.removeItem(id + "Weights");
+    localStorage.removeItem(id);
     localStorage.removeItem(id + "Episodes");
 }
