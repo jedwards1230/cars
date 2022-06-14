@@ -36,9 +36,7 @@ import {
 } from "../network/layers.js";
 
 const carCanvas = document.getElementById("carCanvas");
-const networkCanvas = document.getElementById("networkCanvas");
 carCanvas.height = 300;
-networkCanvas.height = 450;
 
 const carCtx = carCanvas.getContext("2d");
 
@@ -46,12 +44,12 @@ const trafficCount = 50;
 const brainCount = 1;
 let smartTraffic = true;
 
+const visualizer = new Visualizer();
 const lossChart = new LossChart();
+const trainForm = new TrainForm();
 
 let breakLoop = false;
 let episodeCounter = 0;
-
-const trainForm = new TrainForm();
 
 const actionCount = 2;
 const activeLayers = () => [
@@ -65,12 +63,11 @@ let info;
 let episodes = [];
 
 let renderTrainEntries = false;
-let visualizer = true;
 let animFrame;
 
 // Set play view
 function setPlayView() {
-    if (visualizer) document.getElementById("networkCanvas").style.display = "inline";
+    if (visualizer.active) document.getElementById("networkCanvas").style.display = "inline";
     document.getElementById("train").style.display = "none";
     lossChart.hide();
 }
@@ -193,7 +190,7 @@ function animate(time) {
     // draw cars
     env.render();
     drawCars();
-    Visualizer.draw(model.brain, time);
+    visualizer.draw(model.brain, time);
     animFrame = requestAnimationFrame(animate);
 }
 
@@ -226,7 +223,7 @@ function drawCars() {
 
 function toggleView() {
     breakLoop = true;
-    if (visualizer) {
+    if (visualizer.active) {
         setPlayView();
     } else {
         setTrainView();
@@ -237,13 +234,13 @@ function reset() {
     // reset environment
     carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
     env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
-    
+
     // reset model
     const x = 0;
     const y = env.road.getLaneCenter(env.startLane)
     model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
     model.addBrain("fsd", env, activeLayers());
-    
+
     // load saved data
     const modelBrain = loadModel(trainForm.activeModel);
     if (modelBrain) model.brain.loadBrain(modelBrain);
@@ -260,13 +257,13 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
 
 // init buttons
 document.querySelector("#startTrain").addEventListener("click", function () {
-    visualizer = false;
+    visualizer.active = false;
     setTrainView();
     setMainView()
 });
 document.querySelector("#trainBtn").addEventListener("click", beginTrain);
 document.querySelector("#startPlay").addEventListener("click", function () {
-    visualizer = true;
+    visualizer.active = true;
     setPlayView();
     setMainView()
 });
@@ -288,7 +285,7 @@ document.querySelector("#resetBtn").addEventListener("click", function () {
 });
 
 document.querySelector("#toggleView").addEventListener("click", function () {
-    visualizer = !visualizer;
+    visualizer.active = !visualizer;
     episodeCounter = trainForm.numEpisodes;
     toggleView();
 });

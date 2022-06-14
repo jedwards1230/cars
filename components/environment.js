@@ -59,13 +59,11 @@ export class Environment {
     }
 
     render() {
-        const networkCanvas = document.getElementById("networkCanvas");
         const navbarHeight = document.getElementById("nav").offsetHeight;
 
         // update dimensions
         this.canvas.style.top = navbarHeight + "px";
         this.canvas.width = window.innerWidth;
-        networkCanvas.width = window.innerWidth;
     }
 
     update() {

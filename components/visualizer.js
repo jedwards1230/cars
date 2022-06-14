@@ -4,14 +4,21 @@ import {
 } from "../utils.js";
 
 export class Visualizer {
-    static draw(brain, time) {
-        const networkCtx = document.getElementById("networkCanvas").getContext("2d");
-
-        networkCtx.lineDashOffset = -time / 40;
-        Visualizer.drawNetwork(networkCtx, brain)
+    constructor() {
+        this.canvas = document.getElementById("networkCanvas");
+        this.context = this.canvas.getContext("2d");
+        this.canvas.height = 450;
+        this.active = true;
     }
 
-    static drawNetwork(ctx, network) {
+    draw(brain, time) {
+        this.canvas.width = window.innerWidth;
+        this.context.lineDashOffset = -time / 40;
+        this.drawNetwork(brain)
+    }
+
+    drawNetwork(network) {
+        const ctx = this.context;
         const margin = 50;
         const width = ctx.canvas.width - margin * 2;
         const height = ctx.canvas.height - margin * 2;
@@ -41,7 +48,7 @@ export class Visualizer {
                 );
 
             ctx.setLineDash([7, 3]);
-            Visualizer.drawLevel(ctx, network.layers[i],
+            this.drawLevel(network.layers[i],
                 margin, levelEnd,
                 levelWidth, height,
                 i == network.layers.length - 1
@@ -55,7 +62,8 @@ export class Visualizer {
         ctx.scale(-1, 1);
     }
 
-    static drawLevel(ctx, level, top, left, width, height, outputLabels) {
+    drawLevel(level, top, left, width, height, outputLabels) {
+        const ctx = this.context;
         const right = left + width;
         const bottom = top + height;
 
@@ -70,11 +78,11 @@ export class Visualizer {
                 ctx.beginPath();
                 ctx.moveTo(
                     left,
-                    Visualizer.#getNodeY(inputs, i, bottom, top)
+                    this.#getNodeY(inputs, i, bottom, top)
                 );
                 ctx.lineTo(
                     right,
-                    Visualizer.#getNodeY(outputs, j, bottom, top)
+                    this.#getNodeY(outputs, j, bottom, top)
                 );
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = getRGBA(inputs[i] * weights[i][j]);
@@ -85,7 +93,7 @@ export class Visualizer {
         // draw input nodes
         const nodeRadius = 18;
         for (let i = 0; i < inputs.length; i++) {
-            const y = Visualizer.#getNodeY(inputs, i, bottom, top);
+            const y = this.#getNodeY(inputs, i, bottom, top);
             ctx.beginPath();
             ctx.arc(left, y, nodeRadius, 0, Math.PI * 2);
             ctx.fillStyle = "black";
@@ -98,7 +106,7 @@ export class Visualizer {
 
         // draw output nodes
         for (let i = 0; i < outputs.length; i++) {
-            const y = Visualizer.#getNodeY(outputs, i, bottom, top);
+            const y = this.#getNodeY(outputs, i, bottom, top);
             ctx.beginPath();
             ctx.arc(right, y, nodeRadius, 0, Math.PI * 2);
             ctx.fillStyle = "black";
@@ -130,7 +138,7 @@ export class Visualizer {
         }
     }
 
-    static#getNodeY(nodes, index, bottom, top) {
+    #getNodeY(nodes, index, bottom, top) {
         return lerp(
             bottom,
             top,
