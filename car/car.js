@@ -34,7 +34,7 @@ export class Car {
 
         this.angle = 0;
 
-        this.speed = 0;
+        this.speed = 1;
         this.maxSpeed = maxspeed;
         this.acceleration = 0.2;
         this.friction = 0.05;
@@ -121,12 +121,6 @@ export class Car {
     update(traffic, borders, action = null) {
         if (action != null) this.updateControls(action);
         this.#move();
-        //if (this.speed < -3 && this.model != "forward") this.damaged = true;
-        /* if (this.speed < 0.5 && this.model == "forward") {
-            this.speed = 0.5;
-            this.forward = true;
-            this.backward = false;
-        } */
 
         if (this.distance < -1000) this.damaged = true;
 
@@ -148,22 +142,26 @@ export class Car {
     updateControls(a) {
         switch (a) {
             case 0:
-                //console.log("forward")
+                // forward
                 this.controls.forward = true;
                 this.controls.backward = false;
+                this.controls.left = false;
+                this.controls.right = false;
                 break;
             case 1:
-                //console.log("backward")
+                // backward
                 this.controls.forward = false;
                 this.controls.backward = true;
+                this.controls.left = false;
+                this.controls.right = false;
                 break;
             case 2:
-                //console.log("left")
+                // left 
                 this.controls.left = true;
                 this.controls.right = false;
                 break;
             case 3:
-                //console.log("right")
+                // right
                 this.controls.left = false;
                 this.controls.right = true;
                 break;
@@ -190,24 +188,39 @@ export class Car {
         return observation
     }
 
-    getMetrics() {
+    getMetrics(action) {
         return {
+            action: action,
             damaged: this.damaged,
-            reward: this.getReward(this.sensorOffsets),
+            reward: this.getReward(action),
         }
     }
 
     /** Get reward for current state */
-    getReward(sensorOffsets) {
-        if (this.damaged) return -1;
-        if (this.distance < 0) return -1;
-        if (this.speed < 1) return -1;
-        if (Math.abs(this.angle) > 1) return -1;
+    getReward(action) {
+        const reward = new Array(this.actionCount).fill(0);
 
-        const mOffset = Math.max(...sensorOffsets);
-        if (mOffset > 0) return -mOffset;
+        if (this.damaged) reward[action] -= 1;
+        if (this.speed < 1 || this.distance < 0) {
+            reward[0] += 1;
+            reward[1] -= 1;
+        }
+        if (this.actionCount > 2) {
+            if (this.angle > 1) {
+                reward[3] -= 0.5;
+            }
+            else if (this.angle < -1) {
+                reward[2] -= 0.5;
+            }
+        }
 
-        return 1;
+        const mOffset = Math.max(...this.sensorOffsets);
+        if (mOffset > 0) {
+            reward[0] -= mOffset;
+            reward[1] += mOffset;
+        }
+
+        return reward;
     }
 
     lazyAction(borders, traffic, backprop = false) {

@@ -1,24 +1,17 @@
-import {
-    Road
-} from "./road.js";
-import {
-    getRandomInt,
-    loadModel
-} from "../utils.js";
+import { Road } from "./road.js";
+import { getRandomInt } from "../utils.js";
 import {
     Linear,
     Sigmoid,
     Relu,
     LeakyRelu,
     Tanh,
-    SoftMax
+    SoftMax,
 } from "../network/layers.js";
-import {
-    Car
-} from "../car/car.js";
+import { Car } from "../car/car.js";
 
 export class Environment {
-    constructor(trafficCount, brainCount, carCanvas, smart=false) {
+    constructor(trafficCount, brainCount, carCanvas, smart = false) {
         this.canvas = carCanvas;
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
@@ -32,10 +25,14 @@ export class Environment {
             new Sigmoid(3, trafficOutputs),
         ];
 
-        this.driverSpeed = 4;
+        this.driverSpeed = 3;
         this.laneCount = 3;
 
-        this.road = new Road(this.canvas.height / 2, this.canvas.height * 0.9, this.laneCount);
+        this.road = new Road(
+            this.canvas.height / 2,
+            this.canvas.height * 0.9,
+            this.laneCount
+        );
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
         this.generateTraffic();
     }
@@ -46,10 +43,10 @@ export class Environment {
         let goodW = [];
         let badW = [];
         for (let i = 0; i < this.traffic.length; i++) {
-            if (this.traffic[i].model == 'fsd') {
+            if (this.traffic[i].model == "fsd") {
                 if (this.traffic[i].damaged) {
                     dmgCt += 1;
-                    console.log(this.traffic[i].brain.layers)
+                    console.log(this.traffic[i].brain.layers);
                 } else {
                     goodCt += 1;
                 }
@@ -88,8 +85,8 @@ export class Environment {
             placed[lane] = placed[lane] + getRandomInt(200, 350);
             const x = placed[lane];
             const y = this.road.getLaneCenter(lane);
-            return [x, y]
-        }
+            return [x, y];
+        };
 
         let car;
         for (let i = 0; i < N; i++) {

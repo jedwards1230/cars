@@ -6,7 +6,7 @@ class Layer {
             this.weights[i] = new Array(outputs).fill(0);
         }
 
-        this.biases = new Array(outputs).fill(0);
+        this.biases = new Array(outputs).fill(0.1);
         this.outputs = new Array(outputs);
 
         this.#randomize();
@@ -119,9 +119,6 @@ class Layer {
                 this.weights[i][j] = Math.random() * 2 - 1;
             }
         }
-        /* for (let i = 0; i < this.outputs.length; i++) {
-            this.biases[i] = Math.random() * 2 - 1;
-        } */
     }
 }
 

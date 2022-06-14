@@ -1,30 +1,16 @@
-import {
-    Environment
-} from "./components/environment.js";
-import {
-    Visualizer
-} from "./components/visualizer.js";
-import {
-    LossChart
-} from "./components/lossChart.js";
-import {
-    MetricsTable
-} from "./components/metricsTable.js";
-import {
-    TrainForm
-} from "./components/trainForm.js";
-import {
-    Car
-} from "./car/car.js";
-import {
-    train
-} from "./network/train.js";
+import { Environment } from "./components/environment.js";
+import { Visualizer } from "./components/visualizer.js";
+import { LossChart } from "./components/lossChart.js";
+import { MetricsTable } from "./components/metricsTable.js";
+import { TrainForm } from "./components/trainForm.js";
+import { Car } from "./car/car.js";
+import { train } from "./network/train.js";
 import {
     saveModel,
     loadModel,
     destroy,
     loadEpisodes,
-    saveEpisodes
+    saveEpisodes,
 } from "./utils.js";
 import {
     Linear,
@@ -32,11 +18,11 @@ import {
     Relu,
     LeakyRelu,
     Tanh,
-    SoftMax
-} from "../network/layers.js";
+    SoftMax,
+} from "./network/layers.js";
 
 const carCanvas = document.getElementById("carCanvas");
-carCanvas.height = 300;
+carCanvas.height = 250;
 
 const carCtx = carCanvas.getContext("2d");
 
@@ -53,8 +39,9 @@ let episodeCounter = 0;
 
 const actionCount = 4;
 const activeLayers = () => [
-    new Tanh(6, 8),
-    new LeakyRelu(8, 10),
+    new Tanh(5, 10),
+    new Tanh(10, 10),
+    new LeakyRelu(10, 10),
     new Sigmoid(10, actionCount),
 ];
 
@@ -68,7 +55,8 @@ let animFrame;
 
 // Set play view
 function setPlayView() {
-    if (visualizer.active) document.getElementById("networkCanvas").style.display = "inline";
+    if (visualizer.active)
+        document.getElementById("networkCanvas").style.display = "inline";
     document.getElementById("train").style.display = "none";
     lossChart.hide();
 }
@@ -91,7 +79,8 @@ function beginTrain() {
     trainForm.readInputs();
 
     document.getElementById("trainStats").style.display = "block";
-    if (renderTrainEntries) document.getElementById("tableTrainEntries").style.display = "block";
+    if (renderTrainEntries)
+        document.getElementById("tableTrainEntries").style.display = "block";
 
     let goodEntriesBar = document.getElementById("goodEntriesBar");
     goodEntriesBar.style.width = "0%";
@@ -112,10 +101,10 @@ function beginTrain() {
 async function episodeLoop() {
     const checkGoodEntry = () => {
         if (info.speed < 1) return false;
-        if (info.distance < 800) return false;
-        if (info.distance > (distanceMax * 0.9)) return true;
+        if (info.distance < 500) return false;
+        if (info.distance > distanceMax * 0.9) return true;
         return false;
-    }
+    };
 
     // mutate less over time
     let mutateBrain = episodeCounter < trainForm.numEpisodes / 2 ? 0.1 : 0.01;
@@ -126,10 +115,13 @@ async function episodeLoop() {
     info = await train(model, env, trainForm.numSteps);
     info.episode = episodes.length + 1;
 
-    const distanceMap = episodes.map(e => e.distance);
-    const speedMap = episodes.map(e => e.speed);
+    const distanceMap = episodes.map((e) => e.distance);
+    const speedMap = episodes.map((e) => e.speed);
     const distanceMax = Math.max(...distanceMap);
-    const speedAvg = (speedMap.length > 0) ? speedMap.reduce((a, b) => a + b) / speedMap.length : 0;
+    const speedAvg =
+        speedMap.length > 0
+            ? speedMap.reduce((a, b) => a + b) / speedMap.length
+            : 0;
 
     info.goodEntry = checkGoodEntry(info);
     episodes.push(info);
@@ -143,7 +135,8 @@ async function episodeLoop() {
     reset();
 
     episodeCounter++;
-    if (episodeCounter > trainForm.numEpisodes || episodeCounter < 0) breakLoop = true;
+    if (episodeCounter > trainForm.numEpisodes || episodeCounter < 0)
+        breakLoop = true;
 
     if (!breakLoop) {
         // set timeout to avoid stack overflow
@@ -168,12 +161,17 @@ function animate(time) {
     // update cars
     env.update();
     if (!model.damaged) {
-        const action = model.lazyAction(env.road.borders, env.traffic, true);
+        //const observation = model.getObservation(env.road.borders, env.traffic);
+        const sData = model.getSensorData(env.road.borders, env.traffic);
+        const output = model.brain.forward(sData, true);
+        const action = model.brain.makeChoice(output);
+        //const action = model.lazyAction(env.road.borders, env.traffic, true);
         env.traffic = model.update(env.traffic, env.road.borders, action);
     }
 
     document.getElementById("activeSpeedName").innerHTML = model.speed.toFixed(2);
-    document.getElementById("activeDistanceName").innerHTML = model.distance.toFixed(0);
+    document.getElementById("activeDistanceName").innerHTML =
+        model.distance.toFixed(0);
 
     // draw cars
     env.render();
@@ -190,11 +188,13 @@ function updateTrainStats(episodes) {
     const goodEntriesBar = document.getElementById("goodEntriesBar");
     const badEntriesBar = document.getElementById("badEntriesBar");
     // get how many episodes survived
-    const goodEntries = episodes.filter(e => e.goodEntry == true).length;
-    const badEntries = episodes.filter(e => e.goodEntry == false).length;
+    const goodEntries = episodes.filter((e) => e.goodEntry == true).length;
+    const badEntries = episodes.filter((e) => e.goodEntry == false).length;
     goodEntriesBar.style.width = `${(goodEntries / episodes.length) * 100}%`;
     badEntriesBar.style.width = `${(badEntries / episodes.length) * 100}%`;
-    document.getElementById("survivedCount").innerHTML = `Good Models: ${goodEntries}/${episodes.length + 1}`;
+    document.getElementById(
+        "survivedCount"
+    ).innerHTML = `Good Models: ${goodEntries}/${episodes.length + 1}`;
 }
 
 function drawCars() {
@@ -225,7 +225,7 @@ function reset() {
 
     // reset model
     const x = 0;
-    const y = env.road.getLaneCenter(env.startLane)
+    const y = env.road.getLaneCenter(env.startLane);
     model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
     model.addBrain("fsd", env, activeLayers());
 
@@ -240,20 +240,24 @@ function reset() {
     animate();
 }
 
-const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+const tooltipTriggerList = document.querySelectorAll(
+    '[data-bs-toggle="tooltip"]'
+);
+const tooltipList = [...tooltipTriggerList].map(
+    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+);
 
 // init buttons
 document.querySelector("#startTrain").addEventListener("click", function () {
     visualizer.active = false;
     setTrainView();
-    setMainView()
+    setMainView();
 });
 document.querySelector("#trainBtn").addEventListener("click", beginTrain);
 document.querySelector("#startPlay").addEventListener("click", function () {
     visualizer.active = true;
     setPlayView();
-    setMainView()
+    setMainView();
 });
 document.querySelector("#saveBtn").addEventListener("click", function () {
     saveModel(trainForm.activeModel, model.brain.save(), episodes);
