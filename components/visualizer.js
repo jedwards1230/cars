@@ -8,7 +8,7 @@ export class Visualizer {
         this.canvas = document.getElementById("networkCanvas");
         this.context = this.canvas.getContext("2d");
         this.canvas.height = 450;
-        this.active = true;
+        this.active = false;
     }
 
     draw(brain, time) {

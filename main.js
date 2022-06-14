@@ -51,10 +51,11 @@ const trainForm = new TrainForm();
 let breakLoop = false;
 let episodeCounter = 0;
 
-const actionCount = 2;
+const actionCount = 4;
 const activeLayers = () => [
-    new Tanh(4, 4),
-    new Sigmoid(4, actionCount),
+    new Tanh(6, 8),
+    new LeakyRelu(8, 10),
+    new Sigmoid(10, actionCount),
 ];
 
 let env, model;
@@ -109,37 +110,26 @@ function beginTrain() {
 
 // Run training loop
 async function episodeLoop() {
+    const checkGoodEntry = () => {
+        if (info.speed < 1) return false;
+        if (info.distance < 800) return false;
+        if (info.distance > (distanceMax * 0.9)) return true;
+        return false;
+    }
+
     // mutate less over time
     let mutateBrain = episodeCounter < trainForm.numEpisodes / 2 ? 0.1 : 0.01;
-    //mutateBrain = 0.01;
+    mutateBrain = 0.01;
     model.brain.mutate(mutateBrain);
 
     // collect episode info
     info = await train(model, env, trainForm.numSteps);
     info.episode = episodes.length + 1;
 
-    // find average of all distances for each episode
-    if (episodes.length > 0) {
-        const distances = episodes.map(e => e.distance);
-        info.averageDistance = distances.reduce((a, b) => a + b) / distances.length;
-    }
-
-    const checkGoodEntry = () => {
-        if (info.speed <= 0) return false;
-        if (info.distance < 800) return false;
-        if (info.distance > (distanceMax * 0.9) && info.speed > (speedAvg * 0.9)) return true;
-        return false;
-    }
-
     const distanceMap = episodes.map(e => e.distance);
-    const distanceMax = Math.max(...distanceMap);
     const speedMap = episodes.map(e => e.speed);
-    let speedAvg;
-    if (speedMap.length > 0) {
-        speedAvg = speedMap.reduce((a, b) => a + b) / speedMap.length;
-    } else {
-        speedAvg = 0;
-    }
+    const distanceMax = Math.max(...distanceMap);
+    const speedAvg = (speedMap.length > 0) ? speedMap.reduce((a, b) => a + b) / speedMap.length : 0;
 
     info.goodEntry = checkGoodEntry(info);
     episodes.push(info);
@@ -147,7 +137,7 @@ async function episodeLoop() {
 
     // save only if model is labelled an improvement
     if (distanceMax > 0 && info.goodEntry) {
-        saveModel(trainForm.activeModel, model.brain.save());
+        await saveModel(trainForm.activeModel, model.brain.save());
     }
     saveEpisodes(trainForm.activeModel, episodes);
     reset();
@@ -178,9 +168,7 @@ function animate(time) {
     // update cars
     env.update();
     if (!model.damaged) {
-        const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
-        const actionValues = model.brain.forward(observation, true);
-        const action = model.brain.makeChoice(actionValues);
+        const action = model.lazyAction(env.road.borders, env.traffic, true);
         env.traffic = model.update(env.traffic, env.road.borders, action);
     }
 
@@ -285,7 +273,7 @@ document.querySelector("#resetBtn").addEventListener("click", function () {
 });
 
 document.querySelector("#toggleView").addEventListener("click", function () {
-    visualizer.active = !visualizer;
+    visualizer.active = !visualizer.active;
     episodeCounter = trainForm.numEpisodes;
     toggleView();
 });

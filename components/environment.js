@@ -33,7 +33,7 @@ export class Environment {
         ];
 
         this.driverSpeed = 4;
-        this.laneCount = 4;
+        this.laneCount = 3;
 
         this.road = new Road(this.canvas.height / 2, this.canvas.height * 0.9, this.laneCount);
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
@@ -70,12 +70,7 @@ export class Environment {
         for (let i = 0; i < this.traffic.length; i++) {
             if (this.traffic[i].model != "fsd") {
                 const car = this.traffic[i];
-                let action = null;
-                if (car.sensors.length > 0) {
-                    const [observation, metrics] = car.getObservation(this.road.borders, this.traffic);
-                    const output = car.brain.forward(observation);
-                    action = car.brain.makeChoice(output);
-                }
+                let action = car.lazyAction(this.road.borders, this.traffic);
                 this.traffic = car.update(this.traffic, this.road.borders, action);
             }
         }

@@ -66,14 +66,14 @@ export class Car {
     addBrain(model, env, layers) {
         this.model = model;
         this.useBrain = true;
-        let observation, metrics, modelData;
+        let modelData, observation;
         let sensorCount = 3;
 
         switch (model) {
             case "fsd":
-                sensorCount = 3;
+                sensorCount = 5;
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
-                [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
+                observation = this.getObservation(env.road.borders, env.traffic);
 
                 this.brain = new Network(layers)
                 modelData = loadModel("trainBrain");
@@ -82,7 +82,7 @@ export class Car {
 
             case "forward":
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
-                [observation, metrics] = this.getObservation(env.road.borders, env.traffic);
+                observation = this.getObservation(env.road.borders, env.traffic);
 
                 this.brain = new Network(layers)
                 modelData = loadModel("forwardBrain");
@@ -90,8 +90,23 @@ export class Car {
                     this.brain.loadBrain(modelData);
                 } else {
                     const defaultForwardBrain = {
-                        "weights":[[[-0.054578436663617134,0.37513033769486365,-0.10983221545303008],[0.16301358590881249,0.06655747653191099,-0.002821014820185678],[0.0015701754260134817,0.2973476526946789,0.03780176776836455],[-0.18999580034831548,0.24332761155702254,-0.056238421904291395]],[[0.05879472462854643,-0.26671087907051877],[0.12702500460514837,0.35342704088524063],[-0.1269635260491831,-0.23965514383302527]]],
-                        "biases":[[-0.9099945191213984,0.5746715078863484,0.10933239518212397],[3.9110326859515516,3.4316354488463214]]
+                        "weights": [
+                            [
+                                [-0.054578436663617134, 0.37513033769486365, -0.10983221545303008],
+                                [0.16301358590881249, 0.06655747653191099, -0.002821014820185678],
+                                [0.0015701754260134817, 0.2973476526946789, 0.03780176776836455],
+                                [-0.18999580034831548, 0.24332761155702254, -0.056238421904291395]
+                            ],
+                            [
+                                [0.05879472462854643, -0.26671087907051877],
+                                [0.12702500460514837, 0.35342704088524063],
+                                [-0.1269635260491831, -0.23965514383302527]
+                            ]
+                        ],
+                        "biases": [
+                            [-0.9099945191213984, 0.5746715078863484, 0.10933239518212397],
+                            [3.9110326859515516, 3.4316354488463214]
+                        ]
                     };
                     console.log("Using default forward brain");
                     saveModel("forwardBrain", defaultForwardBrain);
@@ -132,11 +147,6 @@ export class Car {
      */
     updateControls(a) {
         switch (a) {
-            /* case 0:
-                console.log("release")
-                this.controls.forward = false;
-                this.controls.backward = false;
-                break; */
             case 0:
                 //console.log("forward")
                 this.controls.forward = true;
@@ -175,26 +185,36 @@ export class Car {
     /** Get observation of environment */
     getObservation(borders, traffic) {
         if (!traffic) return;
-        const sensorOffsets = this.getSensorData(borders, traffic)
-        const observation = [this.speed].concat(sensorOffsets);
-        const reward = this.getReward(sensorOffsets);
-        const metrics = {
+        this.sensorOffsets = this.getSensorData(borders, traffic)
+        const observation = [this.speed].concat(this.sensorOffsets);
+        return observation
+    }
+
+    getMetrics() {
+        return {
             damaged: this.damaged,
-            reward: reward,
+            reward: this.getReward(this.sensorOffsets),
         }
-        return [observation, metrics]
     }
 
     /** Get reward for current state */
     getReward(sensorOffsets) {
-        const mOffset = Math.max(...sensorOffsets);
-
         if (this.damaged) return -1;
         if (this.distance < 0) return -1;
-        if (this.speed < 0) return -1;
-        if (mOffset > 0.8) return -mOffset;
+        if (this.speed < 1) return -1;
+        if (Math.abs(this.angle) > 1) return -1;
 
-        return 1 - mOffset;
+        const mOffset = Math.max(...sensorOffsets);
+        if (mOffset > 0) return -mOffset;
+
+        return 1;
+    }
+
+    lazyAction(borders, traffic, backprop = false) {
+        if (!this.useBrain) return null;
+        const observation = this.getObservation(borders, traffic);
+        const action = this.brain.forward(observation, backprop);
+        return this.brain.makeChoice(action);
     }
 
     #checkDamage(roadBorders, traffic) {
@@ -274,6 +294,11 @@ export class Car {
 
                 if (this.controls.left) this.angle += 0.04 * flip;
                 if (this.controls.right) this.angle -= 0.04 * flip;
+
+                if ((this.controls.left || this.controls.right) &&
+                    this.model == "fsd") {
+                    console.log("angle: " + this.angle);
+                }
             }
 
             // limit speed

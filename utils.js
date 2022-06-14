@@ -95,7 +95,7 @@ export function loadEpisodes(id) {
  * @param  {string} id Active model name
  * @param  {array} weights weights
  */
-export function saveModel(id, weights) {
+export async function saveModel(id, weights) {
     localStorage.setItem(id, JSON.stringify(weights));
 }
 

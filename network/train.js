@@ -28,7 +28,8 @@ export async function train(model, env, maxTimeSteps) {
     for (let i = 0; i < maxTimeSteps; i++) {
         // update environment
         env.update();
-        const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
+        const observation = model.getObservation(env.road.borders, env.traffic);
+        const metrics = model.getMetrics();
         reward = metrics.reward;
 
         // forward pass to get action

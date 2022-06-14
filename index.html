@@ -48,35 +48,35 @@
                 <form>
                     <div class="row py-2">
                         <div class="col">
-                            <div class="mb-3">
-                                <label for="episodeCountInput" class="form-label">Episode Count</label>
+                            <div class="form-floating mb-3">
                                 <input type="number" class="form-control" id="episodeCountInput">
+                                <label for="episodeCountInput">Episode Count</label>
                             </div>
                         </div>
                         <div class="col">
-                            <div class="mb-3">
-                                <label for="timeLimitInput" class="form-label">Time Limit</label>
+                            <div class="form-floating mb-3">
                                 <input type="number" class="form-control" id="timeLimitInput">
+                                <label for="timeLimitInput">Time Limit</label>
                             </div>
                         </div>
                     </div>
                     <!-- section for epsilon decay rate, toggle, and learning rate -->
                     <div class="row pb-2">
                         <div class="col">
-                            <label for="epsilonDecayInput" class="form-label">Epsilon Decay Rate</label>
-                            <div class="input-group mb-3">
-                                <input type="number" class="form-control" id="epsilonDecayInput">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="epsilonDecayInput">
+                                <label for="epsilonDecayInput">Epsilon Decay Rate</label>
                             </div>
                         </div>
                         <div class="col">
-                            <div class="mb-3">
-                                <label for="learningRateInput" class="form-label">Learning Rate</label>
-                                <input type="number" class="form-control" id="learningRateInput">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="learningRateInput">
+                                <label for="learningRateInput">Learning Rate</label>
                             </div>
                         </div>
                     </div>
+                    <button type="button" id="trainBtn" class="btn mb-3 mx-0 btn-primary">Start</button>
                 </form>
-                <button type="button" id="trainBtn" class="btn mb-3 mx-0 btn-primary">Start</button>
             </div>
             <div id="trainStats" class="row py-2 my-2 bg-light">
                 <!-- section to view average, min, and max metrics for each item in the table -->
@@ -87,7 +87,7 @@
                     <table class="table table-borderless table-hover table-sm text-center align-middle">
                         <thead>
                             <tr>
-                                <th scope="col"></th>
+                                <th scope="col">Saved Models</th>
                                 <th scope="col">Min</th>
                                 <th scope="col">Average</th>
                                 <th scope="col">Max</th>
