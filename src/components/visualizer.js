@@ -5,14 +5,14 @@ import {
 
 export class Visualizer {
     constructor() {
-        this.canvas = document.getElementById("networkCanvas");
-        this.context = this.canvas.getContext("2d");
-        this.canvas.height = 450;
         this.active = false;
     }
 
+    setContext(context) {
+        this.context = context;
+    }
+
     draw(brain, time) {
-        this.canvas.width = window.innerWidth;
         this.context.lineDashOffset = -time / 40;
         this.drawNetwork(brain)
     }
@@ -29,7 +29,7 @@ export class Visualizer {
         let actionValues = network.layers[last].outputs;
         const idx = actionValues.indexOf(Math.max(...actionValues));
         for (let j = 0; j < actionValues.length; j++) {
-            if (j == idx) {
+            if (j === idx) {
                 actionValues[j] = 1;
             } else {
                 actionValues[j] = 0;
@@ -42,7 +42,7 @@ export class Visualizer {
                 lerp(
                     0,
                     width - levelWidth,
-                    network.layers.length == 1 ?
+                    network.layers.length === 1 ?
                     0.5 :
                     i / (network.layers.length - 1)
                 );
@@ -51,7 +51,7 @@ export class Visualizer {
             this.drawLevel(network.layers[i],
                 margin, levelEnd,
                 levelWidth, height,
-                i == network.layers.length - 1
+                i === network.layers.length - 1
                 // up, down, left, right
                 ?
                 //['\u290a', '\u290b', '\u21da', '\u21db'] :
@@ -124,7 +124,7 @@ export class Visualizer {
             ctx.stroke();
             ctx.setLineDash([]);
 
-            if (outputLabels[i] && outputs[i] == 1) {
+            if (outputLabels[i] && outputs[i] === 1) {
                 ctx.beginPath();
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
@@ -142,7 +142,7 @@ export class Visualizer {
         return lerp(
             bottom,
             top,
-            nodes.length == 1 ?
+            nodes.length === 1 ?
             0.5 :
             index / (nodes.length - 1)
         );

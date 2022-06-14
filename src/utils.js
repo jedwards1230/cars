@@ -11,7 +11,7 @@ export function getIntersection(A, B, C, D) {
     const uTop = (C.y - A.y) * (A.x - B.x) - (C.x - A.x) * (A.y - B.y);
     const bottom = (D.y - C.y) * (B.x - A.x) - (D.x - C.x) * (B.y - A.y);
 
-    if (bottom != 0) {
+    if (bottom !== 0) {
         const t = tTop / bottom;
         const u = uTop / bottom;
 
@@ -55,9 +55,9 @@ export function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function normalize(val, max, min) {
+/* function normalize(val, max, min) {
     return (val - min) / (max - min);
-}
+} */
 
 // dot product of two arrays
 export function dotProduct(A, B) {

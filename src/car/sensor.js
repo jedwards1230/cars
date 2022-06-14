@@ -55,7 +55,7 @@ export class Sensor {
         // check overlap with other traffic
         for (let i = 0; i < traffic.length; i++) {
             const poly = traffic[i].polygon;
-            if (this.car.id != traffic[i].id && traffic[i].model != "fsd") {
+            if (this.car.id !== traffic[i].id && traffic[i].model !== "fsd") {
                 for (let j = 0; j < poly.length; j++) {
                     const value = getIntersection(
                         ray[0],
@@ -71,13 +71,13 @@ export class Sensor {
         }
 
         // no touches
-        if (touches.length == 0) {
+        if (touches.length === 0) {
             return null;
         }
 
         const offsets = touches.map(e => e.offset);
         const minOffset = Math.min(...offsets);
-        return touches.find(e => e.offset == minOffset);
+        return touches.find(e => e.offset === minOffset);
     }
 
     #castRays() {
@@ -86,7 +86,7 @@ export class Sensor {
             const rayAngle = lerp(
                 this.raySpread / 2,
                 -this.raySpread / 2,
-                this.rayCount == 1 ? 0.5 : i / (this.rayCount - 1),
+                this.rayCount === 1 ? 0.5 : i / (this.rayCount - 1),
             ) + this.car.angle;
 
             const start = {

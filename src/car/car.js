@@ -66,14 +66,15 @@ export class Car {
     addBrain(model, env, layers) {
         this.model = model;
         this.useBrain = true;
-        let modelData, observation;
+        let modelData;
+        //let observation;
         let sensorCount = 3;
 
         switch (model) {
             case "fsd":
                 sensorCount = 5;
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
-                observation = this.getObservation(env.road.borders, env.traffic);
+                //observation = this.getObservation(env.road.borders, env.traffic);
 
                 this.brain = new Network(layers)
                 modelData = loadModel("trainBrain");
@@ -82,7 +83,7 @@ export class Car {
 
             case "forward":
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
-                observation = this.getObservation(env.road.borders, env.traffic);
+                //observation = this.getObservation(env.road.borders, env.traffic);
 
                 this.brain = new Network(layers)
                 modelData = loadModel("forwardBrain");
@@ -241,7 +242,7 @@ export class Car {
         // check collision with traffic
         for (let i = 0; i < traffic.length; i++) {
             const car = traffic[i];
-            if (car.id != this.id && car.model != "fsd") {
+            if (car.id !== this.id && car.model !== "fsd") {
                 if (polysIntersect(this.polygon, car.polygon)) {
                     damage = car.id;
                 }
@@ -249,11 +250,11 @@ export class Car {
         }
 
         // set values if car or any traffic are damaged
-        if (damage == this.id) {
+        if (damage === this.id) {
             this.damaged = true;
             this.speed = 0;
         } else if (traffic[damage]) {
-            if (this.model != "fsd") {
+            if (this.model !== "fsd") {
                 traffic[damage].damaged = true;
                 traffic[damage].controls.forward = false;
             }
@@ -299,14 +300,14 @@ export class Car {
             }
 
             // check direction
-            if (this.speed != 0) {
+            if (this.speed !== 0) {
                 const flip = this.speed > 0 ? 1 : -1;
 
                 if (this.controls.left) this.angle += 0.04 * flip;
                 if (this.controls.right) this.angle -= 0.04 * flip;
 
                 if ((this.controls.left || this.controls.right) &&
-                    this.model == "fsd") {
+                    this.model === "fsd") {
                 }
             }
 

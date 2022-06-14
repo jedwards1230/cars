@@ -1,4 +1,4 @@
-export class TrainForm {
+class TrainForm {
     constructor() {
         this.numEpisodes = 1000;
         this.numSteps = 1000;
@@ -22,3 +22,5 @@ export class TrainForm {
         document.getElementById("learningRateInput").value = this.learningRate;
     }
 }
+
+export default TrainForm;

@@ -1,4 +1,4 @@
-export class MetricsTable {
+class MetricsTable {
     static update(totalEpisodes) {
         const episodes = totalEpisodes.filter(e => e.goodEntry == true);
         
@@ -41,3 +41,5 @@ export class MetricsTable {
         document.getElementById("speedAvg").innerHTML = speedAvg.toFixed(2);
     }
 }
+
+export default MetricsTable;

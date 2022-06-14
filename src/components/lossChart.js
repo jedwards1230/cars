@@ -1,10 +1,11 @@
-export class LossChart {
-    constructor() {
-        this.chart = this.#newChart();
+import {Chart} from 'chart.js';
+
+class LossChart {
+    constructor(ctx) {
+        this.chart = this.#newChart(ctx);
     }
 
-    #newChart() {
-        const chartCtx = document.getElementById("lossChart").getContext("2d");
+    #newChart(chartCtx) {
         return new Chart(chartCtx, {
             data: {
                 labels: [],
@@ -92,3 +93,5 @@ export class LossChart {
         this.chart = this.#newChart();
     }
 }
+
+export default LossChart;
