@@ -1,6 +1,6 @@
 //import logo from './logo.svg';
 import './App.css';
-import { MainView } from './components/mainView.js';
+import MainView from './components/mainView.js';
 import { Visualizer } from './components/visualizer.js';
 import LossChart from './components/lossChart.js';
 import TrainForm from './components/trainForm.js';
@@ -174,19 +174,6 @@ const App = () => {
 		document.getElementById(
 			"survivedCount"
 		).innerHTML = `Good Models: ${goodEntries}/${episodes.length + 1}`;
-	}
-
-
-	const drawCars = () => {
-		carCtx.save();
-		carCtx.translate(carCanvas.height * 0.7 - model.x, 0);
-		env.road.draw(carCtx);
-		for (let i = 0; i < env.traffic.length; i++) {
-			env.traffic[i].draw(carCtx);
-			carCtx.globalAlpha = 1;
-		}
-		model.draw(carCtx, true);
-		carCtx.restore();
 	}
 
 	const reset = () => {

@@ -2,10 +2,10 @@ import { Visualizer } from "./visualizer.js";
 import React, { useEffect, useRef } from "react";
 
 
-export const VisualizerComponent = (props) => {
+export const VisualizerComponent = props => {
 
     const vis = new Visualizer();
-    const canvasRef = useRef(0);
+    const canvasRef = useRef();
 
     useEffect(() => {
         const canvas = canvasRef.current
@@ -17,5 +17,5 @@ export const VisualizerComponent = (props) => {
         canvas.width = window.innerWidth;
     }, []);
 
-    return (<canvas ref={canvasRef} {...props} />)
+    return <canvas ref={canvasRef} {...props} />
 }
