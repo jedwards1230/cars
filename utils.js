@@ -76,26 +76,35 @@ export function MSE(targets, outputs) {
 /**
  * Loads brain and episodes from localStorage
  */
-export function load(id) {
+export function loadModel(id) {
     const brain = localStorage.getItem(id);
+    if (brain) return JSON.parse(brain)
+        
+    return null;
+}
+
+export function loadEpisodes(id) {
     const episodes = localStorage.getItem(id + "Episodes");
-    if (brain && episodes) {
-        return {
-            brain: JSON.parse(brain),
-            episodes: JSON.parse(episodes),
-        };
-    }
+    if (episodes) return JSON.parse(episodes);
+    
     return null;
 }
 
 /**
- * Saves brain and episodes to localStorage
+ * Saves brain to localStorage
  * @param  {string} id Active model name
  * @param  {array} weights weights
+ */
+export function saveModel(id, weights) {
+    localStorage.setItem(id, JSON.stringify(weights));
+}
+
+/**
+ * Saves episodes to localStorage
+ * @param  {string} id Active model name
  * @param  {array} episodes Episodes array
  */
-export function save(id, weights, episodes) {
-    localStorage.setItem(id, JSON.stringify(weights));
+export function saveEpisodes(id, episodes) {
     localStorage.setItem(id + "Episodes", JSON.stringify(episodes));
 }
 

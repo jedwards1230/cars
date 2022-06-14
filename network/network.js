@@ -29,7 +29,7 @@ export class Network {
     }
 
     /** Forward pass each layer */
-    forward(inputs, backprop = true) {
+    forward(inputs, backprop = false) {
         let outputs = this.layers[0].forward(inputs, backprop);
         for (let i = 1; i < this.layers.length; i++) {
             outputs = this.layers[i].forward(outputs, backprop);

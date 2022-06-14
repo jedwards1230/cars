@@ -1,9 +1,9 @@
 export class TrainForm {
     constructor() {
         this.numEpisodes = 1000;
-        this.numSteps = 10000;
+        this.numSteps = 1000;
         this.learningRate = 0.001;
-        this.epsilonDecay = 0.3;
+        this.epsilonDecay = 0.5;
         this.activeModel = "trainBrain";
     }
 

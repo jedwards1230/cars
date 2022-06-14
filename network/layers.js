@@ -18,7 +18,6 @@ class Layer {
         const x = inputs;
 
         const bias = this.biases;
-        this.inputs = x;
 
         let preActive = new Array(this.outputs.length);
         for (let i = 0; i < this.outputs.length; i++) {
@@ -33,7 +32,10 @@ class Layer {
 
         // activate outputs
         const y = this.activation(preActive);
-        this.outputs = y;
+        if (backprop) {
+            this.inputs = x;
+            this.outputs = y;
+        }
 
         return y;
     }
@@ -114,7 +116,7 @@ class Layer {
     #randomize() {
         for (let i = 0; i < this.inputs.length; i++) {
             for (let j = 0; j < this.outputs.length; j++) {
-                this.weights[i][j] = Math.random() * 2 - 1;
+                this.weights[i][j] = (Math.random() * 2 - 1) / 2;
             }
         }
         /* for (let i = 0; i < this.outputs.length; i++) {

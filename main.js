@@ -5,18 +5,26 @@ import {
     Visualizer
 } from "./components/visualizer.js";
 import {
+    LossChart
+} from "./components/lossChart.js";
+import {
+    MetricsTable
+} from "./components/metricsTable.js";
+import {
+    TrainForm
+} from "./components/trainForm.js";
+import {
     Car
 } from "./car/car.js";
 import {
     train
 } from "./network/train.js";
 import {
-    LossChart
-} from "./components/lossChart.js";
-import {
-    save,
-    load,
-    destroy
+    saveModel,
+    loadModel,
+    destroy,
+    loadEpisodes,
+    saveEpisodes
 } from "./utils.js";
 import {
     Linear,
@@ -26,12 +34,6 @@ import {
     Tanh,
     SoftMax
 } from "../network/layers.js";
-import {
-    MetricsTable
-} from "./components/metricsTable.js";
-import {
-    TrainForm
-} from "./components/trainForm.js";
 
 const carCanvas = document.getElementById("carCanvas");
 const networkCanvas = document.getElementById("networkCanvas");
@@ -42,7 +44,7 @@ const carCtx = carCanvas.getContext("2d");
 
 const trafficCount = 50;
 const brainCount = 1;
-let smartTraffic = false;
+let smartTraffic = true;
 
 const lossChart = new LossChart();
 
@@ -51,11 +53,10 @@ let episodeCounter = 0;
 
 const trainForm = new TrainForm();
 
-const actionCount = 4;
-const activeLayers = [
-    new Tanh(6, 6),
-    new LeakyRelu(6, 5),
-    new Sigmoid(5, actionCount),
+const actionCount = 2;
+const activeLayers = () => [
+    new Tanh(4, 4),
+    new Sigmoid(4, actionCount),
 ];
 
 let env, model;
@@ -103,6 +104,7 @@ function beginTrain() {
     episodeCounter = 0;
 
     reset();
+    lossChart.hide();
     console.log("beginning training");
     breakLoop = false;
     episodeLoop();
@@ -128,8 +130,7 @@ async function episodeLoop() {
     const checkGoodEntry = () => {
         if (info.speed <= 0) return false;
         if (info.distance < 800) return false;
-        if (info.distance > (distanceMax * 0.9)) return true;
-        if (info.loss < 0.01) return true;
+        if (info.distance > (distanceMax * 0.9) && info.speed > (speedAvg * 0.9)) return true;
         return false;
     }
 
@@ -145,14 +146,14 @@ async function episodeLoop() {
 
     info.goodEntry = checkGoodEntry(info);
     episodes.push(info);
-    updateTrainStats();
+    updateTrainStats(episodes);
 
-    // save only if model is better than average
+    // save only if model is labelled an improvement
     if (distanceMax > 0 && info.goodEntry) {
-        save(trainForm.activeModel, model.brain.save(), episodes);
+        saveModel(trainForm.activeModel, model.brain.save());
     }
+    saveEpisodes(trainForm.activeModel, episodes);
     reset();
-
 
     episodeCounter++;
     if (episodeCounter > trainForm.numEpisodes || episodeCounter < 0) breakLoop = true;
@@ -181,7 +182,7 @@ function animate(time) {
     env.update();
     if (!model.damaged) {
         const [observation, metrics] = model.getObservation(env.road.borders, env.traffic);
-        const actionValues = model.brain.forward(observation);
+        const actionValues = model.brain.forward(observation, true);
         const action = model.brain.makeChoice(actionValues);
         env.traffic = model.update(env.traffic, env.road.borders, action);
     }
@@ -197,14 +198,13 @@ function animate(time) {
 }
 
 // Update training stats on page
-function updateTrainStats() {
+function updateTrainStats(episodes) {
     MetricsTable.update(episodes);
 
     // update survivedBar
     const goodEntriesBar = document.getElementById("goodEntriesBar");
     const badEntriesBar = document.getElementById("badEntriesBar");
     // get how many episodes survived
-    // episode survived if !damaged
     const goodEntries = episodes.filter(e => e.goodEntry == true).length;
     const badEntries = episodes.filter(e => e.goodEntry == false).length;
     goodEntriesBar.style.width = `${(goodEntries / episodes.length) * 100}%`;
@@ -234,19 +234,23 @@ function toggleView() {
 }
 
 function reset() {
+    // reset environment
     carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
-
     env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
+    
+    // reset model
     const x = 0;
     const y = env.road.getLaneCenter(env.startLane)
     model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
-    model.addBrain("fsd", env, activeLayers);
-    const modelData = load(trainForm.activeModel);
-    if (modelData) {
-        model.brain.loadBrain(modelData.brain);
-        episodes = modelData.episodes;
-    }
+    model.addBrain("fsd", env, activeLayers());
+    
+    // load saved data
+    const modelBrain = loadModel(trainForm.activeModel);
+    if (modelBrain) model.brain.loadBrain(modelBrain);
+    const modelEpisodes = loadEpisodes(trainForm.activeModel);
+    if (modelEpisodes) episodes = modelEpisodes;
 
+    // reset animation
     cancelAnimationFrame(animFrame);
     animate();
 }
@@ -267,7 +271,7 @@ document.querySelector("#startPlay").addEventListener("click", function () {
     setMainView()
 });
 document.querySelector("#saveBtn").addEventListener("click", function () {
-    save(trainForm.activeModel, model.brain.save(), episodes);
+    saveModel(trainForm.activeModel, model.brain.save(), episodes);
 });
 document.querySelector("#destroyBtn").addEventListener("click", function () {
     breakLoop = true;

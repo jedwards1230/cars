@@ -3,7 +3,7 @@ import {
 } from "./road.js";
 import {
     getRandomInt,
-    load
+    loadModel
 } from "../utils.js";
 import {
     Linear,
@@ -24,15 +24,15 @@ export class Environment {
         this.brainCount = brainCount;
         this.smart = smart;
 
-        const trafficInputs = 2;
+        const trafficInputs = 4;
         const trafficOutputs = 2;
 
         this.modelLayers = [
-            new Relu(trafficInputs, 5),
-            new Sigmoid(5, trafficOutputs),
+            new Tanh(trafficInputs, 3),
+            new Sigmoid(3, trafficOutputs),
         ];
 
-        this.driverSpeed = 3;
+        this.driverSpeed = 4;
         this.laneCount = 4;
 
         this.road = new Road(this.canvas.height / 2, this.canvas.height * 0.9, this.laneCount);
@@ -75,7 +75,8 @@ export class Environment {
                 let action = null;
                 if (car.sensors.length > 0) {
                     const [observation, metrics] = car.getObservation(this.road.borders, this.traffic);
-                    action = car.brain.makeChoice(observation);
+                    const output = car.brain.forward(observation);
+                    action = car.brain.makeChoice(output);
                 }
                 this.traffic = car.update(this.traffic, this.road.borders, action);
             }
@@ -85,7 +86,7 @@ export class Environment {
     generateTraffic() {
         const N = this.trafficCount;
         this.traffic = [];
-        let placed = new Array(this.road.laneCount).fill(200);
+        let placed = new Array(this.road.laneCount).fill(100);
 
         // randomize lane
         const getStartPosition = (i) => {
