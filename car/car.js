@@ -235,9 +235,6 @@ export class Car {
         // check collision with road borders
         for (let i = 0; i < roadBorders.length; i++) {
             if (polysIntersect(this.polygon, roadBorders[i])) {
-                if (this.model == "fsd") {
-                    console.log(this.id)
-                }
                 damage = this.id;
             }
         }
@@ -310,7 +307,6 @@ export class Car {
 
                 if ((this.controls.left || this.controls.right) &&
                     this.model == "fsd") {
-                    console.log("angle: " + this.angle);
                 }
             }
 
