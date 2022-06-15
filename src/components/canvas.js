@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "react";
 
 const CanvasComponent = props => {
-    const drawCars = () => {
+    /* const drawCars = (carCtx, canvas, model, env) => {
 		carCtx.save();
-		carCtx.translate(carCanvas.height * 0.7 - model.x, 0);
+		carCtx.translate(canvas.height * 0.7 - model.x, 0);
 		env.road.draw(carCtx);
 		for (let i = 0; i < env.traffic.length; i++) {
 			env.traffic[i].draw(carCtx);
@@ -11,22 +11,17 @@ const CanvasComponent = props => {
 		}
 		model.draw(carCtx, true);
 		carCtx.restore();
-	}
+	} */
 
-    const canvasRef = useRef()
+    const canvasRef = useRef(null)
 
     useEffect(() => {
-        const canvas = canvasRef.current
-        const context = canvas.getContext('2d')
-
-        vis.setContext(context);
-
-        canvas.height = 450;
-        canvas.width = window.innerWidth;
+        //const canvas = canvasRef.current;
+        //const context = canvas.getContext('2d')
     }, []);
 
     return (
-        <canvas id = {props.id} />
+        <canvas ref={canvasRef} id={props.id} width={window.innerWidth} height={props.height}/>
     )
 }
 
