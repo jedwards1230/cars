@@ -3,12 +3,13 @@ import './App.css';
 import MainView from './components/mainView.js';
 import { Visualizer } from './components/visualizer.js';
 import LossChart from './components/lossChart.js';
-import TrainForm from './components/trainForm.js';
 import { Environment } from './components/environment';
 import { Car } from './car/car.js';
 import { train } from "./network/train.js";
 import MetricsTable from './components/metricsTable.js';
 import {Tooltip} from 'bootstrap';
+import React, {useEffect, useState} from "react";
+import { useCanvas } from './components/canvas.js';
 import {
 	saveModel,
 	loadModel,
@@ -25,18 +26,21 @@ import {
 } from "./network/layers.js";
 
 const App = () => {
-	const trafficCount = 50;
-	const brainCount = 1;
-	let smartTraffic = true;
+	const [trafficCount, setTrafficCount] = useState(50);
+	const [brainCount, setBrainCount] = useState(1);
+	const [smartTraffic, setSmartTraffic] = useState(true);
+
+	//const [carCanvas, setCarCanvas] = useState(null);
 
 	const visualizer = new Visualizer();
-	const lossChart = new LossChart();
-	const trainForm = new TrainForm();
+	//const lossChart = new LossChart();
+	let trainForm;
 
-	let breakLoop = false;
-	let episodeCounter = 0;
+	const [breakLoop, setBreakLoop] = useState(false);
+	const [episodeCounter, setEpisodeCounter] = useState(0);
 
-	const actionCount = 4;
+	const [actionCount, setActionCount] = useState(4);
+
 	const activeLayers = () => [
 		new Tanh(5, 10),
 		new Tanh(10, 10),
@@ -44,19 +48,28 @@ const App = () => {
 		new Sigmoid(10, actionCount),
 	];
 
-	let env, model;
+	const carCanvas = useCanvas().current;
 
-	let info;
-	let episodes = [];
+	const roadConfig = {
+		y: 300 / 2,
+		width: 300 * 0.9
+	}
 
-	let renderTrainEntries = false;
-	let animFrame;
+	const [activeModel, setActiveModel] = useState("trainBrain");
+
+	const [env, setEnv] = useState(new Environment(trafficCount, brainCount, roadConfig, smartTraffic));
+	const x = 0;
+	const y = env.road.getLaneCenter(env.startLane);
+	const [model, setModel] = useState(new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount));
+
+	const [info, setInfo] = useState(null);
+	const [episodes, setEpisodes] = useState([]);
+
+	const [renderTrainEntries, setRenderTrainEntries] = useState(false);
+	const [animFrame, setAnimFrame] = useState(null);
 
 	// Prepare for training
 	const beginTrain = () => {
-		document.getElementById("trainTableBody").replaceChildren();
-		trainForm.readInputs();
-
 		document.getElementById("trainStats").style.display = "block";
 		if (renderTrainEntries)
 			document.getElementById("tableTrainEntries").style.display = "block";
@@ -67,12 +80,12 @@ const App = () => {
 		let badEntriesBar = document.getElementById("badEntriesBar");
 		badEntriesBar.style.width = "0%";
 
-		episodeCounter = 0;
+		setEpisodeCounter(0);
 
 		reset();
-		lossChart.hide();
+		//lossChart.hide();
 		console.log("beginning training");
-		breakLoop = false;
+		setBreakLoop(false);
 		episodeLoop();
 	}
 
@@ -122,8 +135,8 @@ const App = () => {
 			setTimeout(episodeLoop, 1);
 		} else {
 			// draw chart
-			lossChart.draw(episodes);
-			lossChart.show();
+			//lossChart.draw(episodes);
+			//lossChart.show();
 			console.log("training complete");
 			const brain = info.model.save();
 			console.log("weights");
@@ -148,13 +161,9 @@ const App = () => {
 			env.traffic = model.update(env.traffic, env.road.borders, action);
 		}
 
-		document.getElementById("activeSpeedName").innerHTML = model.speed.toFixed(2);
-		document.getElementById("activeDistanceName").innerHTML =
-			model.distance.toFixed(0);
-
 		// draw cars
 		env.render();
-		drawCars();
+		//drawCars();
 		visualizer.draw(model.brain, time);
 		animFrame = requestAnimationFrame(animate);
 	}
@@ -178,24 +187,24 @@ const App = () => {
 
 	const reset = () => {
 		// reset environment
-		carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
-		env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
+		//const carCtx = carCanvas.getContext("2d");
+		//carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 
 		// reset model
 		const x = 0;
 		const y = env.road.getLaneCenter(env.startLane);
-		model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
+		//setModel(new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount));
 		model.addBrain("fsd", env, activeLayers());
 
 		// load saved data
-		const modelBrain = loadModel(trainForm.activeModel);
+		const modelBrain = loadModel(activeModel);
 		if (modelBrain) model.brain.loadBrain(modelBrain);
-		const modelEpisodes = loadEpisodes(trainForm.activeModel);
-		if (modelEpisodes) episodes = modelEpisodes;
+		const modelEpisodes = loadEpisodes(activeModel);
+		if (modelEpisodes) setEpisodes(modelEpisodes);
 
 		// reset animation
-		cancelAnimationFrame(animFrame);
-		animate();
+		//cancelAnimationFrame(animFrame);
+		//animate();
 	}
 
 	const tooltipTriggerList = document.querySelectorAll(
@@ -205,7 +214,15 @@ const App = () => {
 		(tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
 	);
 
-	return <MainView />
+	reset();
+
+	return <MainView 
+		model={model} 
+		env={env}
+		activeModel={activeModel}
+		episodes={episodes} 
+		beginTrain={beginTrain}
+		carCanvas={carCanvas} />
 }
 
 

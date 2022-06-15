@@ -5,13 +5,9 @@ import {
 
 export class Network {
     constructor(layers = [], lr = 0.001) {
-        let epsDecayRate = document.getElementById("epsilonDecayInput").value;
-        epsDecayRate = parseFloat(epsDecayRate);
-        lr = parseFloat(document.getElementById("learningRateInput").value);
-
         this.memory = [];
         this.layers = [];
-        this.epsilon = epsDecayRate;
+        this.epsilon = 0.5;
         this.confidence = 0.5;
 
         this.lossFunction = (targets, outputs) => {

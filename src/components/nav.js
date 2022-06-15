@@ -6,13 +6,13 @@ const NavComponent = (props) => {
             <a className="navbar-brand" href="index.html">Miles' Driving School</a>
             <div className="ms-auto navbar-text">
                 <span id="activeModel" className="px-2 me-auto navbar-text">
-                    model = "<span id="activeModelName" className=""></span>"
+                    model = "{props.activeModel}"
                 </span>
                 <span id="activeSpeed" className="px-2 navbar-text">
-                    speed = <span id="activeSpeedName" className=""></span>
+                    speed = {props.activeSpeed}
                 </span>
                 <span id="activeDistance" className="px-2 navbar-text">
-                    distance = <span id="activeDistanceName" className=""></span>
+                    distance = {props.activeDistance}
                 </span>
                 <button id="saveBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Save Weights"
                     className="btn btn-outline-primary">💾</button>
