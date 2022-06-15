@@ -1,15 +1,12 @@
 //import logo from './logo.svg';
 import './App.css';
 import MainView from './components/mainView.js';
-import { Visualizer } from './components/visualizer.js';
-import LossChart from './components/lossChart.js';
 import { Environment } from './components/environment';
 import { Car } from './car/car.js';
 import { train } from "./network/train.js";
 import MetricsTable from './components/metricsTable.js';
 import {Tooltip} from 'bootstrap';
 import React, {useEffect, useState} from "react";
-import { useCanvas } from './components/canvas.js';
 import {
 	saveModel,
 	loadModel,
@@ -30,25 +27,18 @@ const App = () => {
 	const [brainCount, setBrainCount] = useState(1);
 	const [smartTraffic, setSmartTraffic] = useState(true);
 
-	//const [carCanvas, setCarCanvas] = useState(null);
-
-	const visualizer = new Visualizer();
-	//const lossChart = new LossChart();
-	let trainForm;
-
 	const [breakLoop, setBreakLoop] = useState(false);
 	const [episodeCounter, setEpisodeCounter] = useState(0);
+
+    const [numEpisodes, setNumEpisodes] = useState(100);
+    const [numSteps, setNumSteps] = useState(1000);
 
 	const [actionCount, setActionCount] = useState(4);
 
 	const activeLayers = () => [
 		new Tanh(5, 10),
-		new Tanh(10, 10),
-		new LeakyRelu(10, 10),
 		new Sigmoid(10, actionCount),
 	];
-
-	const carCanvas = useCanvas().current;
 
 	const roadConfig = {
 		y: 300 / 2,
@@ -61,25 +51,22 @@ const App = () => {
 	const x = 0;
 	const y = env.road.getLaneCenter(env.startLane);
 	const [model, setModel] = useState(new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount));
+	const initLayers = activeLayers();
+	model.addBrain("fsd", env, initLayers);
 
 	const [info, setInfo] = useState(null);
 	const [episodes, setEpisodes] = useState([]);
 
-	const [renderTrainEntries, setRenderTrainEntries] = useState(false);
+	const [animTime, setAnimTime] = useState(0);
 	const [animFrame, setAnimFrame] = useState(null);
+
+	const toggleView = () => {
+		setBreakLoop(true);
+		setEpisodeCounter(numEpisodes);
+	}
 
 	// Prepare for training
 	const beginTrain = () => {
-		document.getElementById("trainStats").style.display = "block";
-		if (renderTrainEntries)
-			document.getElementById("tableTrainEntries").style.display = "block";
-
-		let goodEntriesBar = document.getElementById("goodEntriesBar");
-		goodEntriesBar.style.width = "0%";
-
-		let badEntriesBar = document.getElementById("badEntriesBar");
-		badEntriesBar.style.width = "0%";
-
 		setEpisodeCounter(0);
 
 		reset();
@@ -99,12 +86,12 @@ const App = () => {
 		};
 
 		// mutate less over time
-		let mutateBrain = episodeCounter < trainForm.numEpisodes / 2 ? 0.1 : 0.01;
+		let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.1 : 0.01;
 		mutateBrain = 0.01;
 		model.brain.mutate(mutateBrain);
 
 		// collect episode info
-		info = await train(model, env, trainForm.numSteps);
+		setInfo(await train(model, env, numSteps));
 		info.episode = episodes.length + 1;
 
 		const distanceMap = episodes.map((e) => e.distance);
@@ -121,22 +108,19 @@ const App = () => {
 
 		// save only if model is labelled an improvement
 		if (distanceMax > 0 && info.goodEntry) {
-			await saveModel(trainForm.activeModel, model.brain.save());
+			await saveModel(activeModel, model.brain.save());
 		}
-		saveEpisodes(trainForm.activeModel, episodes);
+		saveEpisodes(activeModel, episodes);
 		reset();
 
-		episodeCounter++;
-		if (episodeCounter > trainForm.numEpisodes || episodeCounter < 0)
-			breakLoop = true;
+		setEpisodeCounter(episodeCounter + 1);
+		if (episodeCounter > numEpisodes || episodeCounter < 0)
+			setBreakLoop(true);
 
 		if (!breakLoop) {
 			// set timeout to avoid stack overflow
 			setTimeout(episodeLoop, 1);
 		} else {
-			// draw chart
-			//lossChart.draw(episodes);
-			//lossChart.show();
 			console.log("training complete");
 			const brain = info.model.save();
 			console.log("weights");
@@ -150,6 +134,7 @@ const App = () => {
 
 	// animate model
 	const animate = (time) => {
+		//setAnimTime(time);
 		// update cars
 		env.update();
 		if (!model.damaged) {
@@ -160,12 +145,7 @@ const App = () => {
 			//const action = model.lazyAction(env.road.borders, env.traffic, true);
 			env.traffic = model.update(env.traffic, env.road.borders, action);
 		}
-
-		// draw cars
-		env.render();
-		//drawCars();
-		visualizer.draw(model.brain, time);
-		animFrame = requestAnimationFrame(animate);
+		//requestAnimationFrame(animate)
 	}
 
 	// Update training stats on page
@@ -176,8 +156,8 @@ const App = () => {
 		const goodEntriesBar = document.getElementById("goodEntriesBar");
 		const badEntriesBar = document.getElementById("badEntriesBar");
 		// get how many episodes survived
-		const goodEntries = episodes.filter((e) => e.goodEntry == true).length;
-		const badEntries = episodes.filter((e) => e.goodEntry == false).length;
+		const goodEntries = episodes.filter((e) => e.goodEntry === true).length;
+		const badEntries = episodes.filter((e) => e.goodEntry === false).length;
 		goodEntriesBar.style.width = `${(goodEntries / episodes.length) * 100}%`;
 		badEntriesBar.style.width = `${(badEntries / episodes.length) * 100}%`;
 		document.getElementById(
@@ -191,20 +171,20 @@ const App = () => {
 		//carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 
 		// reset model
-		const x = 0;
+		/* const x = 0;
 		const y = env.road.getLaneCenter(env.startLane);
 		//setModel(new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount));
-		model.addBrain("fsd", env, activeLayers());
+		//model.addBrain("fsd", env, activeLayers());
 
 		// load saved data
 		const modelBrain = loadModel(activeModel);
 		if (modelBrain) model.brain.loadBrain(modelBrain);
 		const modelEpisodes = loadEpisodes(activeModel);
-		if (modelEpisodes) setEpisodes(modelEpisodes);
+		if (modelEpisodes) setEpisodes(modelEpisodes); */
 
 		// reset animation
-		//cancelAnimationFrame(animFrame);
-		//animate();
+		cancelAnimationFrame(animFrame);
+		animate();
 	}
 
 	const tooltipTriggerList = document.querySelectorAll(
@@ -214,7 +194,7 @@ const App = () => {
 		(tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
 	);
 
-	reset();
+	animate();
 
 	return <MainView 
 		model={model} 
@@ -222,7 +202,10 @@ const App = () => {
 		activeModel={activeModel}
 		episodes={episodes} 
 		beginTrain={beginTrain}
-		carCanvas={carCanvas} />
+		animationTime={animTime}
+		toggleView={toggleView}
+		numEpisodes={numEpisodes}
+		numSteps={numSteps} />
 }
 
 

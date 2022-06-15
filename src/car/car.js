@@ -3,15 +3,9 @@ import {
     loadModel,
     saveModel
 } from "../utils.js";
-import {
-    Controls
-} from "./controls.js";
-import {
-    Sensor
-} from "./sensor.js";
-import {
-    Network
-} from "../network/network.js";
+import { Controls } from "./controls.js";
+import { Sensor } from "./sensor.js";
+import { Network } from "../network/network.js";
 
 export class Car {
     /** 
@@ -114,6 +108,9 @@ export class Car {
                     this.brain.loadBrain(defaultForwardBrain);
                 }
                 break;
+
+            default:
+                break;
         }
     }
 
@@ -165,6 +162,8 @@ export class Car {
                 // right
                 this.controls.left = false;
                 this.controls.right = true;
+                break;
+            default:
                 break;
         }
     }
@@ -333,23 +332,5 @@ export class Car {
 
         this.x += Math.cos(this.angle) * this.speed;
         this.y += Math.sin(this.angle) * this.speed;
-    }
-
-    draw(ctx, drawSensors = false) {
-        if (this.damaged) {
-            ctx.fillStyle = "gray";
-        } else {
-            ctx.fillStyle = this.color;
-            if (this.sensors && drawSensors) {
-                this.sensors[0].draw(ctx);
-            }
-        }
-
-        ctx.beginPath();
-        ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
-        for (let i = 1; i < this.polygon.length; i++) {
-            ctx.lineTo(this.polygon[i].x, this.polygon[i].y)
-        }
-        ctx.fill();
     }
 }

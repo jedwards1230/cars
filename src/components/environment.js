@@ -54,14 +54,6 @@ export class Environment {
         console.log("good", goodCt, ", bad", dmgCt);
     }
 
-    render(canvas) {
-        const navbarHeight = document.getElementById("nav").offsetHeight;
-
-        // update dimensions
-        canvas.style.top = navbarHeight + "px";
-        canvas.width = window.innerWidth;
-    }
-
     update() {
         for (let i = 0; i < this.traffic.length; i++) {
             if (this.traffic[i].model !== "fsd") {
