@@ -1,7 +1,7 @@
 //import logo from './logo.svg';
 import './App.css';
 import MainView from './components/mainView.js';
-import { Environment } from './components/environment';
+import { Environment } from './car/environment';
 import { Car } from './car/car.js';
 import { train } from "./network/train.js";
 import { Tooltip } from 'bootstrap';

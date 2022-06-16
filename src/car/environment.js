@@ -1,4 +1,4 @@
-import { Road } from "../car/road.js";
+import { Road } from "./road.js";
 import { getRandomInt } from "../utils.js";
 import {
     Linear,
@@ -8,7 +8,7 @@ import {
     Tanh,
     SoftMax,
 } from "../network/layers.js";
-import { Car } from "../car/car.js";
+import { Car } from "./car.js";
 
 export class Environment {
     constructor(trafficCount, brainCount, roadConfig, smart = false) {
