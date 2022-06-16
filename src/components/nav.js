@@ -7,8 +7,8 @@ const NavComponent = (props) => {
 
     useEffect(() => {
         setActiveModel(props.activeModel);
-        setSpeed(props.model.speed);
-        setDistance(props.model.distance);
+        setSpeed(props.model.speed.toFixed(1));
+        setDistance(props.model.distance.toFixed(0));
     }, [props.model]);
 
     return (

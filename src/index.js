@@ -130,7 +130,7 @@ async function episodeLoop() {
 		await saveModel(activeModel, model.brain.save());
 	}
 	saveEpisodes(activeModel, episodes);
-	reset();
+	reset(false);
 
 	episodeCounter++;
 	if (episodeCounter > numEpisodes || episodeCounter < 0)
@@ -166,8 +166,8 @@ function toggleView() {
 	}
 }
 
-function reset() {
-	breakLoop = true;
+function reset(breakL = true) {
+	breakLoop = breakL;
 	// reset environment
 	carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 	env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
