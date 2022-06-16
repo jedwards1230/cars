@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useContext, useEffect } from "react";
 import { lerp } from "../utils.js";
+import useAnimationFrame from "./animator.js";
+import { AppContext } from "../App.js";
 
-
-const CanvasComponent = props => {
+const RoadCanvas = props => {
     const drawSensor = (sensor) => {
         const canvas = canvasRef.current;
         const context = canvas.getContext("2d");
@@ -97,31 +98,57 @@ const CanvasComponent = props => {
     const drawCars = (model, env) => {
         const canvas = canvasRef.current;
         const context = canvas.getContext("2d");
-		context.save();
-		context.translate(canvas.height * 0.7 - model.x, 0);
-		drawRoad(env.road);
-		for (let i = 0; i < env.traffic.length; i++) {
+        context.save();
+        context.translate(canvas.height * 0.7 - model.x, 0);
+        drawRoad(env.road);
+        for (let i = 0; i < env.traffic.length; i++) {
             drawCar(env.traffic[i]);
-			context.globalAlpha = 1;
-		}
+            context.globalAlpha = 1;
+        }
         drawCar(model, true);
-		context.restore();
-	}
+        context.restore();
+    }
 
+    useAnimationFrame(deltaTime => {
+        app.env.update();
+        if (!app.model.damaged) {
+            //const observation = model.getObservation(env.road.borders, env.traffic);
+            const sData = app.model.getSensorData(app.env.road.borders, app.env.traffic);
+            const output = app.model.brain.forward(sData, true);
+            const action = app.model.brain.makeChoice(output);
+            //const action = model.lazyAction(env.road.borders, env.traffic, true);
+            env.traffic = app.model.update(app.env.traffic, app.env.road.borders, action);
+        }
+        drawCars(app.model, app.env);
+        app.setEnv(app.env);
+        app.setModel(model);
+        app.setFrame(app.frame + 1);
+    }); 
+
+    /* useEffect(() => {
+        env.update();
+        if (!model.damaged) {
+            //const observation = model.getObservation(env.road.borders, env.traffic);
+            const sData = model.getSensorData(env.road.borders, env.traffic);
+            const output = model.brain.forward(sData, true);
+            const action = model.brain.makeChoice(output);
+            //const action = model.lazyAction(env.road.borders, env.traffic, true);
+            env.traffic = model.update(env.traffic, env.road.borders, action);
+        }
+        drawCars(app.model, app.env);
+        app.setEnv(env);
+        app.setModel(app.model);
+    }); */
+
+    const app = useContext(AppContext);
+    const env = app.env;
+    const model = app.model;
+    
     const canvasRef = useRef(null)
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const context = canvas.getContext('2d')
-        context.clearRect(0, 0, canvas.width, canvas.height)
-
-        drawCars(props.model, props.env);
-
-    }, [props.model, props.env]);
-
     return (
-        <canvas ref={canvasRef} id={props.id} width={window.innerWidth} height={props.height}/>
+        <canvas ref={canvasRef} id={props.id} width={window.innerWidth} height={props.height} />
     )
 }
 
-export default CanvasComponent;
+export default RoadCanvas;

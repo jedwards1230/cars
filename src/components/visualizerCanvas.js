@@ -1,11 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
+import useAnimationFrame from "./animator.js";
 import {
     getRGBA,
     lerp
 } from "../utils.js";
 
 
-const VisualizerComponent = props => {
+const VisualizerCanvas = props => {
 
     const canvasRef = useRef(null);
 
@@ -143,11 +144,11 @@ const VisualizerComponent = props => {
         );
     }
 
-    useEffect(() => {
-        drawNetwork(props.brain, 0);
-    }, []);
+    useAnimationFrame(time => {
+        drawNetwork(props.brain, time);
+    });
 
     return <canvas ref={canvasRef} id={props.id} width={window.innerWidth} height={props.height} />
 }
 
-export default VisualizerComponent;
+export default VisualizerCanvas;

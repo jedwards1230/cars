@@ -5,8 +5,8 @@ import { Environment } from './components/environment';
 import { Car } from './car/car.js';
 import { train } from "./network/train.js";
 import MetricsTable from './components/metricsTable.js';
-import {Tooltip} from 'bootstrap';
-import React, {useEffect, useState} from "react";
+import { Tooltip } from 'bootstrap';
+import React, { useEffect, useState, createContext } from "react";
 import {
 	saveModel,
 	loadModel,
@@ -22,6 +22,17 @@ import {
 	SoftMax,
 } from "./network/layers.js";
 
+export const AppContext = createContext({
+	env: null,
+	setEnv: () => {},
+	model: null,
+	setModel: () => {},
+	episodes: [],
+	setEpisodes: () => {},
+	frame: 0,
+	setFrame: () => {},
+});
+
 const App = () => {
 	const [trafficCount, setTrafficCount] = useState(50);
 	const [brainCount, setBrainCount] = useState(1);
@@ -30,8 +41,8 @@ const App = () => {
 	const [breakLoop, setBreakLoop] = useState(false);
 	const [episodeCounter, setEpisodeCounter] = useState(0);
 
-    const [numEpisodes, setNumEpisodes] = useState(100);
-    const [numSteps, setNumSteps] = useState(1000);
+	const [numEpisodes, setNumEpisodes] = useState(100);
+	const [numSteps, setNumSteps] = useState(1000);
 
 	const [actionCount, setActionCount] = useState(4);
 
@@ -59,6 +70,7 @@ const App = () => {
 
 	const [animTime, setAnimTime] = useState(0);
 	const [animFrame, setAnimFrame] = useState(null);
+	const [frame, setFrame] = useState(0);
 
 	const toggleView = () => {
 		setBreakLoop(true);
@@ -69,8 +81,6 @@ const App = () => {
 	const beginTrain = () => {
 		setEpisodeCounter(0);
 
-		reset();
-		//lossChart.hide();
 		console.log("beginning training");
 		setBreakLoop(false);
 		episodeLoop();
@@ -111,7 +121,6 @@ const App = () => {
 			await saveModel(activeModel, model.brain.save());
 		}
 		saveEpisodes(activeModel, episodes);
-		reset();
 
 		setEpisodeCounter(episodeCounter + 1);
 		if (episodeCounter > numEpisodes || episodeCounter < 0)
@@ -132,22 +141,6 @@ const App = () => {
 		}
 	}
 
-	// animate model
-	const animate = (time) => {
-		//setAnimTime(time);
-		// update cars
-		env.update();
-		if (!model.damaged) {
-			//const observation = model.getObservation(env.road.borders, env.traffic);
-			const sData = model.getSensorData(env.road.borders, env.traffic);
-			const output = model.brain.forward(sData, true);
-			const action = model.brain.makeChoice(output);
-			//const action = model.lazyAction(env.road.borders, env.traffic, true);
-			env.traffic = model.update(env.traffic, env.road.borders, action);
-		}
-		//requestAnimationFrame(animate)
-	}
-
 	// Update training stats on page
 	const updateTrainStats = (episodes) => {
 		MetricsTable.update(episodes);
@@ -165,28 +158,6 @@ const App = () => {
 		).innerHTML = `Good Models: ${goodEntries}/${episodes.length + 1}`;
 	}
 
-	const reset = () => {
-		// reset environment
-		//const carCtx = carCanvas.getContext("2d");
-		//carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
-
-		// reset model
-		/* const x = 0;
-		const y = env.road.getLaneCenter(env.startLane);
-		//setModel(new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount));
-		//model.addBrain("fsd", env, activeLayers());
-
-		// load saved data
-		const modelBrain = loadModel(activeModel);
-		if (modelBrain) model.brain.loadBrain(modelBrain);
-		const modelEpisodes = loadEpisodes(activeModel);
-		if (modelEpisodes) setEpisodes(modelEpisodes); */
-
-		// reset animation
-		cancelAnimationFrame(animFrame);
-		animate();
-	}
-
 	const tooltipTriggerList = document.querySelectorAll(
 		'[data-bs-toggle="tooltip"]'
 	);
@@ -194,18 +165,27 @@ const App = () => {
 		(tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
 	);
 
-	animate();
-
-	return <MainView 
-		model={model} 
-		env={env}
-		activeModel={activeModel}
-		episodes={episodes} 
-		beginTrain={beginTrain}
-		animationTime={animTime}
-		toggleView={toggleView}
-		numEpisodes={numEpisodes}
-		numSteps={numSteps} />
+	return (
+		<AppContext.Provider value={{
+			env: env,
+			setEnv: setEnv,
+			model: model,
+			setModel: setModel,
+			episodes: episodes,
+			setEpisodes: setEpisodes,
+			frame: frame,
+			setFrame: setFrame,
+		}}>
+			<MainView
+				activeModel={activeModel}
+				episodes={episodes}
+				beginTrain={beginTrain}
+				animationTime={animTime}
+				toggleView={toggleView}
+				numEpisodes={numEpisodes}
+				numSteps={numSteps} />
+		</AppContext.Provider>
+	)
 }
 
 

@@ -1,6 +1,8 @@
-import React from "react";
+import React, {useContext} from "react";
+import { AppContext } from "../App.js";
 
 const NavComponent = (props) => {
+    const app = useContext(AppContext);
     return (
         <nav id="nav" className="navbar px-3 navbar-expand bg-light">
             <a className="navbar-brand" href="index.html">Miles' Driving School</a>
@@ -9,10 +11,10 @@ const NavComponent = (props) => {
                     model = "{props.activeModel}"
                 </span>
                 <span id="activeSpeed" className="px-2 navbar-text">
-                    speed = {props.activeSpeed}
+                    speed = {app.model.speed}
                 </span>
                 <span id="activeDistance" className="px-2 navbar-text">
-                    distance = {props.activeDistance}
+                    distance = {app.model.distance}
                 </span>
                 <button id="saveBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Save Weights"
                     className="btn btn-outline-primary">💾</button>
