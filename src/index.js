@@ -68,7 +68,6 @@ let env, model;
 let info;
 let episodes = [];
 
-let renderTrainEntries = false;
 let animFrame;
 
 // Set play view
@@ -88,12 +87,11 @@ function beginTrain(nEpisodes, nSteps, epDecay, lr) {
 	numSteps = nSteps;
 	epsilonDecay = epDecay;
 	learningRate = lr;
-
 	episodeCounter = 0;
 
-	reset();
-	console.log("beginning training");
-	breakLoop = false;
+	reset(false);
+
+	console.log("Training | Episodes: ", numEpisodes, " | Steps: ", numSteps, " | Decay: ", epsilonDecay, " | Learning Rate: ", learningRate);
 	episodeLoop();
 }
 
@@ -134,7 +132,7 @@ async function episodeLoop() {
 		breakLoop = true;
 
 	if (!breakLoop) {
-		setTimeout(episodeLoop, 1);
+		setTimeout(episodeLoop, 10);
 	} else {
 		console.log("training complete");
 	}
@@ -227,7 +225,7 @@ const drawUI = () => {
 			<React.StrictMode>
 				<NavComponent
 					activeModel={activeModel}
-          model={model}
+					model={model}
 					destroy={destroyModel}
 					reset={reset}
 					toggleView={toggleView} />
@@ -268,7 +266,7 @@ function animate(time) {
 	visualizer.draw(model.brain, time);
 	drawUI();
 
-  if (!welcomed && model.damaged) setTimeout(reset, 0);
+	if (!welcomed && model.damaged) setTimeout(reset, 0);
 
 	animFrame = requestAnimationFrame(animate);
 }

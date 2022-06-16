@@ -47,8 +47,7 @@ const MetricsTable = props => {
     }, [props.episodes]);
 
     return (
-        <div className="metricsTable">
-            <h5 className="p-3 text-center">Training Stats</h5>
+        <div className="metricsTable container">
             <table className="table table-borderless table-hover table-sm text-center align-middle">
                 <thead>
                     <tr>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import WelcomeView from "./welcome";
 import TrainConfigForm from "./trainConfigForm";
-import TrainProgress from "./trainStats";
+import TrainProgress from "./trainProgress";
 import MetricsTable from "./metrics";
 import LossChart from "./lossChart";
 
@@ -19,6 +19,7 @@ const BodyComponent = props => {
                     beginTrain={props.beginTrain} />
                 {showStats &&
                     <div id="trainStats" className=" py-2 my-2">
+                        <h5 className="p-3 text-center">Training Stats</h5>
                         <MetricsTable
                             episodes={props.episodes} />
                         <TrainProgress

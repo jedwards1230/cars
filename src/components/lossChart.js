@@ -80,10 +80,15 @@ const LossChart = props => {
         draw(props.episodes)
     }, [props.episodes]);
 
-    return <Chart
-        type='line'
-        options={options}
-        data={data} />
+    return (
+        <div className='container-fluid'>
+            <Chart
+                id='lossChart'
+                type='line'
+                options={options}
+                data={data} />
+        </div>
+    )
 }
 
 export default LossChart;
