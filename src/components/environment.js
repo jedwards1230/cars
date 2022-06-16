@@ -43,7 +43,7 @@ export class Environment {
         let goodW = [];
         let badW = [];
         for (let i = 0; i < this.traffic.length; i++) {
-            if (this.traffic[i].model == "fsd") {
+            if (this.traffic[i].model === "fsd") {
                 if (this.traffic[i].damaged) {
                     dmgCt += 1;
                     console.log(this.traffic[i].brain.layers);
@@ -65,7 +65,7 @@ export class Environment {
 
     update() {
         for (let i = 0; i < this.traffic.length; i++) {
-            if (this.traffic[i].model != "fsd") {
+            if (this.traffic[i].model !== "fsd") {
                 const car = this.traffic[i];
                 let action = car.lazyAction(this.road.borders, this.traffic);
                 this.traffic = car.update(this.traffic, this.road.borders, action);
@@ -81,7 +81,7 @@ export class Environment {
         // randomize lane
         const getStartPosition = (i) => {
             const lane = getRandomInt(0, this.road.laneCount - 1);
-            const nextLane = placed[lane - 1] ? lane - 1 : lane + 1;
+            //const nextLane = placed[lane - 1] ? lane - 1 : lane + 1;
             placed[lane] = placed[lane] + getRandomInt(200, 350);
             const x = placed[lane];
             const y = this.road.getLaneCenter(lane);

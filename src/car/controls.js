@@ -5,7 +5,7 @@ export class Controls {
         this.left = false;
         this.right = false;
 
-        if (controller == "player") {
+        if (controller === "player") {
             this.#addKeyboardListeners();
         } else {
             this.forward = true;
@@ -27,6 +27,8 @@ export class Controls {
                 case "ArrowRight":
                     this.right = true;
                     break;
+                default:
+                    break;
             }
         }
         document.onkeyup = (event) => {
@@ -42,6 +44,8 @@ export class Controls {
                     break;
                 case "ArrowRight":
                     this.right = false;
+                    break;
+                default:
                     break;
             }
         }

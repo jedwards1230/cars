@@ -1,6 +1,6 @@
 import 'chart.js/auto';
 import { Chart } from 'react-chartjs-2';
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const LossChart = props => {
     const [chartData, setChartData] = useState([]);
@@ -57,7 +57,6 @@ const LossChart = props => {
     };
 
     const draw = (episodes) => {
-        const eps = episodes.filter(e => e.goodEntry === true)
         const d = [];
         const l = [];
         for (let i = 0; i < episodes.length; i++) {
