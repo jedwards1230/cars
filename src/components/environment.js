@@ -1,4 +1,4 @@
-import { Road } from "./road.js";
+import { Road } from "../car/road.js";
 import { getRandomInt } from "../utils.js";
 import {
     Linear,
