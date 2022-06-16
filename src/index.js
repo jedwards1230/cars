@@ -5,8 +5,8 @@ import './App.css';
 
 import { Tooltip } from 'bootstrap';
 
-import { Environment } from "./components/environment.js";
-import { Visualizer } from "./components/visualizer.js";
+import { Environment } from "./car/environment.js";
+import { Visualizer } from "./network/visualizer.js";
 import { Car } from "./car/car.js";
 import { train } from "./network/train.js";
 import {

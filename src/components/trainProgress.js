@@ -8,9 +8,8 @@ const TrainProgress = props => {
 
     React.useEffect(() => {
         setEpisodes(props.episodes);
-        //const episodes = props.episodes.filter(e => e.goodEntry === true)
         setGoodEntries(props.episodes.filter(e => e.goodEntry === true).length);
-        setBadEntries(props.episodes.filter(e => e.goodEntry === false).length);
+        setBadEntries(props.episodes.filter(e => e.goodEntry === false).length - 1);
     }, [props.episodes.length]);
 
 

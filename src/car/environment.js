@@ -8,7 +8,7 @@ import {
     Tanh,
     SoftMax,
 } from "../network/layers.js";
-import { Car } from "../car/car.js";
+import { Car } from "./car.js";
 
 export class Environment {
     constructor(trafficCount, brainCount, carCanvas, smart = false) {
