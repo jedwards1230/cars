@@ -4,14 +4,11 @@ import {
 } from "../utils.js";
 
 export class Network {
-    constructor(layers = [], lr = 0.001) {
-        let epsDecayRate = document.getElementById("epsilonDecayInput").value;
-        epsDecayRate = parseFloat(epsDecayRate);
-        lr = parseFloat(document.getElementById("learningRateInput").value);
+    constructor(layers = [], lr = 0.001, epsilon = 0.99) {
 
         this.memory = [];
         this.layers = [];
-        this.epsilon = epsDecayRate;
+        this.epsilon = epsilon;
         this.confidence = 0.5;
 
         this.lossFunction = (targets, outputs) => {

@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream:components/lossChart.js
 export class LossChart {
     constructor() {
         this.chart = this.#newChart();
@@ -5,6 +6,12 @@ export class LossChart {
 
     #newChart() {
         const chartCtx = document.getElementById("lossChart").getContext("2d");
+=======
+import {Chart} from 'chart.js';
+
+const LossChart = () => {
+    const newChart = (chartCtx) => {
+>>>>>>> Stashed changes:src/components/lossChart.js
         return new Chart(chartCtx, {
             data: {
                 labels: [],
@@ -56,7 +63,7 @@ export class LossChart {
         });
     }
 
-    draw(episodes) {
+    const draw = (episodes) => {
         const d = [];
         const l = [];
         for (let i = 0; i < episodes.length; i++) {
@@ -78,6 +85,7 @@ export class LossChart {
         });
         this.chart.update();
     }
+<<<<<<< Updated upstream:components/lossChart.js
 
     show() {
         document.getElementById("lossChart").style.display = "block";
@@ -92,3 +100,7 @@ export class LossChart {
         this.chart = this.#newChart();
     }
 }
+=======
+}
+
+>>>>>>> Stashed changes:src/components/lossChart.js

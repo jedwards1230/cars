@@ -4,7 +4,6 @@ export class TrainForm {
         this.numSteps = 1000;
         this.learningRate = 0.001;
         this.epsilonDecay = 0.5;
-        this.activeModel = "trainBrain";
     }
 
     readInputs() {
@@ -17,7 +16,6 @@ export class TrainForm {
     setValues() {
         document.getElementById("episodeCountInput").value = this.numEpisodes;
         document.getElementById("timeLimitInput").value = this.numSteps;
-        document.getElementById("activeModelName").innerHTML = this.activeModel;
         document.getElementById("epsilonDecayInput").value = this.epsilonDecay;
         document.getElementById("learningRateInput").value = this.learningRate;
     }
