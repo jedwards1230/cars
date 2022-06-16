@@ -110,19 +110,7 @@ const RoadCanvas = props => {
     }
 
     useAnimationFrame(deltaTime => {
-        app.env.update();
-        if (!app.model.damaged) {
-            //const observation = model.getObservation(env.road.borders, env.traffic);
-            const sData = app.model.getSensorData(app.env.road.borders, app.env.traffic);
-            const output = app.model.brain.forward(sData, true);
-            const action = app.model.brain.makeChoice(output);
-            //const action = model.lazyAction(env.road.borders, env.traffic, true);
-            env.traffic = app.model.update(app.env.traffic, app.env.road.borders, action);
-        }
         drawCars(app.model, app.env);
-        app.setEnv(app.env);
-        app.setModel(model);
-        app.setFrame(app.frame + 1);
     }); 
 
     /* useEffect(() => {

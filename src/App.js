@@ -4,7 +4,6 @@ import MainView from './components/mainView.js';
 import { Environment } from './components/environment';
 import { Car } from './car/car.js';
 import { train } from "./network/train.js";
-import MetricsTable from './components/metricsTable.js';
 import { Tooltip } from 'bootstrap';
 import React, { useEffect, useState, createContext } from "react";
 import {
@@ -59,14 +58,19 @@ const App = () => {
 	const [activeModel, setActiveModel] = useState("trainBrain");
 
 	const [env, setEnv] = useState(new Environment(trafficCount, brainCount, roadConfig, smartTraffic));
+	const savedEpisodes = loadEpisodes(activeModel);
+	const savedModel = loadModel(activeModel);
+
 	const x = 0;
 	const y = env.road.getLaneCenter(env.startLane);
 	const [model, setModel] = useState(new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount));
+	
 	const initLayers = activeLayers();
 	model.addBrain("fsd", env, initLayers);
 
-	const [info, setInfo] = useState(null);
-	const [episodes, setEpisodes] = useState([]);
+	const [info, setInfo] = useState({});
+	const [episodes, setEpisodes] = useState(savedEpisodes);
+	if (!episodes) setEpisodes([]);
 
 	const [animTime, setAnimTime] = useState(0);
 	const [animFrame, setAnimFrame] = useState(null);
@@ -113,8 +117,7 @@ const App = () => {
 				: 0;
 
 		info.goodEntry = checkGoodEntry(info);
-		episodes.push(info);
-		updateTrainStats(episodes);
+		setEpisodes([...episodes, info]);
 
 		// save only if model is labelled an improvement
 		if (distanceMax > 0 && info.goodEntry) {
@@ -141,29 +144,24 @@ const App = () => {
 		}
 	}
 
-	// Update training stats on page
-	const updateTrainStats = (episodes) => {
-		MetricsTable.update(episodes);
-
-		// update survivedBar
-		const goodEntriesBar = document.getElementById("goodEntriesBar");
-		const badEntriesBar = document.getElementById("badEntriesBar");
-		// get how many episodes survived
-		const goodEntries = episodes.filter((e) => e.goodEntry === true).length;
-		const badEntries = episodes.filter((e) => e.goodEntry === false).length;
-		goodEntriesBar.style.width = `${(goodEntries / episodes.length) * 100}%`;
-		badEntriesBar.style.width = `${(badEntries / episodes.length) * 100}%`;
-		document.getElementById(
-			"survivedCount"
-		).innerHTML = `Good Models: ${goodEntries}/${episodes.length + 1}`;
-	}
-
 	const tooltipTriggerList = document.querySelectorAll(
 		'[data-bs-toggle="tooltip"]'
 	);
 	const tooltipList = [...tooltipTriggerList].map(
 		(tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
 	);
+
+	/* useEffect(() => {
+        env.update();
+        if (!model.damaged) {
+            //const observation = model.getObservation(env.road.borders, env.traffic);
+            const sData = model.getSensorData(env.road.borders, env.traffic);
+            const output = model.brain.forward(sData, true);
+            const action = model.brain.makeChoice(output);
+            //const action = model.lazyAction(env.road.borders, env.traffic, true);
+            env.traffic = model.update(env.traffic, env.road.borders, action);
+        }
+	}); */
 
 	return (
 		<AppContext.Provider value={{
@@ -178,7 +176,6 @@ const App = () => {
 		}}>
 			<MainView
 				activeModel={activeModel}
-				episodes={episodes}
 				beginTrain={beginTrain}
 				animationTime={animTime}
 				toggleView={toggleView}
@@ -187,35 +184,5 @@ const App = () => {
 		</AppContext.Provider>
 	)
 }
-
-
-
-// init buttons
-/* 
-
-document.querySelector("#trainBtn").addEventListener("click", beginTrain);
-document.querySelector("#startPlay").addEventListener("click", function () {
-	visualizer.active = true;
-	setPlayView();
-	setMainView();
-});
-document.querySelector("#saveBtn").addEventListener("click", function () {
-	saveModel(trainForm.activeModel, model.brain.save(), episodes);
-});
-document.querySelector("#destroyBtn").addEventListener("click", function () {
-	breakLoop = true;
-	destroy(trainForm.activeModel);
-	episodes = [];
-	lossChart.reset();
-	document.getElementById("lossChart").style.display = "none";
-	document.getElementById("trainStats").style.display = "none";
-	reset();
-});
-document.querySelector("#resetBtn").addEventListener("click", function () {
-	breakLoop = true;
-	reset();
-});
-
-*/
 
 export default App;

@@ -1,5 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useContext } from "react";
 import useAnimationFrame from "./animator.js";
+import { AppContext } from "../App.js";
 import {
     getRGBA,
     lerp
@@ -144,8 +145,10 @@ const VisualizerCanvas = props => {
         );
     }
 
+    const app = useContext(AppContext);
+
     useAnimationFrame(time => {
-        drawNetwork(props.brain, time);
+        drawNetwork(app.model.brain, time);
     });
 
     return <canvas ref={canvasRef} id={props.id} width={window.innerWidth} height={props.height} />

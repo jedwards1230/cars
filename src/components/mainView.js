@@ -1,13 +1,15 @@
 import VisualizerCanvas from "./visualizerCanvas.js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext} from "react";
 import WelcomeView from "./welcome.js";
 import NavComponent from "./nav.js";
 import RoadCanvas from "./roadCanvas.js";
-import MTable from "./mTable.js";
+import MetricsTable from "./metricsTable.js";
 import TrainConfigForm from "./trainConfigForm.js";
 import TrainStats from "./trainStats.js";
+import { AppContext } from "../App.js";
 
 const MainView = props => {
+    const app = useContext(AppContext);
     const [learningRate, setLearningRate] = useState(0.001);
     const [epsilonDecay, setEpsilonDecay] = useState(0.5);
     const [welcomed, setWelcomed] = useState(false);
@@ -42,9 +44,7 @@ const MainView = props => {
                 {visualizer ? (
                     <VisualizerCanvas
                         id="networkCanvas"
-                        height="450"
-                        brain={props.model.brain}
-                        time={props.animationTime} />
+                        height="450" />
                 ) : (
                     <div id="train" className="trainView py-3 container-fluid">
                         <TrainConfigForm
@@ -53,11 +53,10 @@ const MainView = props => {
                             numSteps={props.numSteps}
                             learningRate={learningRate}
                             epsilonDecay={epsilonDecay} />
-                        {props.episodes.length > 0 && (
+                        {app.episodes.length > 0 && (
                             <div>
-                                <MTable />
-                                <RoadCanvas id="lossChart" />
-                                <TrainStats />
+                                <MetricsTable episodes={app.episodes}/>
+                                <TrainStats episodes={app.episodes} />
                             </div>
                         )}
                     </div>

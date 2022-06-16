@@ -35,6 +35,7 @@ export async function train(model, env, maxTimeSteps) {
         // forward pass to get action
         prevOutput = JSON.parse(JSON.stringify(output));
         prevReward = reward;
+        console.log(model, env)
         output = model.brain.forward(sData, true);
         const epsilonGreedy = true;
         action = model.brain.makeChoice(output, epsilonGreedy);
