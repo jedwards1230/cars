@@ -1,11 +1,17 @@
-import {Chart} from 'chart.js';
-
-class LossChart {
-    constructor(ctx) {
-        this.chart = this.#newChart(ctx);
+<<<<<<< Updated upstream:components/lossChart.js
+export class LossChart {
+    constructor() {
+        this.chart = this.#newChart();
     }
 
-    #newChart(chartCtx) {
+    #newChart() {
+        const chartCtx = document.getElementById("lossChart").getContext("2d");
+=======
+import {Chart} from 'chart.js';
+
+const LossChart = () => {
+    const newChart = (chartCtx) => {
+>>>>>>> Stashed changes:src/components/lossChart.js
         return new Chart(chartCtx, {
             data: {
                 labels: [],
@@ -57,7 +63,7 @@ class LossChart {
         });
     }
 
-    draw(episodes) {
+    const draw = (episodes) => {
         const d = [];
         const l = [];
         for (let i = 0; i < episodes.length; i++) {
@@ -79,6 +85,7 @@ class LossChart {
         });
         this.chart.update();
     }
+<<<<<<< Updated upstream:components/lossChart.js
 
     show() {
         document.getElementById("lossChart").style.display = "block";
@@ -93,5 +100,7 @@ class LossChart {
         this.chart = this.#newChart();
     }
 }
+=======
+}
 
-export default LossChart;
+>>>>>>> Stashed changes:src/components/lossChart.js

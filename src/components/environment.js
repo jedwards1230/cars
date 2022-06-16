@@ -8,10 +8,11 @@ import {
     Tanh,
     SoftMax,
 } from "../network/layers.js";
-import { Car } from "./car.js";
+import { Car } from "../car/car.js";
 
 export class Environment {
-    constructor(trafficCount, brainCount, roadConfig, smart = false) {
+    constructor(trafficCount, brainCount, carCanvas, smart = false) {
+        this.canvas = carCanvas;
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
         this.smart = smart;
@@ -28,8 +29,8 @@ export class Environment {
         this.laneCount = 3;
 
         this.road = new Road(
-            roadConfig.y,
-            roadConfig.width,
+            this.canvas.height / 2,
+            this.canvas.height * 0.9,
             this.laneCount
         );
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
@@ -42,7 +43,7 @@ export class Environment {
         let goodW = [];
         let badW = [];
         for (let i = 0; i < this.traffic.length; i++) {
-            if (this.traffic[i].model === "fsd") {
+            if (this.traffic[i].model == "fsd") {
                 if (this.traffic[i].damaged) {
                     dmgCt += 1;
                     console.log(this.traffic[i].brain.layers);
@@ -54,9 +55,17 @@ export class Environment {
         console.log("good", goodCt, ", bad", dmgCt);
     }
 
+    render() {
+        const navbarHeight = document.getElementById("nav").offsetHeight;
+
+        // update dimensions
+        this.canvas.style.top = navbarHeight + "px";
+        this.canvas.width = window.innerWidth;
+    }
+
     update() {
         for (let i = 0; i < this.traffic.length; i++) {
-            if (this.traffic[i].model !== "fsd") {
+            if (this.traffic[i].model != "fsd") {
                 const car = this.traffic[i];
                 let action = car.lazyAction(this.road.borders, this.traffic);
                 this.traffic = car.update(this.traffic, this.road.borders, action);
