@@ -45,8 +45,6 @@ const brainCount = 1;
 let smartTraffic = true;
 
 const visualizer = new Visualizer();
-//const lossCtx = document.getElementById("lossChart").getContext("2d");
-//const lossChart = new LossChart();
 
 let breakLoop = false;
 let numSteps = 1000;
@@ -94,7 +92,6 @@ function beginTrain(nEpisodes, nSteps, epDecay, lr) {
 	episodeCounter = 0;
 
 	reset();
-	//lossChart.hide();
 	console.log("beginning training");
 	breakLoop = false;
 	episodeLoop();
@@ -201,8 +198,6 @@ const destroyModel = () => {
 	breakLoop = true;
 	destroy(activeModel);
 	episodes = [];
-	//lossChart.reset();
-	document.getElementById("lossChart").style.display = "none";
 	document.getElementById("trainStats").style.display = "none";
 	reset();
 }

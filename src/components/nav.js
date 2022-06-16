@@ -26,7 +26,7 @@ const NavComponent = (props) => {
                 </span>
                 <button id="saveBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Save Weights"
                     className="btn btn-outline-primary">💾</button>
-                <button id="destroyBtn" onClick={props.destroyModel} data-bs-toggle="tooltip" data-bs-placement="bottom" title="Discard Weights"
+                <button id="destroyBtn" onClick={props.destroy} data-bs-toggle="tooltip" data-bs-placement="bottom" title="Discard Weights"
                     className="btn btn-outline-danger">🗑️</button>
                 <button id="resetBtn" onClick={props.reset} data-bs-toggle="tooltip" data-bs-placement="bottom" title="Break Loop"
                     className="btn btn-outline-success">♻️</button>

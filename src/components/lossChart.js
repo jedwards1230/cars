@@ -1,67 +1,60 @@
-<<<<<<< Updated upstream:components/lossChart.js
-export class LossChart {
-    constructor() {
-        this.chart = this.#newChart();
-    }
+import 'chart.js/auto';
+import { Chart } from 'react-chartjs-2';
+import { useRef, useState, useEffect } from 'react';
 
-    #newChart() {
-        const chartCtx = document.getElementById("lossChart").getContext("2d");
-=======
-import {Chart} from 'chart.js';
+const LossChart = props => {
+    const [chartData, setChartData] = useState([]);
+    const [labels, setLabels] = useState([]);
 
-const LossChart = () => {
-    const newChart = (chartCtx) => {
->>>>>>> Stashed changes:src/components/lossChart.js
-        return new Chart(chartCtx, {
-            data: {
-                labels: [],
-                datasets: [{
-                    type: 'line',
-                    label: 'Loss',
-                    data: [],
-                    parsing: {
-                        yAxisKey: 'loss'
-                    },
-                    fill: false,
-                    borderColor: 'rgb(255, 75, 75)',
-                    tension: 0.2
-                }, {
-                    type: 'line',
-                    label: 'Distance',
-                    data: [],
-                    parsing: {
-                        yAxisKey: 'distance'
-                    },
-                    fill: false,
-                    borderColor: 'rgb(75, 255, 75)',
-                    tension: 0.2
-                }, {
-                    type: 'line',
-                    label: 'Time Steps',
-                    data: [],
-                    parsing: {
-                        yAxisKey: 'time'
-                    },
-                    fill: false,
-                    borderColor: 'rgb(75, 75, 75)',
-                    tension: 0.2
-                }, {
-                    type: 'line',
-                    label: 'Average Speed',
-                    data: [],
-                    parsing: {
-                        yAxisKey: 'speed'
-                    },
-                    fill: false,
-                    borderColor: 'rgb(75, 75, 255)',
-                    tension: 0.2
-                }]
+    const options = {
+        normalized: true,
+        responsive: true,
+    };
+
+    const data = {
+        labels,
+        datasets: [{
+            type: 'line',
+            label: 'Loss',
+            data: chartData,
+            parsing: {
+                yAxisKey: 'loss'
             },
-            options: {
-                normalized: true
-            }
-        });
-    }
+            fill: false,
+            borderColor: 'rgb(255, 75, 75)',
+            tension: 0.2
+        }, {
+            type: 'line',
+            label: 'Distance',
+            data: chartData,
+            parsing: {
+                yAxisKey: 'distance'
+            },
+            fill: false,
+            borderColor: 'rgb(75, 255, 75)',
+            tension: 0.2
+        }, {
+            type: 'line',
+            label: 'Time Steps',
+            data: chartData,
+            parsing: {
+                yAxisKey: 'time'
+            },
+            fill: false,
+            borderColor: 'rgb(75, 75, 75)',
+            tension: 0.2
+        }, {
+            type: 'line',
+            label: 'Average Speed',
+            data: chartData,
+            parsing: {
+                yAxisKey: 'speed'
+            },
+            fill: false,
+            borderColor: 'rgb(75, 75, 255)',
+            tension: 0.2
+        }]
+    };
 
     const draw = (episodes) => {
         const d = [];
@@ -79,28 +72,18 @@ const LossChart = () => {
                 });
             }
         }
-        this.chart.data.labels = l;
-        this.chart.data.datasets.forEach((dataset) => {
-            dataset.data = d;
-        });
-        this.chart.update();
-    }
-<<<<<<< Updated upstream:components/lossChart.js
-
-    show() {
-        document.getElementById("lossChart").style.display = "block";
+        setChartData(d);
+        setLabels(l);
     }
 
-    hide() {
-        document.getElementById("lossChart").style.display = "none";
-    }
+    useEffect(() => {
+        draw(props.episodes)
+    }, [props.episodes]);
 
-    reset() {
-        this.chart.destroy();
-        this.chart = this.#newChart();
-    }
-}
-=======
+    return <Chart
+        type='line'
+        options={options}
+        data={data} />
 }
 
->>>>>>> Stashed changes:src/components/lossChart.js
+export default LossChart;

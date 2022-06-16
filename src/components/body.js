@@ -3,6 +3,7 @@ import WelcomeView from "./welcome";
 import TrainConfigForm from "./trainConfigForm";
 import TrainStats from "./trainStats";
 import MetricsTable from "./metrics";
+import LossChart from "./lossChart";
 
 const BodyComponent = props => {
     const [showStats, setShowStats] = useState(props.episodes > 0);
@@ -20,7 +21,10 @@ const BodyComponent = props => {
                     <div id="trainStats" className="row py-2 my-2 bg-light">
                         <MetricsTable
                             episodes={props.episodes} />
-                        <TrainStats episodes={props.episodes} />
+                        <LossChart
+                            episodes={props.episodes} />
+                        <TrainStats
+                            episodes={props.episodes} />
                     </div>}
             </div>
         )
