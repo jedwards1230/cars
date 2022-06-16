@@ -57,11 +57,12 @@ const LossChart = props => {
     };
 
     const draw = (episodes) => {
+        const eps = episodes.filter(e => e.goodEntry === true)
         const d = [];
         const l = [];
         for (let i = 0; i < episodes.length; i++) {
-            if (i % 5 === 0) {
-                const episodeInfo = episodes[i];
+            const episodeInfo = episodes[i];
+            if (episodeInfo.goodEntry) {
                 l.push(i);
                 d.push({
                     x: i,

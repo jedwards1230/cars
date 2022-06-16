@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import WelcomeView from "./welcome";
 import TrainConfigForm from "./trainConfigForm";
-import TrainStats from "./trainStats";
+import TrainProgress from "./trainStats";
 import MetricsTable from "./metrics";
 import LossChart from "./lossChart";
 
@@ -14,16 +14,16 @@ const BodyComponent = props => {
 
     if (props.welcomed && !props.showVisualizer) {
         return (
-            <div>
+            <div id="mainView">
                 <TrainConfigForm
                     beginTrain={props.beginTrain} />
                 {showStats &&
-                    <div id="trainStats" className="row py-2 my-2 bg-light">
+                    <div id="trainStats" className=" py-2 my-2">
                         <MetricsTable
                             episodes={props.episodes} />
                         <LossChart
                             episodes={props.episodes} />
-                        <TrainStats
+                        <TrainProgress
                             episodes={props.episodes} />
                     </div>}
             </div>

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 
-const TrainStats = props => {
+const TrainProgress = props => {
     const [episodes, setEpisodes] = useState(props.episodes);
     const [goodEntries, setGoodEntries] = useState(0);
     const [badEntries, setBadEntries] = useState(0);
@@ -28,4 +28,4 @@ const TrainStats = props => {
     )
 }
 
-export default TrainStats;
+export default TrainProgress;

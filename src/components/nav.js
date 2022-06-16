@@ -9,7 +9,7 @@ const NavComponent = (props) => {
         setActiveModel(props.activeModel);
         setSpeed(props.model.speed.toFixed(1));
         setDistance(props.model.distance.toFixed(0));
-    }, [props.model]);
+    }, [props.model.speed, props.model.distance]);
 
     return (
         <nav id="nav" className="navbar px-3 navbar-expand bg-light">

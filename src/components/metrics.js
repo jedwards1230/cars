@@ -17,8 +17,11 @@ const MetricsTable = props => {
     const [lossMin, setLossMin] = useState(0);
     const [lossAvg, setLossAvg] = useState(0);
 
+    const [modelCount, setModelCount] = useState(0);
+
     useEffect(() => {
         const episodes = props.episodes.filter(e => e.goodEntry === true)
+        setModelCount(episodes.length);
 
         const timeMap = episodes.map(e => e.time);
         setTimeAvg((timeMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(0));
@@ -44,12 +47,12 @@ const MetricsTable = props => {
     }, [props.episodes]);
 
     return (
-        <div className="MTable">
+        <div className="metricsTable">
             <h5 className="p-3 text-center">Training Stats</h5>
             <table className="table table-borderless table-hover table-sm text-center align-middle">
                 <thead>
                     <tr>
-                        <th scope="col">Saved Models</th>
+                        <th scope="col">Generation {modelCount} </th>
                         <th scope="col">Min</th>
                         <th scope="col">Average</th>
                         <th scope="col">Max</th>
