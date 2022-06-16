@@ -21,9 +21,9 @@ const BodyComponent = props => {
                     <div id="trainStats" className=" py-2 my-2">
                         <MetricsTable
                             episodes={props.episodes} />
-                        <LossChart
-                            episodes={props.episodes} />
                         <TrainProgress
+                            episodes={props.episodes} />
+                        <LossChart
                             episodes={props.episodes} />
                     </div>}
             </div>
