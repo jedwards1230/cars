@@ -10,15 +10,14 @@ const TrainConfigForm = props => {
         props.beginTrain(numEpisodes, numSteps, epsilonDecay, learningRate);
     }
 
-
     return (
         <div className="trainForm">
             <div id="trainParams" className="container text-center text-bg-light">
                 <h5 className="p-3">Training Parameters</h5>
                 <form>
-                    <div className="row py-2">
+                    <div className="row py-2  mb-3">
                         <div className="col">
-                            <div className="form-floating mb-3">
+                            <div className="form-floating">
                                 <input 
                                     type="number" 
                                     className="form-control" 
@@ -28,7 +27,7 @@ const TrainConfigForm = props => {
                             </div>
                         </div>
                         <div className="col">
-                            <div className="form-floating mb-3">
+                            <div className="form-floating">
                                 <input 
                                     type="number" 
                                     className="form-control" 
@@ -37,10 +36,8 @@ const TrainConfigForm = props => {
                                 <label htmlFor="timeLimitInput">Time Limit</label>
                             </div>
                         </div>
-                    </div>
-                    <div className="row pb-2">
                         <div className="col">
-                            <div className="form-floating mb-3">
+                            <div className="form-floating">
                                 <input 
                                     type="text" 
                                     className="form-control" 
@@ -50,7 +47,7 @@ const TrainConfigForm = props => {
                             </div>
                         </div>
                         <div className="col">
-                            <div className="form-floating mb-3">
+                            <div className="form-floating">
                                 <input 
                                     type="text" 
                                     className="form-control" 
@@ -60,7 +57,7 @@ const TrainConfigForm = props => {
                             </div>
                         </div>
                     </div>
-                    <button type="button" onClick={submitForm} id="trainBtn" className="btn mb-3 mx-0 btn-primary">Start</button>
+                    <button type="button" onClick={submitForm} id="trainBtn" className="btn mb-3 btn-primary">Start</button>
                 </form>
             </div>
         </div>

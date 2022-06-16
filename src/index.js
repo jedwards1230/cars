@@ -128,7 +128,7 @@ async function episodeLoop() {
 	reset(false);
 
 	episodeCounter++;
-	if (episodeCounter > numEpisodes || episodeCounter < 0)
+	if (episodeCounter >= numEpisodes || episodeCounter < 0)
 		breakLoop = true;
 
 	if (!breakLoop) {
@@ -163,6 +163,7 @@ function toggleView() {
 
 function reset(breakL = true) {
 	breakLoop = breakL;
+	if (breakL) episodeCounter = numEpisodes;
 	// reset environment
 	carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
 	env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
@@ -193,10 +194,8 @@ const tooltipList = [...tooltipTriggerList].map(
 
 
 const destroyModel = () => {
-	breakLoop = true;
-	destroy(activeModel);
 	episodes = [];
-	document.getElementById("trainStats").style.display = "none";
+	destroy(activeModel);
 	reset();
 }
 
