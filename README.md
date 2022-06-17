@@ -22,6 +22,7 @@ Adjust these in car.js and network.js
 * Better handling of episodes
   * better storing model history. episodes currently cap at around 1000 stored. way too small. 
 * add web worker to handle training
+* service worker for offline use
 * form for layer composition and other hyperparameters
 * compose layers in ui 
   * inputs, outputs, activation 

@@ -66,7 +66,34 @@ const activeLayers = () => [
 let modelLayers = activeLayers();
 
 const setModelLayers = layers => {
-	modelLayers = layers;
+	let preparedLayers = [];
+	for (let i = 0; i < layers.length; i++) {
+		console.log("Checking layer: ", layers[i]);
+		switch (layers[i].activation) {
+			case "linear":
+				preparedLayers.push(new Linear(layers[i].inputs, layers[i].outputs, learningRate));
+				break;
+			case "sigmoid":
+				preparedLayers.push(new Sigmoid(layers[i].inputs, layers[i].outputs, learningRate));
+				break;
+			case "relu":
+				preparedLayers.push(new Relu(layers[i].inputs, layers[i].outputs, learningRate));
+				break;
+			case "leakyRelu":
+				preparedLayers.push(new LeakyRelu(layers[i].inputs, layers[i].outputs, learningRate));
+				break;
+			case "tanh":
+				preparedLayers.push(new Tanh(layers[i].inputs, layers[i].outputs, learningRate));
+				break;
+			case "softMax":
+				preparedLayers.push(new SoftMax(layers[i].inputs, layers[i].outputs, learningRate));
+				break;
+			default:
+				console.log("Unknown activation function");
+				break;
+		}
+	}
+	modelLayers = preparedLayers;
 }
 
 let env, model;
@@ -88,11 +115,13 @@ function setTrainView() {
 }
 
 // Prepare for training
-function beginTrain(nEpisodes, nSteps, epDecay, lr) {
+function beginTrain(nEpisodes, nSteps, epDecay, lr, layers) {
 	numEpisodes = nEpisodes;
 	numSteps = nSteps;
 	epsilonDecay = epDecay;
 	learningRate = lr;
+	setModelLayers(layers);
+	console.log("Training with layers: ", modelLayers);
 	episodeCounter = 0;
 
 	reset(false);
@@ -120,7 +149,7 @@ async function episodeLoop() {
 	info.episode = episodes.length + 1;
 
 	const distanceMap = episodes.map((e) => e.distance);
-	const speedMap = episodes.map((e) => e.speed);
+	//const speedMap = episodes.map((e) => e.speed);
 	const distanceMax = Math.max(...distanceMap);
 
 	info.goodEntry = checkGoodEntry(info);
@@ -178,6 +207,7 @@ function reset(breakL = true) {
 	const x = 0;
 	const y = env.road.getLaneCenter(env.startLane);
 	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
+	//modelLayers = activeLayers();
 	model.addBrain("fsd", env, modelLayers);
 
 	// load saved data

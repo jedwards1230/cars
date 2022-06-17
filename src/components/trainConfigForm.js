@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import LayerEntry from "./layer";
+import React, { useState } from "react";
+import NetworkLayerList from "./layer";
 import { Form, Row, Col } from "react-bootstrap";
 
 const TrainConfigForm = props => {
@@ -7,14 +7,42 @@ const TrainConfigForm = props => {
     const [numSteps, setNumSteps] = useState(1000);
     const [epsilonDecay, setEpsilonDecay] = useState(0.99);
     const [learningRate, setLearningRate] = useState(0.01);
-    const [layers, setLayers] = useState([]);
+    const [counter, setCounter] = useState(0);
+
+    const [layers, setLayers] = useState([{
+        activation: "linear",
+        inputs: null,
+        outputs: null,
+        id: counter
+    }]);
 
     const submitForm = () => {
         props.beginTrain(numEpisodes, numSteps, epsilonDecay, learningRate, layers);
     }
 
-    const addLayer = layer => {
-        setLayers([...layers, layer]);
+    const removeLayer = (id) => {
+        if (layers.length > 1) {
+            const newList = layers.filter((item) => item.id !== id);
+            setLayers(newList);
+        }
+    }
+
+    const updateLayer = (id, activation, inputs, outputs) => {
+        let newLayers = [...layers];
+        newLayers[id].activation = activation;
+        newLayers[id].inputs = parseInt(inputs);
+        newLayers[id].outputs = parseInt(outputs);
+        setLayers(newLayers);
+    }
+
+    const addLayer = () => {
+        setLayers([...layers, {
+            activation: "linear",
+            inputs: null,
+            outputs: null,
+            id: counter+1
+        }]);
+        setCounter(counter+1);
     }
 
     return (
@@ -64,7 +92,7 @@ const TrainConfigForm = props => {
                             </div>
                         </Col>
                     </Row>
-                    <LayerEntry layers={layers} addLayer={addLayer} />
+                    <NetworkLayerList layers={layers} onRemove={removeLayer} addLayer={addLayer} updateLayer={updateLayer} />
                     <button type="button" onClick={submitForm} id="trainBtn" className="btn mb-3 btn-primary">Start</button>
                 </Form>
             </div>
