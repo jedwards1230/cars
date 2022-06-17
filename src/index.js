@@ -55,13 +55,19 @@ let episodeCounter = 0;
 
 const activeModel = "trainBrain";
 
+
 const actionCount = 4;
 const activeLayers = () => [
 	new Tanh(5, 10),
 	new Tanh(10, 10),
-	new LeakyRelu(10, 10),
 	new Sigmoid(10, actionCount),
 ];
+
+let modelLayers = activeLayers();
+
+const setModelLayers = layers => {
+	modelLayers = layers;
+}
 
 let env, model;
 
@@ -123,8 +129,8 @@ async function episodeLoop() {
 	// save only if model is labelled an improvement
 	if (distanceMax > 0 && info.goodEntry) {
 		await saveModel(activeModel, model.brain.save());
+		saveEpisodes(activeModel, episodes);
 	}
-	saveEpisodes(activeModel, episodes);
 	reset(false);
 
 	episodeCounter++;
@@ -172,7 +178,7 @@ function reset(breakL = true) {
 	const x = 0;
 	const y = env.road.getLaneCenter(env.startLane);
 	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
-	model.addBrain("fsd", env, activeLayers());
+	model.addBrain("fsd", env, modelLayers);
 
 	// load saved data
 	const modelBrain = loadModel(activeModel);
@@ -202,7 +208,6 @@ const destroyModel = () => {
 function setMainView() {
 	document.getElementById("carCanvas").style.display = "inline";
 
-	reset();
 	animate();
 }
 
@@ -219,7 +224,7 @@ const startVisualizer = () => {
 }
 
 const drawUI = () => {
-	if (welcomed) {
+	if (true) {
 		reactHeader.render(
 			<React.StrictMode>
 				<NavComponent
@@ -241,7 +246,8 @@ const drawUI = () => {
 				setTrain={startTrain}
 				setPlay={startVisualizer}
 				beginTrain={beginTrain}
-				episodes={episodes} />
+				episodes={episodes}
+				layers={modelLayers} />
 		</React.StrictMode>
 	);
 }
