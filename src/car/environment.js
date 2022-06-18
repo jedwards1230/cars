@@ -1,13 +1,5 @@
 import { Road } from "./road.js";
 import { getRandomInt } from "../utils.js";
-import {
-    Linear,
-    Sigmoid,
-    Relu,
-    LeakyRelu,
-    Tanh,
-    SoftMax,
-} from "../network/layers.js";
 import { Car } from "./car.js";
 import defaultForwardBrain from "../network/network.js";
 
@@ -17,9 +9,6 @@ export class Environment {
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
         this.smart = smart;
-
-        const trafficInputs = 4;
-        const trafficOutputs = 2;
 
         this.modelLayers = defaultForwardBrain;
 
@@ -33,24 +22,6 @@ export class Environment {
         );
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
         this.generateTraffic();
-    }
-
-    end() {
-        let dmgCt = 0;
-        let goodCt = 0;
-        let goodW = [];
-        let badW = [];
-        for (let i = 0; i < this.traffic.length; i++) {
-            if (this.traffic[i].model === "fsd") {
-                if (this.traffic[i].damaged) {
-                    dmgCt += 1;
-                    console.log(this.traffic[i].brain.layers);
-                } else {
-                    goodCt += 1;
-                }
-            }
-        }
-        console.log("good", goodCt, ", bad", dmgCt);
     }
 
     render() {

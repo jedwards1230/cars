@@ -92,7 +92,7 @@ export function loadEpisodes(id) {
  * @param  {object} model JSON of model object
  */
 export function saveModel(id, model) {
-    localStorage.setItem(id, JSON.stringify(model));
+    localStorage.setItem(id, JSON.stringify(model, null, '\t'));
 }
 
 /**
@@ -101,7 +101,7 @@ export function saveModel(id, model) {
  * @param  {array} episodes Episodes array
  */
 export function saveEpisodes(id, episodes) {
-    localStorage.setItem(id + "Episodes", JSON.stringify(episodes));
+    localStorage.setItem(id + "Episodes", JSON.stringify(episodes, null, '\t'));
 }
 
 export function destroy(id) {

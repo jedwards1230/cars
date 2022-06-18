@@ -9,6 +9,9 @@ import { Environment } from "./car/environment.js";
 import { Visualizer } from "./network/visualizer.js";
 import { Car } from "./car/car.js";
 import { train } from "./network/train.js";
+import defaultForwardBrain from './network/network';
+import NavComponent from './components/nav';
+import BodyComponent from './components/body';
 import {
 	saveModel,
 	loadModel,
@@ -16,17 +19,6 @@ import {
 	loadEpisodes,
 	saveEpisodes,
 } from "./utils.js";
-import {
-	Linear,
-	Sigmoid,
-	Relu,
-	LeakyRelu,
-	Tanh,
-	SoftMax,
-} from "./network/layers.js";
-import defaultForwardBrain from './network/network';
-import NavComponent from './components/nav';
-import BodyComponent from './components/body';
 
 const reactHeader = ReactDOM.createRoot(document.getElementById('reactHeader'));
 const reactBody = ReactDOM.createRoot(document.getElementById('reactBody'));
@@ -48,53 +40,10 @@ let smartTraffic = false;
 const visualizer = new Visualizer();
 
 let breakLoop = false;
-let numSteps = 1000;
-let numEpisodes = 1000;
-let epsilonDecay = 0.99;
-let learningRate = 0.01;
+let numSteps, numEpisodes, epsilonDecay, learningRate;
 let episodeCounter = 0;
 
 const activeModel = "trainBrain";
-
-
-const actionCount = 4;
-const activeLayers = () => [
-	new Tanh(5, 10),
-	new Tanh(10, 10),
-	new Sigmoid(10, actionCount),
-];
-
-let modelLayers = activeLayers();
-
-const setModelLayers = layers => {
-	let preparedLayers = [];
-	for (let i = 0; i < layers.length; i++) {
-		switch (layers[i].activation) {
-			case "linear":
-				preparedLayers.push(new Linear(layers[i].inputs, layers[i].outputs, learningRate));
-				break;
-			case "sigmoid":
-				preparedLayers.push(new Sigmoid(layers[i].inputs, layers[i].outputs, learningRate));
-				break;
-			case "relu":
-				preparedLayers.push(new Relu(layers[i].inputs, layers[i].outputs, learningRate));
-				break;
-			case "leakyRelu":
-				preparedLayers.push(new LeakyRelu(layers[i].inputs, layers[i].outputs, learningRate));
-				break;
-			case "tanh":
-				preparedLayers.push(new Tanh(layers[i].inputs, layers[i].outputs, learningRate));
-				break;
-			case "softMax":
-				preparedLayers.push(new SoftMax(layers[i].inputs, layers[i].outputs, learningRate));
-				break;
-			default:
-				console.log("Unknown activation function");
-				break;
-		}
-	}
-	modelLayers = preparedLayers;
-}
 
 let env, model;
 
@@ -120,8 +69,6 @@ function beginTrain(nEpisodes, nSteps, epDecay, lr, layers) {
 	numSteps = nSteps;
 	epsilonDecay = epDecay;
 	learningRate = lr;
-	setModelLayers(layers);
-	console.log("Training with layers: ", modelLayers);
 	episodeCounter = 0;
 
 	reset(false);
@@ -149,7 +96,6 @@ async function episodeLoop() {
 	info.episode = episodes.length + 1;
 
 	const distanceMap = episodes.map((e) => e.distance);
-	//const speedMap = episodes.map((e) => e.speed);
 	const distanceMax = Math.max(...distanceMap);
 
 	info.goodEntry = checkGoodEntry(info);
@@ -206,13 +152,12 @@ function reset(breakL = true) {
 	// reset model
 	const x = 0;
 	const y = env.road.getLaneCenter(env.startLane);
-	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
-	//modelLayers = activeLayers();
+	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
 	model.loadBrainConfig(defaultForwardBrain);
 
 	// load saved model and episodes
-	const savedModelConfig = loadModel(activeModel);
-	if (savedModelConfig) model.brain.loadBrain(savedModelConfig)
+	//const savedModelConfig = loadModel(activeModel);
+	//if (savedModelConfig) model.loadBrainConfig(savedModelConfig)
 
 	const savedEpisodes = loadEpisodes(activeModel);
 	if (savedEpisodes) episodes = savedEpisodes;
@@ -240,8 +185,7 @@ const destroyModel = () => {
 
 function setMainView() {
 	document.getElementById("carCanvas").style.display = "inline";
-
-	animate();
+	reset();
 }
 
 const startTrain = () => {
@@ -279,8 +223,7 @@ const drawUI = () => {
 				setTrain={startTrain}
 				setPlay={startVisualizer}
 				beginTrain={beginTrain}
-				episodes={episodes}
-				layers={modelLayers} />
+				episodes={episodes} />
 		</React.StrictMode>
 	);
 }
@@ -291,10 +234,10 @@ function animate(time) {
 	env.update();
 	if (!model.damaged) {
 		//const observation = model.getObservation(env.road.borders, env.traffic);
-		const sData = model.getSensorData(env.road.borders, env.traffic);
+		/* const sData = model.getSensorData(env.road.borders, env.traffic);
 		const output = model.brain.forward(sData, true);
-		const action = model.brain.makeChoice(output);
-		//const action = model.lazyAction(env.road.borders, env.traffic, true);
+		const action = model.brain.makeChoice(output); */
+		const action = model.lazyAction(env.road.borders, env.traffic, true);
 		env.traffic = model.update(env.traffic, env.road.borders, action);
 	}
 

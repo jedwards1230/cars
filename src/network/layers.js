@@ -106,22 +106,6 @@ class Layer {
         }
     }
 
-    /** Load saved weights */
-    loadWeights(weights) {
-        if (weights.length !== this.weights.length) return
-        for (let i = 0; i < this.weights.length; i++) {
-            this.weights[i] = weights[i];
-        }
-    }
-
-    /** Load saved biases */
-    loadBiases(biases) {
-        if (biases.length !== this.biases.length) return
-        for (let i = 0; i < this.biases.length; i++) {
-            this.biases[i] = biases[i];
-        }
-    }
-
     /** Randomize weights with (Math.random() * 2 - 1) */
     #randomize() {
         for (let i = 0; i < this.inputs.length; i++) {

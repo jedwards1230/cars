@@ -25,7 +25,7 @@ export class Car {
      * @param {number} width - The width of the car.
      * @param {number} height - The height of the car.
      */
-    constructor(id, x, y, maxspeed = 2, controller = "dummy", color = "blue", actionCount = 2) {
+    constructor(id, x, y, maxspeed = 2, controller = "dummy", color = "blue") {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -48,7 +48,7 @@ export class Car {
 
         this.controller = controller;
         this.controls = new Controls(controller);
-        this.actionCount = actionCount;
+        this.actionCount = 2;
 
         this.polygon = this.#createPolygon();
         this.sensors = []
@@ -69,86 +69,20 @@ export class Car {
         this.useBrain = true;
         this.brain = new Network(config);
         let sensorCount = 3;
-        let savedModelConfig;
         
         switch (this.model) {
             case "fsd":
-                sensorCount = 5;
+                //sensorCount = 5;
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
-
-                savedModelConfig = loadModel("trainBrain");
-                if (savedModelConfig) this.brain.loadBrain(savedModelConfig);
                 break;
 
             case "forward":
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
-
-                savedModelConfig = loadModel("forwardBrain");
-                if (savedModelConfig) {
-                    this.brain.loadBrain(savedModelConfig);
-                } else {
-                    console.log("Using default forward brain");
-                    saveModel("forwardBrain", defaultForwardBrain);
-                    this.brain.loadBrain(defaultForwardBrain);
-                }
+                saveModel("forwardBrain", defaultForwardBrain);
                 break;
 
             default:
                 console.log("Invalid brain");
-        }
-    }
-
-    addBrain(model, modelConfig) {
-        this.model = model;
-        this.useBrain = true;
-        let modelData;
-        let sensorCount = 3;
-
-        switch (model) {
-            case "fsd":
-                sensorCount = 5;
-                this.sensors.push(new Sensor(this, sensorCount, "forward"));
-
-                this.brain = new Network(modelConfig)
-                modelData = loadModel("trainBrain");
-                if (modelData) this.brain.loadBrain(modelData);
-                break;
-
-            case "forward":
-                this.sensors.push(new Sensor(this, sensorCount, "forward"));
-
-                this.brain = new Network(modelConfig)
-                modelData = loadModel("forwardBrain");
-                if (modelData) {
-                    this.brain.loadBrain(modelData);
-                } else {
-                    /* const defaultForwardBrain = {
-                        "weights": [
-                            [
-                                [-0.054578436663617134, 0.37513033769486365, -0.10983221545303008],
-                                [0.16301358590881249, 0.06655747653191099, -0.002821014820185678],
-                                [0.0015701754260134817, 0.2973476526946789, 0.03780176776836455],
-                                [-0.18999580034831548, 0.24332761155702254, -0.056238421904291395]
-                            ],
-                            [
-                                [0.05879472462854643, -0.26671087907051877],
-                                [0.12702500460514837, 0.35342704088524063],
-                                [-0.1269635260491831, -0.23965514383302527]
-                            ]
-                        ],
-                        "biases": [
-                            [-0.9099945191213984, 0.5746715078863484, 0.10933239518212397],
-                            [3.9110326859515516, 3.4316354488463214]
-                        ]
-                    }; */
-                    console.log("Using default forward brain");
-                    saveModel("forwardBrain", defaultForwardBrain);
-                    this.brain.loadBrain(defaultForwardBrain);
-                }
-                break;
-
-            default:
-                console.log("No brain selected");
         }
     }
 
@@ -264,7 +198,7 @@ export class Car {
     lazyAction(borders, traffic, backprop = false) {
         if (!this.useBrain) return null;
         const observation = this.getObservation(borders, traffic);
-        const action = this.brain.forward(observation, backprop);
+        const action = this.brain.forward(this.sensorOffsets, backprop);
         return this.brain.makeChoice(action);
     }
 
