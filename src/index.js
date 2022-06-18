@@ -14,7 +14,6 @@ import { Visualizer } from "./network/visualizer.js";
 import { Car } from "./car/car.js";
 import { train } from "./network/train.js";
 import { ModelConfig } from './network/config';
-import { destroy } from "./utils.js";
 
 // Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.unregister();
@@ -208,7 +207,7 @@ const tooltipList = [...tooltipTriggerList].map(
 );
 
 const destroyModel = () => {
-	destroy(modelConfig.name);
+	modelConfig.destroy();
 	reset();
 }
 

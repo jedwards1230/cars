@@ -1,13 +1,7 @@
 import { Controls } from "./controls.js";
 import { Sensor } from "./sensor.js";
-import {
-    Network,
-    defaultForwardBrain
-} from "../network/network.js";
-import {
-    polysIntersect,
-    saveModel
-} from "../utils.js";
+import { Network } from "../network/network.js";
+import { polysIntersect } from "../utils.js";
 
 export class Car {
     /** 
@@ -79,7 +73,6 @@ export class Car {
 
             case "forward":
                 this.sensors = new Sensor(this, sensorCount, "forward");
-                saveModel("forwardBrain", defaultForwardBrain);
                 break;
 
             default:
