@@ -20,7 +20,7 @@ const MetricsTable = props => {
     const [modelCount, setModelCount] = useState(0);
 
     useEffect(() => {
-        const episodes = props.episodes.filter(e => e.goodEntry === true)
+        const episodes = props.episodes
         setModelCount(episodes.length);
 
         const timeMap = episodes.map(e => e.time);

@@ -43,7 +43,7 @@ const visualizer = new Visualizer();
 let env, model;
 const trafficCount = 50;
 const brainCount = 1;
-let smartTraffic = false;
+let smartTraffic = true;
 
 // init for training loop
 let breakLoop = false;
@@ -251,7 +251,9 @@ const drawUI = () => {
 				setTrain={startTrain}
 				setPlay={startVisualizer}
 				beginTrain={beginTrain}
-				model={model} />
+				model={model}
+				modelConfig={modelConfig}
+				generations={modelConfig.generations} />
 		</React.StrictMode>
 	);
 }

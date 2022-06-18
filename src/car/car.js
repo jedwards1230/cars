@@ -281,8 +281,6 @@ export class Car {
             } else if (this.speed < -this.maxSpeed * 2 / 3) {
                 this.speed = -this.maxSpeed * 2 / 3;
             }
-        } else {
-            console.log("damaged");
         }
 
         // add friction

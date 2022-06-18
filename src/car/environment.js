@@ -64,7 +64,7 @@ export class Environment {
             const [x, y] = getStartPosition(i);
 
             if (this.smart) {
-                car = new Car(idx, x, y, getRandomInt(2, 4), "network");
+                car = new Car(idx, x, y, getRandomInt(2, 3), "network");
                 car.loadBrainConfig(this.modelConfig);
             } else {
                 car = new Car(idx, x, y, getRandomInt(2, 2), "dummy");

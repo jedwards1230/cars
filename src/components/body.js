@@ -1,32 +1,31 @@
 import React, { useEffect, useState } from "react";
 import WelcomeView from "./welcome";
 import TrainConfigForm from "./trainConfigForm";
+// eslint-disable-next-line no-unused-vars
 import TrainProgress from "./trainProgress";
 import MetricsTable from "./metrics";
 import LossChart from "./lossChart";
 
 const BodyComponent = props => {
-    const [showStats, setShowStats] = useState(props.model.modelConfig.generations > 0);
+    const [showStats, setShowStats] = useState(props.generations > 0);
 
     useEffect(() => {
-        setShowStats(props.model.modelConfig.generations.length > 0);
-    }, [props.model.modelConfig.generations]);
+        setShowStats(props.generations.length > 0);
+    }, [props.generations]);
 
     if (props.welcomed && !props.showVisualizer) {
         return (
             <div id="mainView">
                 <TrainConfigForm
                     beginTrain={props.beginTrain}
-                    modelConfig={props.model.modelConfig} />
+                    modelConfig={props.modelConfig} />
                 {showStats &&
                     <div id="trainStats" className=" py-2 my-2">
                         <h5 className="p-3 text-center">Training Stats</h5>
                         <MetricsTable
-                            episodes={props.model.modelConfig.generations} />
-                        <TrainProgress
-                            episodes={props.model.modelConfig.generations} />
+                            episodes={props.generations} />
                         <LossChart
-                            episodes={props.model.modelConfig.generations} />
+                            episodes={props.generations} />
                     </div>}
             </div>
         )
