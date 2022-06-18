@@ -1,7 +1,7 @@
 import { Road } from "./road.js";
 import { getRandomInt } from "../utils.js";
 import { Car } from "./car.js";
-import defaultForwardBrain from "../network/network.js";
+import { ModelConfig } from "../network/config.js";
 
 export class Environment {
     constructor(trafficCount, brainCount, carCanvas, smart = false) {
@@ -10,7 +10,8 @@ export class Environment {
         this.brainCount = brainCount;
         this.smart = smart;
 
-        this.modelLayers = defaultForwardBrain;
+        this.modelConfig = new ModelConfig("trafficForward", "forward");
+        this.modelConfig.load();
 
         this.driverSpeed = 3;
         this.laneCount = 3;
@@ -64,7 +65,7 @@ export class Environment {
 
             if (this.smart) {
                 car = new Car(idx, x, y, getRandomInt(2, 4), "network");
-                car.loadBrainConfig(defaultForwardBrain)
+                car.loadBrainConfig(this.modelConfig);
             } else {
                 car = new Car(idx, x, y, getRandomInt(2, 2), "dummy");
             }

@@ -56,7 +56,6 @@ let animFrame;
 let modelConfig = new ModelConfig("trainBrain", "fsd");
 modelConfig.load();
 
-
 // Set play view
 function setPlayView() {
 	if (visualizer.active)
