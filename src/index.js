@@ -9,7 +9,7 @@ import { Environment } from "./car/environment.js";
 import { Visualizer } from "./network/visualizer.js";
 import { Car } from "./car/car.js";
 import { train } from "./network/train.js";
-import defaultForwardBrain from './network/network';
+import { defaultTrainBrain } from './network/network';
 import NavComponent from './components/nav';
 import BodyComponent from './components/body';
 import {
@@ -153,7 +153,7 @@ function reset(breakL = true) {
 	const x = 0;
 	const y = env.road.getLaneCenter(env.startLane);
 	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-	model.loadBrainConfig(defaultForwardBrain);
+	model.loadBrainConfig(defaultTrainBrain);
 
 	// load saved model and episodes
 	//const savedModelConfig = loadModel(activeModel);
