@@ -1,3 +1,5 @@
+import { defaultTrainBrain } from "./network";
+
 export class ModelConfig {
     constructor() {
         this.name = "";
@@ -6,11 +8,13 @@ export class ModelConfig {
         this.layers = [];
     }
 
+    /** Save config to localStorage */
     save() {
         const data = JSON.stringify(this);
         localStorage.setItem(this.name, data);
     }
 
+    /** Load config from localStorage */
     load(name) {
         const data = localStorage.getItem(name);
         if (data) {
@@ -19,7 +23,25 @@ export class ModelConfig {
             this.alias = config.alias;
             this.lr = config.lr;
             this.layers = config.layers;
+        } else if (name === "trainBrain") {
+            const config = defaultTrainBrain;
+            this.name = config.name;
+            this.alias = config.alias;
+            this.lr = config.lr;
+            this.layers = config.layers;
         }
+    }
+
+    /** Compare configs to see if layers are compatible (by activation, input, and output count) */
+    compare(config) {
+        if (!config || !config.layers) return false;
+        if (this.layers.length !== config.layers.length) return false;
+        for (let i = 0; i < this.layers.length; i++) {
+            if (this.layers[i].activation !== config.layers[i].activation) return false;
+            if (this.layers[i].inputs !== config.layers[i].inputs) return false;
+            if (this.layers[i].outputs !== config.layers[i].outputs) return false;
+        }
+        return true;
     }
 }
 
