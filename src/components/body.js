@@ -16,7 +16,8 @@ const BodyComponent = props => {
         return (
             <div id="mainView">
                 <TrainConfigForm
-                    beginTrain={props.beginTrain} />
+                    beginTrain={props.beginTrain}
+                    modelConfig={props.modelConfig} />
                 {showStats &&
                     <div id="trainStats" className=" py-2 my-2">
                         <h5 className="p-3 text-center">Training Stats</h5>
