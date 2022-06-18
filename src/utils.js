@@ -88,11 +88,10 @@ export function loadEpisodes(id) {
 
 /**
  * Saves brain to localStorage
- * @param  {string} id Active model name
- * @param  {object} model JSON of model object
+ * @param  {object} modelConfig JSON of model object
  */
-export function saveModel(id, model) {
-    localStorage.setItem(id, JSON.stringify(model, null, '\t'));
+export function saveModel(modelConfig) {
+    localStorage.setItem(modelConfig.name, JSON.stringify(modelConfig, null, '\t'));
 }
 
 /**

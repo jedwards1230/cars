@@ -59,6 +59,11 @@ export class Car {
         this.polygon = this.#createPolygon();
     }
 
+    saveModelConfig() {
+        this.modelConfig.layers = this.brain.saveLayers();
+        return this.modelConfig;
+    }
+
     loadBrainConfig(config) {
         this.modelConfig = config;
         this.model = config.alias;
@@ -69,11 +74,11 @@ export class Car {
         switch (this.model) {
             case "fsd":
                 //sensorCount = 5;
-                this.sensors.push(new Sensor(this, sensorCount, "forward"));
+                this.sensors = new Sensor(this, sensorCount, "forward");
                 break;
 
             case "forward":
-                this.sensors.push(new Sensor(this, sensorCount, "forward"));
+                this.sensors = new Sensor(this, sensorCount, "forward");
                 saveModel("forwardBrain", defaultForwardBrain);
                 break;
 
@@ -140,11 +145,9 @@ export class Car {
     getSensorData(roadBorders, traffic) {
         let sensorOffsets = [];
         // update each sensor
-        for (let i = 0; i < this.sensors.length; i++) {
-            this.sensors[i].update(roadBorders, traffic);
-            const offsets = this.sensors[i].getSensorOffsets();
-            sensorOffsets = sensorOffsets.concat(offsets)
-        }
+        this.sensors.update(roadBorders, traffic);
+        const offsets = this.sensors.getSensorOffsets();
+        sensorOffsets = sensorOffsets.concat(offsets)
         return sensorOffsets
     }
 
@@ -193,8 +196,9 @@ export class Car {
 
     lazyAction(borders, traffic, backprop = false) {
         if (!this.useBrain) return null;
-        const observation = this.getObservation(borders, traffic);
-        const action = this.brain.forward(this.sensorOffsets, backprop);
+        // eslint-disable-next-line no-unused-vars
+        const sData = this.getSensorData(borders, traffic);
+        const action = this.brain.forward(sData, backprop);
         return this.brain.makeChoice(action);
     }
 
@@ -308,7 +312,7 @@ export class Car {
         } else {
             ctx.fillStyle = this.color;
             if (this.sensors && drawSensors) {
-                this.sensors[0].draw(ctx);
+                this.sensors.draw(ctx);
             }
         }
 

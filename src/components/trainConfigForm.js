@@ -6,8 +6,8 @@ const TrainConfigForm = props => {
     const [numEpisodes, setNumEpisodes] = useState(1000);
     const [numSteps, setNumSteps] = useState(1000);
     const [epsilonDecay, setEpsilonDecay] = useState(0.99);
-    const [learningRate, setLearningRate] = useState(props.modelConfig.learningRate);
-    const [counter, setCounter] = useState(props.modelConfig.layers.length);
+    const [learningRate, setLearningRate] = useState(props.modelConfig.lr);
+    const [counter, setCounter] = useState(props.modelConfig.layers.length-1);
 
     const [layers, setLayers] = useState(props.modelConfig.layers);
 
@@ -19,6 +19,7 @@ const TrainConfigForm = props => {
         if (layers.length > 1) {
             const newList = layers.filter((item) => item.id !== id);
             setLayers(newList);
+            setCounter(newList.length - 1);
         }
     }
 

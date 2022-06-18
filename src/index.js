@@ -14,13 +14,7 @@ import { Visualizer } from "./network/visualizer.js";
 import { Car } from "./car/car.js";
 import { train } from "./network/train.js";
 import { ModelConfig } from './network/config';
-import {
-	saveModel,
-	loadModel,
-	destroy,
-	loadEpisodes,
-	saveEpisodes,
-} from "./utils.js";
+import { destroy } from "./utils.js";
 
 // Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.unregister();
@@ -57,13 +51,11 @@ let breakLoop = false;
 let numSteps, numEpisodes, epsilonDecay;
 let episodeCounter = 0;
 let info;
-let episodes = [];
 let animFrame;
 
 // init default config
-const activeModel = "trainBrain";
-const modelConfig = new ModelConfig();
-modelConfig.load(activeModel);
+let modelConfig = new ModelConfig("trainBrain", "fsd");
+modelConfig.load();
 
 
 // Set play view
@@ -87,6 +79,9 @@ function beginTrain(nEpisodes, nSteps, epDecay, lr, layers) {
 
 	modelConfig.learningRate = lr;
 	modelConfig.layers = layers;
+	modelConfig.name = "trainBrain";
+	modelConfig.alias = "fsd";
+	console.log("Model config inputs: ", modelConfig);
 
 	// reset environment
 	reset(false);
@@ -102,7 +97,7 @@ async function episodeLoop() {
 	// these get saved for future generations to evolve from.
 	const checkGoodEntry = () => {
 		if (info.speed < 1) return false;
-		if (info.distance < 500) return false;
+		//if (info.distance < 500) return false;
 		if (info.distance > distanceMax * 0.9) return true;
 		return false;
 	};
@@ -116,31 +111,30 @@ async function episodeLoop() {
 
 	// collect episode info for training run
 	info = await train(model, env, numSteps);
-	info.episode = episodes.length + 1;
+	//info.episode = episodes.length + 1;
 
 	// save max distance so we can mark model improvement
 	// the main goal is distance without crashing
-	const distanceMap = episodes.map((e) => e.distance);
-	const distanceMax = Math.max(...distanceMap);
+	const distanceMap = model.modelConfig.generations.map((e) => e.distance);
+	const distanceMax = Math.max(...distanceMap, 500);
 
 	// check if this is a good model
 	info.goodEntry = checkGoodEntry(info);
-	episodes.push(info);
 
 	// save only if model is labelled an improvement
 	if (distanceMax > 0 && info.goodEntry) {
-		console.log("Saving model...");
-		const configToSave = model.brain.saveBrain();
-		saveModel(activeModel, configToSave);
-		saveEpisodes(activeModel, episodes);
+		model.modelConfig.generations.push(info);
+		modelConfig = model.saveModelConfig();
+		console.log("Saving model: ", modelConfig);
+		modelConfig.save();
 	}
 
 	// reset environment without breaking loop
 	reset(false);
 
-	episodeCounter++;
 
 	// break loop if we've reached the max number of episodes
+	episodeCounter++;
 	if (episodeCounter >= numEpisodes || episodeCounter < 0)
 		breakLoop = true;
 
@@ -195,20 +189,8 @@ function reset(breakL = true) {
 	const x = 0;
 	const y = env.road.getLaneCenter(env.startLane);
 	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-	// load config from training form inputs
+	// load config from training form inputsmodelConfig.load();
 	model.loadBrainConfig(modelConfig);
-
-	// load saved model with same name
-	const savedModelConfig = loadModel(activeModel);
-	// check if models are compatible (layer count, activations, inputs, outputs)
-	if (modelConfig.compare(savedModelConfig)) {
-		// load saved config
-		model.loadBrainConfig(savedModelConfig)
-
-		// load associated episodes
-		const savedEpisodes = loadEpisodes(activeModel);
-		if (savedEpisodes) episodes = savedEpisodes;
-	}
 
 	// reset animation
 	cancelAnimationFrame(animFrame);
@@ -226,8 +208,7 @@ const tooltipList = [...tooltipTriggerList].map(
 );
 
 const destroyModel = () => {
-	episodes = [];
-	destroy(activeModel);
+	destroy(modelConfig.name);
 	reset();
 }
 
@@ -254,7 +235,7 @@ const drawUI = () => {
 		reactHeader.render(
 			<React.StrictMode>
 				<NavComponent
-					activeModel={activeModel}
+					activeModel={modelConfig.name}
 					model={model}
 					destroy={destroyModel}
 					reset={reset}
@@ -272,7 +253,6 @@ const drawUI = () => {
 				setTrain={startTrain}
 				setPlay={startVisualizer}
 				beginTrain={beginTrain}
-				episodes={episodes}
 				model={model} />
 		</React.StrictMode>
 	);

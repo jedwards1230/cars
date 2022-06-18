@@ -1,15 +1,19 @@
 class Layer {
-    constructor(inputs, outputs) {
-        this.inputs = new Array(inputs);
-        this.weights = new Array(inputs);
-        for (let i = 0; i < inputs; i++) {
-            this.weights[i] = new Array(outputs).fill(0);
+    constructor(config, lr) {
+        this.inputs = new Array(config.inputs);
+        this.weights = new Array(config.inputs);
+        for (let i = 0; i < config.inputs; i++) {
+            this.weights[i] = new Array(config.outputs).fill(0);
         }
+        this.lr = lr;
 
-        this.biases = new Array(outputs).fill(0.1);
-        this.outputs = new Array(outputs);
+        this.biases = new Array(config.outputs).fill(0.1);
+        this.outputs = new Array(config.outputs);
 
         this.#randomize();
+
+        if (config.biases) this.biases = config.biases;
+        if (config.weights) this.weights = config.weights;
     }
 
     /** Forward propagation */
@@ -98,6 +102,7 @@ class Layer {
 
     save() {
         return {
+            id: this.id,
             activation: this.name,
             inputs: this.inputs.length,
             outputs: this.outputs.length,
@@ -117,11 +122,9 @@ class Layer {
 }
 
 export class SoftMax extends Layer {
-    constructor(inputs, outputs, lr, weights=null, biases=null) {
-        super(inputs, outputs, lr);
+    constructor(config, lr) {
+        super(config, lr);
         this.name = "SoftMax";
-        if (weights) this.weights = weights;
-        if (biases) this.biases = biases;
         this.activation = (x) => {
             const maxLogit = Math.max(...x);
             const scores = x.map(l => Math.exp(l - maxLogit));
@@ -132,11 +135,9 @@ export class SoftMax extends Layer {
 }
 
 export class Sigmoid extends Layer {
-    constructor(inputCount, outputCount, lr, weights=null, biases=null) {
-        super(inputCount, outputCount, lr);
+    constructor(config, lr) {
+        super(config, lr);
         this.name = "Sigmoid";
-        if (weights) this.weights = weights;
-        if (biases) this.biases = biases;
         this.activation = x => {
             return x.map(x => 1 / (1 + Math.exp(-x)));
         }
@@ -147,11 +148,9 @@ export class Sigmoid extends Layer {
 }
 
 export class LeakyRelu extends Layer {
-    constructor(inputCount, outputCount, lr, weights=null, biases=null, alpha = 0.01) {
-        super(inputCount, outputCount, lr);
+    constructor(config, lr, alpha = 0.01) {
+        super(config, lr);
         this.name = "LeakyRelu";
-        if (weights) this.weights = weights;
-        if (biases) this.biases = biases;
         this.alpha = alpha;
         this.activation = x => {
             return x.map(x => x > 0 ? x : x * this.alpha);
@@ -163,11 +162,9 @@ export class LeakyRelu extends Layer {
 }
 
 export class DropOut extends Layer {
-    constructor(inputCount, outputCount, lr, weights=null, biases=null, dropRate = 0.5) {
-        super(inputCount, outputCount, lr);
+    constructor(config, lr, dropRate = 0.5) {
+        super(config, lr);
         this.name = "DropOut";
-        if (weights) this.weights = weights;
-        if (biases) this.biases = biases;
         this.dropRate = dropRate;
         this.activation = x => {
             return x.map(x => Math.random() < this.dropRate ? 0 : x);
@@ -176,11 +173,9 @@ export class DropOut extends Layer {
 }
 
 export class Tanh extends Layer {
-    constructor(inputCount, outputCount, lr, weights=null, biases=null) {
-        super(inputCount, outputCount, lr);
+    constructor(config, lr) {
+        super(config, lr);
         this.name = "Tanh";
-        if (weights) this.weights = weights;
-        if (biases) this.biases = biases;
         this.activation = x => {
             return x.map(x => Math.tanh(x));
         }
@@ -191,11 +186,9 @@ export class Tanh extends Layer {
 }
 
 export class Linear extends Layer {
-    constructor(inputCount, outputCount, lr, weights=null, biases=null) {
-        super(inputCount, outputCount, lr);
+    constructor(config, lr) {
+        super(config, lr);
         this.name = "Linear";
-        if (weights) this.weights = weights;
-        if (biases) this.biases = biases;
         this.activation = x => {
             return x;
         }
@@ -206,11 +199,9 @@ export class Linear extends Layer {
 }
 
 export class Relu extends Layer {
-    constructor(inputCount, outputCount, lr, weights=null, biases=null) {
-        super(inputCount, outputCount, lr);
+    constructor(config, lr) {
+        super(config, lr);
         this.name = "Relu";
-        if (weights) this.weights = weights;
-        if (biases) this.biases = biases;
         this.activation = x => {
             return x.map(x => x > 0 ? x : 0);
         }

@@ -25,12 +25,13 @@ const NetworkLayerItem = props => {
     const [activation, setActivation] = useState(props.item.activation);
     const [inputs, setInputs] = useState(props.item.inputs);
     const [outputs, setOutputs] = useState(props.item.outputs);
+    const id = props.item.id;
 
     const updateLayer = (activation, inputs, outputs) => {
         setActivation(activation);
         setInputs(inputs);
         setOutputs(outputs);
-        props.updateLayer(props.item.id, activation, inputs, outputs);
+        props.updateLayer(id, activation, inputs, outputs);
     }
 
     return (
@@ -59,7 +60,7 @@ const NetworkLayerItem = props => {
                 </Form.Select>
             </td>
             <td>
-                <Button variant="danger" onClick={() => props.onRemove(props.item.id)}>-</Button>
+                <Button variant="danger" onClick={() => props.onRemove(id)}>-</Button>
             </td>
         </tr>
     )

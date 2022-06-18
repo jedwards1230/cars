@@ -59,23 +59,17 @@ export class Network {
         return choice;
     }
 
-    saveBrain() {
+    saveLayers() {
         const layers = [];
-        this.layers.forEach(level => {
+        this.layers.forEach((level, index) => {
+            level.id = index;
             layers.push(level.save());
         });
 
-        return {
-            name: this.name,
-            alias: this.alias,
-            lr: this.lr,
-            layers: layers,
-        }
+        return layers
     }
 
     loadBrain(saved) {
-        console.log("Loading network...");
-        console.log(saved);
         this.name = saved.name;
         this.lr = saved.lr;
         this.alias = saved.alias;
@@ -91,22 +85,22 @@ export class Network {
         for (let i = 0; i < layers.length; i++) {
             switch (layers[i].activation) {
                 case "Linear":
-                    preparedLayers[i] = new Linear(layers[i].inputs, layers[i].outputs, this.lr, layers[i].weights, layers[i].biases);
+                    preparedLayers[i] = new Linear(layers[i], this.lr);
                     break;
                 case "Sigmoid":
-                    preparedLayers[i] = new Sigmoid(layers[i].inputs, layers[i].outputs, this.lr, layers[i].weights, layers[i].biases);
+                    preparedLayers[i] = new Sigmoid(layers[i], this.lr);
                     break;
                 case "Relu":
-                    preparedLayers[i] = new Relu(layers[i].inputs, layers[i].outputs, this.lr, layers[i].weights, layers[i].biases);
+                    preparedLayers[i] = new Relu(layers[i], this.lr);
                     break;
                 case "LeakyRelu":
-                    preparedLayers[i] = new LeakyRelu(layers[i].inputs, layers[i].outputs, this.lr, layers[i].weights, layers[i].biases);
+                    preparedLayers[i] = new LeakyRelu(layers[i], this.lr);
                     break;
                 case "Tanh":
-                    preparedLayers[i] = new Tanh(layers[i].inputs, layers[i].outputs, this.lr, layers[i].weights, layers[i].biases);
+                    preparedLayers[i] = new Tanh(layers[i], this.lr);
                     break;
                 case "SoftMax":
-                    preparedLayers[i] = new SoftMax(layers[i].inputs, layers[i].outputs, this.lr, layers[i].weights, layers[i].biases);
+                    preparedLayers[i] = new SoftMax(layers[i], this.lr);
                     break;
                 default:
                     console.log("Unknown activation function");
@@ -152,7 +146,7 @@ export const defaultTrainBrain = {
         {
             "activation": "Tanh",
             "id": 0,
-            "inputs": 4,
+            "inputs": 3,
             "outputs": 3,
         }, {
             "activation": "Sigmoid",
@@ -160,7 +154,8 @@ export const defaultTrainBrain = {
             "inputs": 3,
             "outputs": 2,
         }
-    ]
+    ],
+    "generations": []
 }
 
 
@@ -172,7 +167,7 @@ export const defaultForwardBrain = {
         {
             "activation": "Tanh",
             "id": 0,
-            "inputs": 4,
+            "inputs": 3,
             "outputs": 3,
             "weights": [
                 [-0.054578436663617134, 0.37513033769486365, -0.10983221545303008],
@@ -193,7 +188,8 @@ export const defaultForwardBrain = {
             ],
             "biases": [3.9110326859515516, 3.2316354488463214]
         }
-    ]
+    ],
+    "generations": []
 }
 
 
