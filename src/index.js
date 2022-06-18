@@ -156,13 +156,11 @@ function reset(breakL = true) {
 	model.loadBrainConfig(defaultTrainBrain);
 
 	// load saved model and episodes
-	//const savedModelConfig = loadModel(activeModel);
-	//if (savedModelConfig) model.loadBrainConfig(savedModelConfig)
+	const savedModelConfig = loadModel(activeModel);
+	if (savedModelConfig) model.loadBrainConfig(savedModelConfig)
 
 	const savedEpisodes = loadEpisodes(activeModel);
 	if (savedEpisodes) episodes = savedEpisodes;
-
-	saveModel(activeModel, model.brain.saveBrain());
 
 	// reset animation
 	cancelAnimationFrame(animFrame);
@@ -172,6 +170,7 @@ function reset(breakL = true) {
 const tooltipTriggerList = document.querySelectorAll(
 	'[data-bs-toggle="tooltip"]'
 );
+// eslint-disable-next-line no-unused-vars
 const tooltipList = [...tooltipTriggerList].map(
 	(tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
 );
