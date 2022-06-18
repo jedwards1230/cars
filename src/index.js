@@ -12,6 +12,7 @@ import { Visualizer } from "./network/visualizer.js";
 import { Car } from "./car/car.js";
 import { train } from "./network/train.js";
 import { defaultTrainBrain } from './network/network';
+import { ModelConfig } from './network/config';
 import NavComponent from './components/nav';
 import BodyComponent from './components/body';
 import {
@@ -25,7 +26,7 @@ import {
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://cra.link/PWA
-serviceWorkerRegistration.register();
+serviceWorkerRegistration.unregister();
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
@@ -56,6 +57,7 @@ let numSteps, numEpisodes, epsilonDecay, learningRate;
 let episodeCounter = 0;
 
 const activeModel = "trainBrain";
+const modelConfig = new ModelConfig();
 
 let env, model;
 
@@ -82,8 +84,8 @@ function beginTrain(nEpisodes, nSteps, epDecay, lr, layers) {
 	epsilonDecay = epDecay;
 	learningRate = lr;
 	episodeCounter = 0;
-	console.log("Layer form: " + layers);
-	console.log("Defauly config: " + defaultTrainBrain);
+	console.log("Layer form: ", layers);
+	console.log("Defauly config: ", defaultTrainBrain);
 
 	reset(false);
 
@@ -236,7 +238,8 @@ const drawUI = () => {
 				setTrain={startTrain}
 				setPlay={startVisualizer}
 				beginTrain={beginTrain}
-				episodes={episodes} />
+				episodes={episodes}
+				model={model} />
 		</React.StrictMode>
 	);
 }

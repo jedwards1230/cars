@@ -151,10 +151,12 @@ export const defaultTrainBrain = {
     "layers": [
         {
             "activation": "Tanh",
+            "id": 0,
             "inputs": 4,
             "outputs": 3,
         }, {
             "activation": "Sigmoid",
+            "id": 1,
             "inputs": 3,
             "outputs": 2,
         }
@@ -169,6 +171,7 @@ export const defaultForwardBrain = {
     "layers": [
         {
             "activation": "Tanh",
+            "id": 0,
             "inputs": 4,
             "outputs": 3,
             "weights": [
@@ -180,6 +183,7 @@ export const defaultForwardBrain = {
             "biases": [-0.9099945191213984, 0.5746715078863484, 0.10933239518212397]
         }, {
             "activation": "Sigmoid",
+            "id": 1,
             "inputs": 3,
             "outputs": 2,
             "weights": [

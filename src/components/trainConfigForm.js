@@ -6,15 +6,10 @@ const TrainConfigForm = props => {
     const [numEpisodes, setNumEpisodes] = useState(1000);
     const [numSteps, setNumSteps] = useState(1000);
     const [epsilonDecay, setEpsilonDecay] = useState(0.99);
-    const [learningRate, setLearningRate] = useState(0.01);
-    const [counter, setCounter] = useState(0);
+    const [learningRate, setLearningRate] = useState(props.modelConfig.learningRate);
+    const [counter, setCounter] = useState(props.modelConfig.layers.length);
 
-    const [layers, setLayers] = useState([{
-        activation: "linear",
-        inputs: null,
-        outputs: null,
-        id: counter
-    }]);
+    const [layers, setLayers] = useState(props.modelConfig.layers);
 
     const submitForm = () => {
         props.beginTrain(numEpisodes, numSteps, epsilonDecay, learningRate, layers);
@@ -37,7 +32,7 @@ const TrainConfigForm = props => {
 
     const addLayer = () => {
         setLayers([...layers, {
-            activation: "linear",
+            activation: "Linear",
             inputs: null,
             outputs: null,
             id: counter+1

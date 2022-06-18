@@ -60,6 +60,7 @@ export class Car {
     }
 
     loadBrainConfig(config) {
+        this.modelConfig = config;
         this.model = config.alias;
         this.useBrain = true;
         this.brain = new Network(config);

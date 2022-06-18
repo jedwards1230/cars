@@ -50,12 +50,12 @@ const NetworkLayerItem = props => {
                     onChange={e => updateLayer(activation, inputs, e.target.value)} ></input>
             </td>
             <td>
-                <Form.Select defaultValue="linear" onChange={e => updateLayer(e.target.value, inputs, outputs)}>
-                    <option value="linear">Linear</option>
-                    <option value="relu">Relu</option>
-                    <option value="leakyRelu">LeakyRelu</option>
-                    <option value="sigmoid">Sigmoid</option>
-                    <option value="tanh">Tanh</option>
+                <Form.Select defaultValue={activation} onChange={e => updateLayer(e.target.value, inputs, outputs)}>
+                    <option value="Linear">Linear</option>
+                    <option value="Relu">Relu</option>
+                    <option value="LeakyRelu">LeakyRelu</option>
+                    <option value="Sigmoid">Sigmoid</option>
+                    <option value="Tanh">Tanh</option>
                 </Form.Select>
             </td>
             <td>
