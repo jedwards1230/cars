@@ -9,6 +9,7 @@ import {
     SoftMax,
 } from "../network/layers.js";
 import { Car } from "./car.js";
+import defaultForwardBrain from "../network/network.js";
 
 export class Environment {
     constructor(trafficCount, brainCount, carCanvas, smart = false) {
@@ -20,10 +21,7 @@ export class Environment {
         const trafficInputs = 4;
         const trafficOutputs = 2;
 
-        this.modelLayers = [
-            new Tanh(trafficInputs, 3),
-            new Sigmoid(3, trafficOutputs),
-        ];
+        this.modelLayers = defaultForwardBrain;
 
         this.driverSpeed = 3;
         this.laneCount = 3;
@@ -95,7 +93,7 @@ export class Environment {
 
             if (this.smart) {
                 car = new Car(idx, x, y, getRandomInt(2, 4), "network");
-                car.addBrain("forward", this, this.modelLayers);
+                car.loadBrainConfig(defaultForwardBrain)
             } else {
                 car = new Car(idx, x, y, getRandomInt(2, 2), "dummy");
             }

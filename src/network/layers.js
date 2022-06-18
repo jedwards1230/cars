@@ -96,6 +96,16 @@ class Layer {
         }
     }
 
+    save() {
+        return {
+            activation: this.name,
+            inputs: this.inputs.length,
+            outputs: this.outputs.length,
+            weights: this.weights,
+            biases: this.biases
+        }
+    }
+
     /** Load saved weights */
     loadWeights(weights) {
         if (weights.length !== this.weights.length) return
@@ -125,6 +135,7 @@ class Layer {
 export class SoftMax extends Layer {
     constructor(inputs, outputs, lr) {
         super(inputs, outputs, lr);
+        this.name = "SoftMax";
         this.activation = (x) => {
             const maxLogit = Math.max(...x);
             const scores = x.map(l => Math.exp(l - maxLogit));
@@ -137,6 +148,7 @@ export class SoftMax extends Layer {
 export class Sigmoid extends Layer {
     constructor(inputCount, outputCount, lr) {
         super(inputCount, outputCount, lr);
+        this.name = "Sigmoid";
         this.activation = x => {
             return x.map(x => 1 / (1 + Math.exp(-x)));
         }
@@ -149,6 +161,7 @@ export class Sigmoid extends Layer {
 export class LeakyRelu extends Layer {
     constructor(inputCount, outputCount, lr, alpha = 0.01) {
         super(inputCount, outputCount, lr);
+        this.name = "LeakyRelu";
         this.alpha = alpha;
         this.activation = x => {
             return x.map(x => x > 0 ? x : x * this.alpha);
@@ -162,6 +175,7 @@ export class LeakyRelu extends Layer {
 export class DropOut extends Layer {
     constructor(inputCount, outputCount, lr, dropRate = 0.5) {
         super(inputCount, outputCount, lr);
+        this.name = "DropOut";
         this.dropRate = dropRate;
         this.activation = x => {
             return x.map(x => Math.random() < this.dropRate ? 0 : x);
@@ -172,6 +186,7 @@ export class DropOut extends Layer {
 export class Tanh extends Layer {
     constructor(inputCount, outputCount, lr) {
         super(inputCount, outputCount, lr);
+        this.name = "Tanh";
         this.activation = x => {
             return x.map(x => Math.tanh(x));
         }
@@ -184,6 +199,7 @@ export class Tanh extends Layer {
 export class Linear extends Layer {
     constructor(inputCount, outputCount, lr) {
         super(inputCount, outputCount, lr);
+        this.name = "Linear";
         this.activation = x => {
             return x;
         }
@@ -196,6 +212,7 @@ export class Linear extends Layer {
 export class Relu extends Layer {
     constructor(inputCount, outputCount, lr) {
         super(inputCount, outputCount, lr);
+        this.name = "Relu";
         this.activation = x => {
             return x.map(x => x > 0 ? x : 0);
         }

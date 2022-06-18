@@ -89,10 +89,10 @@ export function loadEpisodes(id) {
 /**
  * Saves brain to localStorage
  * @param  {string} id Active model name
- * @param  {array} weights weights
+ * @param  {object} model JSON of model object
  */
-export async function saveModel(id, weights) {
-    localStorage.setItem(id, JSON.stringify(weights));
+export function saveModel(id, model) {
+    localStorage.setItem(id, JSON.stringify(model));
 }
 
 /**

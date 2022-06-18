@@ -24,6 +24,7 @@ import {
 	Tanh,
 	SoftMax,
 } from "./network/layers.js";
+import defaultForwardBrain from './network/network';
 import NavComponent from './components/nav';
 import BodyComponent from './components/body';
 
@@ -42,7 +43,7 @@ const carCtx = carCanvas.getContext("2d");
 
 const trafficCount = 50;
 const brainCount = 1;
-let smartTraffic = true;
+let smartTraffic = false;
 
 const visualizer = new Visualizer();
 
@@ -68,7 +69,6 @@ let modelLayers = activeLayers();
 const setModelLayers = layers => {
 	let preparedLayers = [];
 	for (let i = 0; i < layers.length; i++) {
-		console.log("Checking layer: ", layers[i]);
 		switch (layers[i].activation) {
 			case "linear":
 				preparedLayers.push(new Linear(layers[i].inputs, layers[i].outputs, learningRate));
@@ -157,7 +157,7 @@ async function episodeLoop() {
 
 	// save only if model is labelled an improvement
 	if (distanceMax > 0 && info.goodEntry) {
-		await saveModel(activeModel, model.brain.save());
+		saveModel(activeModel, model.brain.saveBrain());
 		saveEpisodes(activeModel, episodes);
 	}
 	reset(false);
@@ -208,13 +208,16 @@ function reset(breakL = true) {
 	const y = env.road.getLaneCenter(env.startLane);
 	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red", actionCount);
 	//modelLayers = activeLayers();
-	model.addBrain("fsd", env, modelLayers);
+	model.loadBrainConfig(defaultForwardBrain);
 
-	// load saved data
-	const modelBrain = loadModel(activeModel);
-	if (modelBrain) model.brain.loadBrain(modelBrain);
-	const modelEpisodes = loadEpisodes(activeModel);
-	if (modelEpisodes) episodes = modelEpisodes;
+	// load saved model and episodes
+	const savedModelConfig = loadModel(activeModel);
+	if (savedModelConfig) model.brain.loadBrain(savedModelConfig)
+
+	const savedEpisodes = loadEpisodes(activeModel);
+	if (savedEpisodes) episodes = savedEpisodes;
+
+	saveModel(activeModel, model.brain.saveBrain());
 
 	// reset animation
 	cancelAnimationFrame(animFrame);

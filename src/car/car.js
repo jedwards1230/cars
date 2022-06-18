@@ -10,7 +10,8 @@ import {
     Sensor
 } from "./sensor.js";
 import {
-    Network
+    Network,
+    defaultForwardBrain
 } from "../network/network.js";
 
 export class Car {
@@ -63,7 +64,41 @@ export class Car {
         this.polygon = this.#createPolygon();
     }
 
-    addBrain(model, env, layers) {
+    loadBrainConfig(config) {
+        this.model = config.alias;
+        this.useBrain = true;
+        this.brain = new Network(config);
+        let sensorCount = 3;
+        let savedModelConfig;
+        
+        switch (this.model) {
+            case "fsd":
+                sensorCount = 5;
+                this.sensors.push(new Sensor(this, sensorCount, "forward"));
+
+                savedModelConfig = loadModel("trainBrain");
+                if (savedModelConfig) this.brain.loadBrain(savedModelConfig);
+                break;
+
+            case "forward":
+                this.sensors.push(new Sensor(this, sensorCount, "forward"));
+
+                savedModelConfig = loadModel("forwardBrain");
+                if (savedModelConfig) {
+                    this.brain.loadBrain(savedModelConfig);
+                } else {
+                    console.log("Using default forward brain");
+                    saveModel("forwardBrain", defaultForwardBrain);
+                    this.brain.loadBrain(defaultForwardBrain);
+                }
+                break;
+
+            default:
+                console.log("Invalid brain");
+        }
+    }
+
+    addBrain(model, modelConfig) {
         this.model = model;
         this.useBrain = true;
         let modelData;
@@ -74,7 +109,7 @@ export class Car {
                 sensorCount = 5;
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
 
-                this.brain = new Network(layers)
+                this.brain = new Network(modelConfig)
                 modelData = loadModel("trainBrain");
                 if (modelData) this.brain.loadBrain(modelData);
                 break;
@@ -82,12 +117,12 @@ export class Car {
             case "forward":
                 this.sensors.push(new Sensor(this, sensorCount, "forward"));
 
-                this.brain = new Network(layers)
+                this.brain = new Network(modelConfig)
                 modelData = loadModel("forwardBrain");
                 if (modelData) {
                     this.brain.loadBrain(modelData);
                 } else {
-                    const defaultForwardBrain = {
+                    /* const defaultForwardBrain = {
                         "weights": [
                             [
                                 [-0.054578436663617134, 0.37513033769486365, -0.10983221545303008],
@@ -105,7 +140,7 @@ export class Car {
                             [-0.9099945191213984, 0.5746715078863484, 0.10933239518212397],
                             [3.9110326859515516, 3.4316354488463214]
                         ]
-                    };
+                    }; */
                     console.log("Using default forward brain");
                     saveModel("forwardBrain", defaultForwardBrain);
                     this.brain.loadBrain(defaultForwardBrain);

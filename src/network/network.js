@@ -2,14 +2,22 @@ import {
     lerp,
     MSE
 } from "../utils.js";
+import {
+    Linear,
+    Sigmoid,
+    Relu,
+    LeakyRelu,
+    Tanh,
+    SoftMax,
+} from "./layers.js";
 
 export class Network {
-    constructor(layers = [], lr = 0.001, epsilon = 0.99) {
-
+    constructor(modelConfig, epsilon = 0.99) {
         this.memory = [];
         this.layers = [];
         this.epsilon = epsilon;
         this.confidence = 0.5;
+        this.loadBrain(modelConfig);
 
         this.lossFunction = (targets, outputs) => {
             let cost = 0
@@ -18,11 +26,6 @@ export class Network {
             }
             return cost / outputs.length;
         };
-
-        for (let i = 0; i < layers.length; i++) {
-            layers[i].lr = lr;
-            this.layers.push(layers[i]);
-        }
     }
 
     /** Forward pass each layer */
@@ -56,28 +59,61 @@ export class Network {
         return choice;
     }
 
-    /** Load weights to each layer */
-    loadBrain(saved) {
-        const weights = saved.weights;
-        const biases = saved.biases;
-        for (let i = 0; i < this.layers.length; i++) {
-            this.layers[i].loadWeights(weights[i]);
-            this.layers[i].loadBiases(biases[i]);
+    saveBrain() {
+        const layers = [];
+        this.layers.forEach(level => {
+            layers.push(level.save());
+        });
+
+        return {
+            name: this.name,
+            alias: this.alias,
+            lr: this.lr,
+            layers: layers,
         }
     }
 
-    /** Get weights and biases from each layer */
-    save() {
-        const weights = [];
-        const biases = [];
-        for (let i = 0; i < this.layers.length; i++) {
-            weights.push(this.layers[i].weights);
-            biases.push(this.layers[i].biases);
+    loadBrain(saved) {
+        console.log("Loading network...");
+        console.log(saved);
+        this.name = saved.name;
+        this.lr = saved.lr;
+        this.alias = saved.alias;
+        this.setModelLayers(saved.layers);
+    }
+
+    /**
+     * Set model layers
+     * @param {array} layers - array of layer configs
+     */
+    setModelLayers = layers => {
+        let preparedLayers = [];
+        for (let i = 0; i < layers.length; i++) {
+            switch (layers[i].activation) {
+                case "Linear":
+                    preparedLayers.push(new Linear(layers[i].inputs, layers[i].outputs, this.lr));
+                    break;
+                case "Sigmoid":
+                    preparedLayers.push(new Sigmoid(layers[i].inputs, layers[i].outputs, this.lr));
+                    break;
+                case "Relu":
+                    preparedLayers.push(new Relu(layers[i].inputs, layers[i].outputs, this.lr));
+                    break;
+                case "LeakyRelu":
+                    preparedLayers.push(new LeakyRelu(layers[i].inputs, layers[i].outputs, this.lr));
+                    break;
+                case "Tanh":
+                    preparedLayers.push(new Tanh(layers[i].inputs, layers[i].outputs, this.lr));
+                    break;
+                case "SoftMax":
+                    preparedLayers.push(new SoftMax(layers[i].inputs, layers[i].outputs, this.lr));
+                    break;
+                default:
+                    console.log("Unknown activation function");
+                    break;
+            }
         }
-        return {
-            weights: weights,
-            biases: biases
-        };
+        this.layers = preparedLayers;
     }
 
     decay() {
@@ -107,3 +143,36 @@ export class Network {
         });
     }
 }
+
+
+export const defaultForwardBrain = {
+    "name": "forwardBrain",
+    "alias": "forward",
+    "lr": 0.001,
+    "layers": [
+        {
+            "activation": "Tanh",
+            "inputs": 4,
+            "outputs": 3,
+            "weights": [
+                [-0.054578436663617134, 0.37513033769486365, -0.10983221545303008],
+                [0.16301358590881249, 0.06655747653191099, -0.002821014820185678],
+                [0.0015701754260134817, 0.2973476526946789, 0.03780176776836455],
+                [-0.18999580034831548, 0.24332761155702254, -0.056238421904291395]
+            ],
+            "biases": [-0.9099945191213984, 0.5746715078863484, 0.10933239518212397]
+        }, {
+            "activation": "Sigmoid",
+            "inputs": 3,
+            "outputs": 2,
+            "weights": [
+                [0.05879472462854643, -0.26671087907051877],
+                [0.12702500460514837, 0.35342704088524063],
+                [-0.1269635260491831, -0.23965514383302527]
+            ],
+            "biases": [3.9110326859515516, 3.2316354488463214]
+        }
+    ]
+}
+
+export default defaultForwardBrain
