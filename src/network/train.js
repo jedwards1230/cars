@@ -47,7 +47,7 @@ export async function train(model, env, maxTimeSteps) {
         //const distance = 2 - (1 / (model.distance + 1));
 
         // apply action to model
-        env.traffic = model.update(env.traffic, env.road.borders, action);
+        model.update(env.traffic, env.road.borders, action);
 
         // metrics
         speeds.push(model.speed);

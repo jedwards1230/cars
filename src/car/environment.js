@@ -37,8 +37,8 @@ export class Environment {
         for (let i = 0; i < this.traffic.length; i++) {
             if (this.traffic[i].model !== "fsd") {
                 const car = this.traffic[i];
-                let action = car.lazyAction(this.road.borders, this.traffic);
-                this.traffic = car.update(this.traffic, this.road.borders, action);
+                const action = car.lazyAction(this.road.borders, this.traffic);
+                car.update(this.traffic, this.road.borders, action);
             }
         }
     }

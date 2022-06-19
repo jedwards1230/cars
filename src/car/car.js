@@ -92,10 +92,8 @@ export class Car {
             const prev_distance = this.distance;
             this.distance += this.speed;
             this.onTrack = (this.distance > prev_distance) ? 1 : 0;
-            traffic = this.#checkDamage(borders, traffic);
+            this.#checkDamage(borders, traffic);
         }
-
-        return traffic;
     }
 
     /**
@@ -195,38 +193,30 @@ export class Car {
     }
 
     #checkDamage(roadBorders, traffic) {
-        let damage = null;
+        const damaged = [];
         // check collision with road borders
         for (let i = 0; i < roadBorders.length; i++) {
             if (polysIntersect(this.polygon, roadBorders[i])) {
-                damage = this.id;
+                damaged.push(this);
             }
         }
         // check collision with traffic
         for (let i = 0; i < traffic.length; i++) {
             const car = traffic[i];
-            if (car.id !== this.id && car.model !== "fsd") {
+            if (car.id !== this.id) {
                 if (polysIntersect(this.polygon, car.polygon)) {
-                    damage = car.id;
+                    damaged.push(this);
+                    damaged.push(car);
                 }
             }
         }
 
-        // set values if car or any traffic are damaged
-        if (damage === this.id) {
-            this.damaged = true;
-            this.speed = 0;
-        } else if (traffic[damage]) {
-            if (this.model !== "fsd") {
-                traffic[damage].damaged = true;
-                traffic[damage].controls.forward = false;
-            }
-            this.damaged = true;
-            this.speed = 0;
-        }
-
-        //if (this.distance < -10) this.damaged = true;
-        return traffic;
+        damaged.forEach(car => {
+            car.damaged = true;
+            car.damaged = true;
+            if(car.model === "fsd") car.speed = 0;
+            car.controls.forward = false;
+        })
     }
 
     #createPolygon() {

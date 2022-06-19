@@ -271,7 +271,7 @@ function animate(time) {
 		const action = model.brain.makeChoice(output); */
 		// lazy action to forward through network and make choice
 		const action = model.lazyAction(env.road.borders, env.traffic, true);
-		env.traffic = model.update(env.traffic, env.road.borders, action);
+		model.update(env.traffic, env.road.borders, action);
 	}
 
 	// draw cars, visualizer, and update UI
