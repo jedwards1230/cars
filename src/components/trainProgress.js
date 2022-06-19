@@ -10,7 +10,7 @@ const TrainProgress = props => {
         setEpisodes(props.episodes);
         setGoodEntries(props.episodes.filter(e => e.goodEntry === true).length);
         setBadEntries(props.episodes.filter(e => e.goodEntry === false).length - 1);
-    }, [props.episodes.length]);
+    }, [props.episodes]);
 
 
     return (

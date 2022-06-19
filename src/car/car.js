@@ -55,7 +55,7 @@ export class Car {
 
     saveModelConfig() {
         this.modelConfig.layers = this.brain.saveLayers();
-        return this.modelConfig;
+        this.modelConfig.save();
     }
 
     loadBrainConfig(config) {
@@ -64,7 +64,6 @@ export class Car {
         this.useBrain = true;
         this.actionCount = config.actionCount;
         this.brain = new Network(config);
-        console.log("loading brain config", config);
         
         switch (this.model) {
             case "fsd":
@@ -189,8 +188,8 @@ export class Car {
 
     lazyAction(borders, traffic, backprop = false) {
         if (!this.useBrain) return null;
-        // eslint-disable-next-line no-unused-vars
         const sData = this.getSensorData(borders, traffic);
+        this.sensorOffsets = sData;
         const action = this.brain.forward(sData, backprop);
         return this.brain.makeChoice(action);
     }

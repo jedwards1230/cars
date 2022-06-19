@@ -52,10 +52,35 @@ export class ModelConfig {
     }
 }
 
+const defaultTrainBrain = {
+    "name": "trainBrain",
+    "alias": "fsd",
+    "lr": 0.001,
+    "epsilonDecay": 0.99,
+    "sensorCount": 3,
+    "actionCount": 2,
+    "layers": [
+        {
+            "id": 0,
+            "activation": "Tanh",
+            "inputs": 3,
+            "outputs": 3
+        },
+        {
+            "id": 1,
+            "activation": "Sigmoid",
+            "inputs": 3,
+            "outputs": 2
+        }
+    ],
+    "generations": []
+}
+
 const defaultForwardBrain = {
     "name": "trafficForward",
     "alias": "forward",
     "lr": 0.001,
+    "epsilonDecay": 0.99,
     "sensorCount": 3,
     "actionCount": 2,
     "layers": [
@@ -84,9 +109,11 @@ const defaultForwardBrain = {
             "biases": [3.8110326859515516, 3.2316354488463214]
         }
     ],
-    "generations": [],
-    "learningRate": 0.001
+    "generations": []
 }
 
-const data = JSON.stringify(defaultForwardBrain, null, "\t");
-localStorage.setItem("trafficForward", data);
+// todo: export these variables instead of setting them here. this currently overwrites on each reload
+const trainData = JSON.stringify(defaultTrainBrain, null, "\t");
+localStorage.setItem("trainBrain", trainData);
+const forwardData = JSON.stringify(defaultForwardBrain, null, "\t");
+localStorage.setItem("trafficForward", forwardData);

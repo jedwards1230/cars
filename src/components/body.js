@@ -10,8 +10,8 @@ const BodyComponent = props => {
     const [showStats, setShowStats] = useState(props.generations > 0);
 
     useEffect(() => {
-        setShowStats(props.generations.length > 0);
-    }, [props.generations.length]);
+        setShowStats((props.generations.length > 0));
+    }, [props.generations]);
 
     if (props.welcomed && !props.showVisualizer) {
         return (

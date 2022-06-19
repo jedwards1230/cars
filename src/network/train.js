@@ -4,10 +4,10 @@ export async function train(model, env, maxTimeSteps) {
     let count = 0;
     let output = [];
     let action, reward;
-    let prevOutput, prevReward;
+    let prevOutput;
 
     const backprop = () => {
-        const gamma = 0.99;
+        //const gamma = 0.99;
         // create reward gradient
         //const target = new Array(output.length).fill(0);
         //target[action] = reward;
@@ -29,12 +29,11 @@ export async function train(model, env, maxTimeSteps) {
     for (let i = 0; i < maxTimeSteps; i++) {
         // update environment
         env.update();
-        const observation = model.getObservation(env.road.borders, env.traffic);
+        //const observation = model.getObservation(env.road.borders, env.traffic);
         const sData = model.getSensorData(env.road.borders, env.traffic);
 
         // forward pass to get action
         prevOutput = JSON.parse(JSON.stringify(output));
-        prevReward = reward;
         output = model.brain.forward(sData, true);
         const epsilonGreedy = true;
         action = model.brain.makeChoice(output, epsilonGreedy);
@@ -44,8 +43,8 @@ export async function train(model, env, maxTimeSteps) {
         reward = metrics.reward;
 
         // maybe use for reward or input?
-        const time = 1 - (1 / (i + 1));
-        const distance = 2 - (1 / (model.distance + 1));
+        //const time = 1 - (1 / (i + 1));
+        //const distance = 2 - (1 / (model.distance + 1));
 
         // apply action to model
         env.traffic = model.update(env.traffic, env.road.borders, action);

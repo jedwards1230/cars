@@ -47,13 +47,13 @@ let smartTraffic = false;
 
 // init for training loop
 let breakLoop = false;
-let numSteps, numEpisodes, epsilonDecay;
+let numSteps, numEpisodes;
 let episodeCounter = 0;
 let info;
 let animFrame;
 
 // init default config
-let modelConfig = new ModelConfig("trainBrain", "fsd");
+const modelConfig = new ModelConfig("trainBrain", "fsd");
 modelConfig.load();
 
 // Set play view
@@ -72,11 +72,10 @@ function beginTrain(nEpisodes, nSteps, epDecay, lr, sensorCount, actionCount, la
 	// these params come form the form on the page
 	numEpisodes = nEpisodes;
 	numSteps = nSteps;
-	epsilonDecay = epDecay;
 	episodeCounter = 0;
 
-	modelConfig = new ModelConfig("trainBrain", "fsd");
 	modelConfig.learningRate = lr;
+	modelConfig.epsilonDecay = epDecay;
 	modelConfig.layers = layers;
 	modelConfig.sensorCount = sensorCount;
 	modelConfig.actionCount = actionCount;
@@ -125,14 +124,11 @@ async function episodeLoop() {
 	// save only if model is labelled an improvement
 	if (distanceMax > 0 && info.goodEntry) {
 		model.modelConfig.generations.push(info);
-		modelConfig = model.saveModelConfig();
-		console.log("Saving model: ", modelConfig);
-		modelConfig.save();
+		model.saveModelConfig();
 	}
 
 	// reset environment without breaking loop
 	reset(false);
-
 
 	// break loop if we've reached the max number of episodes
 	episodeCounter++;
@@ -190,7 +186,8 @@ function reset(breakL = true) {
 	const x = 0;
 	const y = env.road.getLaneCenter(env.startLane);
 	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-	// load config from training form inputsmodelConfig.load();
+	// load saved config
+	modelConfig.load();
 	model.loadBrainConfig(modelConfig);
 
 	// reset animation
@@ -245,6 +242,7 @@ const drawUI = () => {
 		);
 	}
 
+	const generations = model.modelConfig.generations;
 	reactBody.render(
 		<React.StrictMode>
 			<BodyComponent
@@ -256,7 +254,7 @@ const drawUI = () => {
 				beginTrain={beginTrain}
 				model={model}
 				modelConfig={modelConfig}
-				generations={modelConfig.generations} />
+				generations={generations} />
 		</React.StrictMode>
 	);
 }

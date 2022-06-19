@@ -42,8 +42,6 @@ const MetricsTable = props => {
         setLossAvg((lossMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(4));
         setLossMin(Math.min(...lossMap).toFixed(4));
         setLossMax(Math.max(...lossMap).toFixed(4));
-
-
     }, [props.episodes]);
 
     return (
