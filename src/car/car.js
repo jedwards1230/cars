@@ -62,17 +62,17 @@ export class Car {
         this.modelConfig = config;
         this.model = config.alias;
         this.useBrain = true;
+        this.actionCount = config.actionCount;
         this.brain = new Network(config);
-        let sensorCount = 3;
+        console.log("loading brain config", config);
         
         switch (this.model) {
             case "fsd":
-                //sensorCount = 5;
-                this.sensors = new Sensor(this, sensorCount, "forward");
+                this.sensors = new Sensor(this, config.sensorCount, "forward");
                 break;
 
             case "forward":
-                this.sensors = new Sensor(this, sensorCount, "forward");
+                this.sensors = new Sensor(this, config.sensorCount, "forward");
                 break;
 
             default:

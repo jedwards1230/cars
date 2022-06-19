@@ -43,7 +43,7 @@ const visualizer = new Visualizer();
 let env, model;
 const trafficCount = 50;
 const brainCount = 1;
-let smartTraffic = true;
+let smartTraffic = false;
 
 // init for training loop
 let breakLoop = false;
@@ -68,15 +68,18 @@ function setTrainView() {
 }
 
 // Prepare for training
-function beginTrain(nEpisodes, nSteps, epDecay, lr, layers) {
+function beginTrain(nEpisodes, nSteps, epDecay, lr, sensorCount, actionCount, layers) {
 	// these params come form the form on the page
 	numEpisodes = nEpisodes;
 	numSteps = nSteps;
 	epsilonDecay = epDecay;
 	episodeCounter = 0;
 
+	modelConfig = new ModelConfig("trainBrain", "fsd");
 	modelConfig.learningRate = lr;
 	modelConfig.layers = layers;
+	modelConfig.sensorCount = sensorCount;
+	modelConfig.actionCount = actionCount;
 	modelConfig.name = "trainBrain";
 	modelConfig.alias = "fsd";
 	console.log("Model config inputs: ", modelConfig);
@@ -85,7 +88,7 @@ function beginTrain(nEpisodes, nSteps, epDecay, lr, layers) {
 	reset(false);
 
 	// beging training loop
-	console.log("Training | Episodes: ", numEpisodes, " | Steps: ", numSteps, " | Decay: ", epsilonDecay, " | Learning Rate: ", modelConfig.learningRate);
+	console.log("Training | Episodes: ", numEpisodes, " | Steps: ", numSteps, " | Learning Rate: ", modelConfig.learningRate);
 	episodeLoop();
 }
 

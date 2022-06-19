@@ -11,7 +11,7 @@ const BodyComponent = props => {
 
     useEffect(() => {
         setShowStats(props.generations.length > 0);
-    }, [props.generations]);
+    }, [props.generations.length]);
 
     if (props.welcomed && !props.showVisualizer) {
         return (

@@ -1,5 +1,3 @@
-import { defaultTrainBrain } from "./network";
-
 export class ModelConfig {
     constructor(name, alias) {
         this.name = name;
@@ -26,16 +24,19 @@ export class ModelConfig {
         if (data) {
             config = JSON.parse(data);
         } else if (this.name === "trainBrain") {
-            console.log("loading defaultTrainBrain")
-            config = defaultTrainBrain;
+            console.log("loading defaultForwardBrain")
+            config = defaultForwardBrain;
         }
         if (!config) return;
 
         this.name = config.name;
         this.alias = config.alias;
         this.lr = config.lr;
+        this.sensorCount = config.sensorCount;
+        this.actionCount = config.actionCount;
         this.layers = config.layers;
         this.generations = config.generations;
+        this.save();
     }
 
     /** Compare configs to see if layers are compatible (by activation, input, and output count) */
@@ -55,6 +56,8 @@ const defaultForwardBrain = {
     "name": "trafficForward",
     "alias": "forward",
     "lr": 0.001,
+    "sensorCount": 3,
+    "actionCount": 2,
     "layers": [
         {
             "id": 0,
@@ -62,7 +65,6 @@ const defaultForwardBrain = {
             "inputs": 3,
             "outputs": 3,
             "weights": [
-                [-0.054578436663617134, 0.37513033769486365, -0.10983221545303008],
                 [0.16301358590881249, 0.06655747653191099, -0.002821014820185678],
                 [0.0015701754260134817, 0.2973476526946789, 0.03780176776836455],
                 [-0.18999580034831548, 0.24332761155702254, -0.056238421904291395]
