@@ -232,7 +232,7 @@ const startVisualizer = () => {
 
 const drawUI = () => {
 	// not sure if i wanna toggle nav with the welcome screen or not
-	if (true) {
+	if (welcomed) {
 		reactHeader.render(
 			<React.StrictMode>
 				<NavComponent
@@ -283,7 +283,7 @@ function animate(time) {
 	drawUI();
 
 	// reset animation on welcome screen when car crashes
-	if (!welcomed && model.damaged) setTimeout(reset, 0);
+	if (visualizer.active && model.damaged) setTimeout(reset, 0);
 
 	// loop animation
 	animFrame = requestAnimationFrame(animate);

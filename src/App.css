@@ -81,11 +81,13 @@ body {
 #carCanvas {
 	background: black;
 	width: 100%;
+  display: none;
 }
 
 #networkCanvas {
 	background: black;
 	width: 100%;
+  display: none;
 }
 
 #lossChart {
