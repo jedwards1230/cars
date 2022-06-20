@@ -68,17 +68,17 @@ function setTrainView() {
 }
 
 // Prepare for training
-function beginTrain(nEpisodes, nSteps, epDecay, lr, sensorCount, actionCount, layers) {
+function beginTrain(config) {
 	// these params come form the form on the page
-	numEpisodes = nEpisodes;
-	numSteps = nSteps;
+	numEpisodes = config.numEpisodes;
+	numSteps = config.numSteps;
 	episodeCounter = 0;
 
-	modelConfig.learningRate = lr;
-	modelConfig.epsilonDecay = epDecay;
-	modelConfig.layers = layers;
-	modelConfig.sensorCount = sensorCount;
-	modelConfig.actionCount = actionCount;
+	modelConfig.learningRate = config.learningRate;
+	modelConfig.epsilonDecay = config.epsilonDecay;
+	modelConfig.layers = config.layers;
+	modelConfig.sensorCount = config.sensorCount;
+	modelConfig.actionCount = config.actionCount;
 	modelConfig.name = "trainBrain";
 	modelConfig.alias = "fsd";
 	console.log("Model config inputs: ", modelConfig);
@@ -253,6 +253,7 @@ const drawUI = () => {
 				setPlay={startVisualizer}
 				beginTrain={beginTrain}
 				model={model}
+				episodeCounter={episodeCounter}
 				modelConfig={modelConfig}
 				generations={generations} />
 		</React.StrictMode>

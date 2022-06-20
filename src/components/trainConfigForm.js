@@ -1,20 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import NetworkLayerList from "./layer";
-import { Form, Row, Col } from "react-bootstrap";
+import { Form, Row, Col, ProgressBar } from "react-bootstrap";
 
 const TrainConfigForm = props => {
+    const [episodeCounter, setEpisodeCounter] = useState(props.episodeCounter);
     const [numEpisodes, setNumEpisodes] = useState(1000);
     const [numSteps, setNumSteps] = useState(1000);
     const [epsilonDecay, setEpsilonDecay] = useState(0.99);
     const [learningRate, setLearningRate] = useState(props.modelConfig.lr);
     const [sensorCount, setSensorCount] = useState(props.modelConfig.sensorCount);
     const [actionCount, setActionCount] = useState(props.modelConfig.actionCount);
-    const [counter, setCounter] = useState(props.modelConfig.layers.length-1);
+    const [counter, setCounter] = useState(props.modelConfig.layers.length - 1);
 
     const [layers, setLayers] = useState(props.modelConfig.layers);
 
     const submitForm = () => {
-        props.beginTrain(numEpisodes, numSteps, epsilonDecay, learningRate, sensorCount, actionCount, layers);
+        const modelConfig = {
+            numEpisodes: numEpisodes,
+            numSteps: numSteps,
+            epsilonDecay: epsilonDecay,
+            learningRate: learningRate,
+            sensorCount: sensorCount,
+            actionCount: actionCount,
+            layers: layers
+        }
+        props.beginTrain(modelConfig);
     }
 
     const removeLayer = (id) => {
@@ -38,15 +48,20 @@ const TrainConfigForm = props => {
             activation: "Linear",
             inputs: null,
             outputs: null,
-            id: counter+1
+            id: counter + 1
         }]);
-        setCounter(counter+1);
+        setCounter(counter + 1);
     }
+
+    useEffect(() => {
+        setEpisodeCounter(props.episodeCounter);
+    }, [props.episodeCounter]);
 
     return (
         <div className="trainForm">
             <div id="trainParams" className="container text-center text-bg-light">
                 <h4 className="p-3">Training Parameters</h4>
+                <ProgressBar now={episodeCounter} max={numEpisodes} />
                 <Form>
                     <Row className="py-2 mb-3">
                         <Col>
@@ -56,7 +71,7 @@ const TrainConfigForm = props => {
                                     className="form-control"
                                     defaultValue={numEpisodes}
                                     onChange={e => setNumEpisodes(parseInt(e.target.value))} ></input>
-                                <label htmlFor="episodeCountInput">Episode Count</label>
+                                <label htmlFor="episodeCountInput">Number of Simulations</label>
                             </div>
                         </Col>
                         <Col>
@@ -66,7 +81,7 @@ const TrainConfigForm = props => {
                                     className="form-control"
                                     defaultValue={numSteps}
                                     onChange={e => setNumSteps(parseInt(e.target.value))}></input>
-                                <label htmlFor="timeLimitInput">Time Limit</label>
+                                <label htmlFor="timeLimitInput">Time Limit (per simulation)</label>
                             </div>
                         </Col>
                         <Col>

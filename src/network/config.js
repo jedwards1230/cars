@@ -64,12 +64,12 @@ const defaultTrainBrain = {
             "id": 0,
             "activation": "Tanh",
             "inputs": 3,
-            "outputs": 3
+            "outputs": 5
         },
         {
             "id": 1,
             "activation": "Sigmoid",
-            "inputs": 3,
+            "inputs": 5,
             "outputs": 2
         }
     ],
@@ -112,8 +112,13 @@ const defaultForwardBrain = {
     "generations": []
 }
 
-// todo: export these variables instead of setting them here. this currently overwrites on each reload
-const trainData = JSON.stringify(defaultTrainBrain, null, "\t");
-localStorage.setItem("trainBrain", trainData);
-const forwardData = JSON.stringify(defaultForwardBrain, null, "\t");
-localStorage.setItem("trafficForward", forwardData);
+const trainBrain = localStorage.getItem("trainBrain");
+if (!trainBrain) {
+    const trainData = JSON.stringify(defaultTrainBrain, null, "\t");
+    localStorage.setItem("trainBrain", trainData);
+}
+const forwardBrain = localStorage.getItem("forwardBrain");
+if (!forwardBrain) {
+    const forwardData = JSON.stringify(defaultForwardBrain, null, "\t");
+    localStorage.setItem("trafficForward", forwardData);
+}

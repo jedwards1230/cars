@@ -12,10 +12,9 @@ import {
 } from "./layers.js";
 
 export class Network {
-    constructor(modelConfig, epsilon = 0.99) {
+    constructor(modelConfig) {
         this.memory = [];
         this.layers = [];
-        this.epsilon = epsilon;
         this.confidence = 0.5;
         this.loadBrain(modelConfig);
 
@@ -72,6 +71,7 @@ export class Network {
     loadBrain(saved) {
         this.name = saved.name;
         this.lr = saved.lr;
+        this.epsilon = saved.epsilonDecay;
         this.alias = saved.alias;
         this.setModelLayers(saved.layers);
     }
