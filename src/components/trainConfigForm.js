@@ -4,9 +4,9 @@ import { Form, Row, Col, ProgressBar } from "react-bootstrap";
 
 const TrainConfigForm = props => {
     const [episodeCounter, setEpisodeCounter] = useState(props.episodeCounter);
-    const [numEpisodes, setNumEpisodes] = useState(1000);
+    const [numEpisodes, setNumEpisodes] = useState(100);
     const [numSteps, setNumSteps] = useState(1000);
-    const [epsilonDecay, setEpsilonDecay] = useState(0.99);
+    const [epsilonDecay, setEpsilonDecay] = useState(props.modelConfig.epsilonDecay);
     const [learningRate, setLearningRate] = useState(props.modelConfig.lr);
     const [sensorCount, setSensorCount] = useState(props.modelConfig.sensorCount);
     const [actionCount, setActionCount] = useState(props.modelConfig.actionCount);

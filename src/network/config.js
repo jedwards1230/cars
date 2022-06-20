@@ -32,6 +32,7 @@ export class ModelConfig {
         this.name = config.name;
         this.alias = config.alias;
         this.lr = config.lr;
+        this.epsilonDecay = config.epsilonDecay;
         this.sensorCount = config.sensorCount;
         this.actionCount = config.actionCount;
         this.layers = config.layers;
@@ -56,7 +57,7 @@ const defaultTrainBrain = {
     "name": "trainBrain",
     "alias": "fsd",
     "lr": 0.001,
-    "epsilonDecay": 0.99,
+    "epsilonDecay": 0.9,
     "sensorCount": 3,
     "actionCount": 2,
     "layers": [
