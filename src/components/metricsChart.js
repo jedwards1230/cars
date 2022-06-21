@@ -61,16 +61,14 @@ const LossChart = props => {
         const l = [];
         for (let i = 0; i < episodes.length; i++) {
             const episodeInfo = episodes[i];
-            if (episodeInfo.goodEntry) {
-                l.push(i);
-                d.push({
-                    x: i,
-                    loss: episodeInfo.loss,
-                    distance: episodeInfo.distance,
-                    time: episodeInfo.time,
-                    speed: episodeInfo.speed,
-                });
-            }
+            l.push(i);
+            d.push({
+                x: i,
+                loss: episodeInfo.loss,
+                distance: episodeInfo.distance,
+                time: episodeInfo.time,
+                speed: episodeInfo.speed,
+            });
         }
         setChartData(d);
         setLabels(l);

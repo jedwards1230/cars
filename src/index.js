@@ -77,14 +77,6 @@ function beginTrain(config) {
  * 6. Repeat until all episodes are done
  */
 async function episodeLoop() {
-	// good entries are models that are an improvement in the right direction.
-	// these get saved for future generations to evolve from.
-	const checkGoodEntry = () => {
-		if (info.speed < 1) return false;
-		if (info.distance > distanceMax * 0.9) return true;
-		return false;
-	};
-
 	// mutate the weights slightly to help with diversity
 	model.brain.mutate(modelConfig.mutationRate);
 
@@ -95,12 +87,17 @@ async function episodeLoop() {
 	// the main goal is distance without crashing
 	const distanceMap = model.modelConfig.generations.map((e) => e.distance);
 	const distanceMax = Math.max(...distanceMap, 1000);
-
-	// check if this is a good model
-	info.goodEntry = checkGoodEntry(info);
+	
+	// good entries are models that are an improvement in the right direction.
+	// these get saved for future generations to evolve from.
+	const checkGoodEntry = () => {
+		if (info.speed < 1) return false;
+		if (info.distance > distanceMax * 0.9) return true;
+		return false;
+	};
 
 	// save only if model is labelled an improvement
-	if (distanceMax > 0 && info.goodEntry) {
+	if (checkGoodEntry(info)) {
 		model.modelConfig.generations.push(info);
 		model.saveModelConfig();
 	}
