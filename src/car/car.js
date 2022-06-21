@@ -159,18 +159,19 @@ export class Car {
     // todo: make this more robust. split up by actions. get explicit.
     getReward(action) {
         const reward = new Array(this.actionCount).fill(0);
+        reward[1] = 1;
 
-        if (this.damaged) reward[action] -= 1;
-        if (this.speed < 1 || this.distance < 0) {
+        //if (this.damaged) reward[1] -= 1;
+        if (this.damaged || this.speed < 1 || this.distance < 0) {
             reward[0] += 1;
             reward[1] -= 1;
         }
         if (this.actionCount > 2) {
-            if (this.angle > 1) {
-                reward[3] -= 0.5;
-            }
-            else if (this.angle < -1) {
+            if (this.angle > 0.1) {
                 reward[2] -= 0.5;
+            }
+            else if (this.angle < -0.1) {
+                reward[3] -= 0.5;
             }
         }
 

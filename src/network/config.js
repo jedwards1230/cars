@@ -20,8 +20,10 @@ export class ModelConfig {
 
     /** Load config from localStorage */
     load() {
+        // Check localStorage
         const data = localStorage.getItem(this.name);
         let config = null;
+        // Load default if none found
         if (data) {
             config = JSON.parse(data);
         } else if (this.name === "trainBrain") {
