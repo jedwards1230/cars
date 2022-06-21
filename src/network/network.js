@@ -137,23 +137,3 @@ export class Network {
         });
     }
 }
-
-export const defaultTrainBrain = {
-    "name": "trainBrain",
-    "alias": "fsd",
-    "lr": 0.001,
-    "layers": [
-        {
-            "activation": "Tanh",
-            "id": 0,
-            "inputs": 3,
-            "outputs": 3,
-        }, {
-            "activation": "Sigmoid",
-            "id": 1,
-            "inputs": 3,
-            "outputs": 2,
-        }
-    ],
-    "generations": []
-}
