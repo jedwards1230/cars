@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import WelcomeView from "./welcome";
 import TrainConfigForm from "./trainConfigForm";
-// eslint-disable-next-line no-unused-vars
-import TrainProgress from "./trainProgress";
 import MetricsTable from "./metrics";
 import LossChart from "./lossChart";
 

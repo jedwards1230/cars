@@ -109,7 +109,7 @@ const TrainConfigForm = props => {
                         <Col>
                             <div className="form-floating">
                                 <input
-                                    type="text"
+                                    type="number"
                                     className="form-control"
                                     defaultValue={sensorCount}
                                     onChange={e => setSensorCount(parseInt(e.target.value))}></input>
@@ -119,7 +119,7 @@ const TrainConfigForm = props => {
                         <Col>
                             <div className="form-floating">
                                 <input
-                                    type="text"
+                                    type="number"
                                     className="form-control"
                                     defaultValue={actionCount}
                                     onChange={e => setActionCount(parseInt(e.target.value))}></input>

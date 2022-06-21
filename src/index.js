@@ -117,7 +117,7 @@ async function episodeLoop() {
 	// save max distance so we can mark model improvement
 	// the main goal is distance without crashing
 	const distanceMap = model.modelConfig.generations.map((e) => e.distance);
-	const distanceMax = Math.max(...distanceMap, 500);
+	const distanceMax = Math.max(...distanceMap, 1000);
 
 	// check if this is a good model
 	info.goodEntry = checkGoodEntry(info);
@@ -141,6 +141,7 @@ async function episodeLoop() {
 		setTimeout(episodeLoop, 10);
 	} else {
 		console.log("training complete");
+		episodeCounter = 0;
 	}
 }
 

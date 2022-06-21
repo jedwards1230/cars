@@ -15,14 +15,14 @@ const NavComponent = (props) => {
         <nav id="nav" className="navbar px-3 navbar-expand bg-light">
             <a className="navbar-brand" href="index.html">Miles' Driving School</a>
             <div className="ms-auto navbar-text">
-                <span id="activeModel" className="px-2 me-auto navbar-text">
-                    model = "{activeModel}"
+                <span id="activeDistance" className="px-2 navbar-text">
+                    distance = {distance}
                 </span>
                 <span id="activeSpeed" className="px-2 navbar-text">
                     speed = {speed}
                 </span>
-                <span id="activeDistance" className="px-2 navbar-text">
-                    distance = {distance}
+                <span id="activeModel" className="px-2 me-auto navbar-text">
+                    model = "{activeModel}"
                 </span>
                 <button id="saveBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Save Weights"
                     className="btn btn-outline-primary">💾</button>
