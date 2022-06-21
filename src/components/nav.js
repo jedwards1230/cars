@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 
 const NavComponent = (props) => {
     const [activeModel, setActiveModel] = useState(props.activeModel);

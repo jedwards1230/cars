@@ -158,6 +158,7 @@ export class Car {
     }
 
     /** Get reward for current state */
+    // todo: make this more robust. split up by actions. get explicit.
     getReward(action) {
         const reward = new Array(this.actionCount).fill(0);
 

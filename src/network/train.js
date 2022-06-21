@@ -1,3 +1,13 @@
+/**
+ * Training Loop
+ * 1. Update environment
+ * 2. Have car observe environment
+ * 3. Process observation with neural network
+ * 4. Get action from neural network
+ * 5. Calculate reward
+ * 6. Update Car with action
+ * 7. Backprop network with reward
+ */
 export async function train(model, env, maxTimeSteps) {
     let speeds = [];
     let rLoss = 1;
@@ -6,11 +16,14 @@ export async function train(model, env, maxTimeSteps) {
     let action, reward;
     let prevOutput;
 
+    /**
+     * Backpropagate the network with the reward
+     * 1. Get the target output of the network
+     * 2. Calculate the loss between the target and the output
+     * 3. Find derivative of loss with respect to the output
+     * 4. Backward propagate the loss
+     */
     const backprop = () => {
-        //const gamma = 0.99;
-        // create reward gradient
-        //const target = new Array(output.length).fill(0);
-        //target[action] = reward;
         const target = reward;
 
         // find average loss

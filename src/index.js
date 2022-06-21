@@ -4,7 +4,6 @@ import './index.css';
 import './App.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import { Tooltip } from 'bootstrap';
 
 import NavComponent from './components/nav';
 import BodyComponent from './components/body';
@@ -33,7 +32,6 @@ const setWelcomed = (val) => welcomed = val;
 
 // prepare road canvas
 const carCanvas = document.getElementById("carCanvas");
-carCanvas.height = 250;
 const carCtx = carCanvas.getContext("2d");
 
 // prepare visualizer canvas
@@ -91,7 +89,14 @@ function beginTrain(config) {
 	episodeLoop();
 }
 
-// Run training loop
+/** Run Training Loop
+ * 1. Start with fresh environment and model
+ * 2. Mutate brain weights slightly
+ * 3. Train model for a n steps
+ * 4. Save the model as a new generation if it is an improvement
+ * 5. Reset environment and model
+ * 6. Repeat until all episodes are done
+ */
 async function episodeLoop() {
 	// good entries are models that are an improvement in the right direction.
 	// these get saved for future generations to evolve from.
@@ -195,16 +200,6 @@ function reset(breakL = true) {
 	animate();
 }
 
-
-// Handle bootstrap tooltips
-const tooltipTriggerList = document.querySelectorAll(
-	'[data-bs-toggle="tooltip"]'
-);
-// eslint-disable-next-line no-unused-vars
-const tooltipList = [...tooltipTriggerList].map(
-	(tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
-);
-
 const destroyModel = () => {
 	modelConfig.destroy();
 	reset();
@@ -258,6 +253,15 @@ const drawUI = () => {
 				generations={generations} />
 		</React.StrictMode>
 	);
+
+	/* // Handle bootstrap tooltips
+	const tooltipTriggerList = document.querySelectorAll(
+		'[data-bs-toggle="tooltip"]'
+	);
+	// eslint-disable-next-line no-unused-vars
+	const tooltipList = [...tooltipTriggerList].map(
+		(tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
+	); */
 }
 
 // animate model
