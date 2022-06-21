@@ -14,14 +14,6 @@ import { Car } from "./car/car.js";
 import { train } from "./network/train.js";
 import { ModelConfig } from './network/config';
 
-// Learn more about service workers: https://cra.link/PWA
-serviceWorkerRegistration.unregister();
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
-
 // hook into DOM
 const reactHeader = ReactDOM.createRoot(document.getElementById('reactHeader'));
 const reactBody = ReactDOM.createRoot(document.getElementById('reactBody'));
@@ -49,17 +41,6 @@ let episodeCounter = 0;
 // init default config
 const modelConfig = new ModelConfig("trainBrain", "fsd");
 modelConfig.load();
-
-// Set play view
-function setPlayView() {
-	if (visualizer.active)
-		document.getElementById("networkCanvas").style.display = "inline";
-}
-
-// Set train view
-function setTrainView() {
-	document.getElementById("networkCanvas").style.display = "none";
-}
 
 // Prepare for training. This is called when the user submits the train config form.
 function beginTrain(config) {
@@ -100,7 +81,6 @@ async function episodeLoop() {
 	// these get saved for future generations to evolve from.
 	const checkGoodEntry = () => {
 		if (info.speed < 1) return false;
-		//if (info.distance < 500) return false;
 		if (info.distance > distanceMax * 0.9) return true;
 		return false;
 	};
@@ -110,7 +90,6 @@ async function episodeLoop() {
 
 	// collect episode info for training run
 	info = await train(model, env, numSteps);
-	//info.episode = episodes.length + 1;
 
 	// save max distance so we can mark model improvement
 	// the main goal is distance without crashing
@@ -183,6 +162,17 @@ function drawCars() {
 	carCtx.restore();
 }
 
+// Set play view
+function setPlayView() {
+	if (visualizer.active)
+		document.getElementById("networkCanvas").style.display = "inline";
+}
+
+// Set train view
+function setTrainView() {
+	document.getElementById("networkCanvas").style.display = "none";
+}
+
 /** Toggle between training and visualizing network */
 function toggleView() {
 	visualizer.active = !visualizer.active;
@@ -248,15 +238,6 @@ const drawUI = () => {
 				generations={generations} />
 		</React.StrictMode>
 	);
-
-	/* // Handle bootstrap tooltips
-	const tooltipTriggerList = document.querySelectorAll(
-		'[data-bs-toggle="tooltip"]'
-	);
-	// eslint-disable-next-line no-unused-vars
-	const tooltipList = [...tooltipTriggerList].map(
-		(tooltipTriggerEl) => new Tooltip(tooltipTriggerEl)
-	); */
 }
 
 // animate model
@@ -265,11 +246,6 @@ function animate(time) {
 	env.update();
 	// only perform action if car is not crashed
 	if (!model.damaged) {
-		//const observation = model.getObservation(env.road.borders, env.traffic);
-		/* const sData = model.getSensorData(env.road.borders, env.traffic);
-		const output = model.brain.forward(sData, true);
-		const action = model.brain.makeChoice(output); */
-		// lazy action to forward through network and make choice
 		const action = model.lazyAction(env.road.borders, env.traffic, true);
 		model.update(env.traffic, env.road.borders, action);
 	}
@@ -286,6 +262,14 @@ function animate(time) {
 	// loop animation
 	animFrame = requestAnimationFrame(animate);
 }
+
+// Learn more about service workers: https://cra.link/PWA
+serviceWorkerRegistration.unregister();
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
 
 // initial setting
 reset();
