@@ -60,9 +60,6 @@ function beginTrain(config) {
 	modelConfig.save();
 	console.log("Model config inputs: ", modelConfig);
 
-	// reset environment
-	reset(false);
-
 	// beging training loop
 	console.log("Training | Episodes: ", numEpisodes, " | Steps: ", numSteps, " | Learning Rate: ", modelConfig.learningRate);
 	episodeLoop();
@@ -77,6 +74,9 @@ function beginTrain(config) {
  * 6. Repeat until all episodes are done
  */
 async function episodeLoop() {
+	// reset environment
+	reset(false);
+
 	// mutate the weights slightly to help with diversity
 	model.brain.mutate(modelConfig.mutationRate);
 
@@ -87,7 +87,7 @@ async function episodeLoop() {
 	// the main goal is distance without crashing
 	const distanceMap = model.modelConfig.generations.map((e) => e.distance);
 	const distanceMax = Math.max(...distanceMap, 1000);
-	
+
 	// good entries are models that are an improvement in the right direction.
 	// these get saved for future generations to evolve from.
 	const checkGoodEntry = () => {
@@ -102,9 +102,6 @@ async function episodeLoop() {
 		model.saveModelConfig();
 	}
 
-	// reset environment without breaking loop
-	reset(false);
-
 	// break loop if we've reached the max number of episodes
 	episodeCounter++;
 	if (episodeCounter >= numEpisodes || episodeCounter < 0)
@@ -116,6 +113,7 @@ async function episodeLoop() {
 	} else {
 		console.log("training complete");
 		episodeCounter = 0;
+		reset(false);
 	}
 }
 
