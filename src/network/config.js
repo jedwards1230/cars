@@ -33,6 +33,7 @@ export class ModelConfig {
         this.alias = config.alias;
         this.lr = config.lr;
         this.epsilonDecay = config.epsilonDecay;
+        this.mutationRate = config.mutationRate;
         this.sensorCount = config.sensorCount;
         this.actionCount = config.actionCount;
         this.layers = config.layers;
@@ -58,6 +59,7 @@ const defaultTrainBrain = {
     "alias": "fsd",
     "lr": 0.001,
     "epsilonDecay": 0.9,
+    "mutationRate": 0.1,
     "sensorCount": 3,
     "actionCount": 2,
     "layers": [
@@ -82,6 +84,7 @@ const defaultForwardBrain = {
     "alias": "forward",
     "lr": 0.001,
     "epsilonDecay": 0.99,
+    "mutationRate": 0.1,
     "sensorCount": 3,
     "actionCount": 2,
     "layers": [

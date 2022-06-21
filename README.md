@@ -19,7 +19,6 @@ Only one action at a time. (toggle this?)
 * Add web worker to handle training?
 * Input validation for forms
   * Ensure network inputs/outputs are anchored to sensor inputs/action counts output
-  * Add input for mutation rate
   * Establish better defaults
   * Tooltips or help would be cool
 * Save/load specific networks

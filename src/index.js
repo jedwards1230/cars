@@ -70,6 +70,7 @@ function beginTrain(config) {
 
 	modelConfig.learningRate = config.learningRate;
 	modelConfig.epsilonDecay = config.epsilonDecay;
+	modelConfig.mutationRate = config.mutationRate;
 	modelConfig.layers = config.layers;
 	modelConfig.sensorCount = config.sensorCount;
 	modelConfig.actionCount = config.actionCount;
@@ -104,11 +105,7 @@ async function episodeLoop() {
 	};
 
 	// mutate the weights slightly to help with diversity
-	// this currently changes values halfway to the max episode count
-	let mutateBrain = episodeCounter < numEpisodes / 2 ? 0.1 : 0.01;
-	// (sike)
-	mutateBrain = 0.01;
-	model.brain.mutate(mutateBrain);
+	model.brain.mutate(modelConfig.mutationRate);
 
 	// collect episode info for training run
 	info = await train(model, env, numSteps);

@@ -7,6 +7,7 @@ const TrainConfigForm = props => {
     const [numEpisodes, setNumEpisodes] = useState(100);
     const [numSteps, setNumSteps] = useState(1000);
     const [epsilonDecay, setEpsilonDecay] = useState(props.modelConfig.epsilonDecay);
+    const [mutationRate, setMutationRate] = useState(props.modelConfig.mutationRate);
     const [learningRate, setLearningRate] = useState(props.modelConfig.lr);
     const [sensorCount, setSensorCount] = useState(props.modelConfig.sensorCount);
     const [actionCount, setActionCount] = useState(props.modelConfig.actionCount);
@@ -19,6 +20,7 @@ const TrainConfigForm = props => {
             numEpisodes: numEpisodes,
             numSteps: numSteps,
             epsilonDecay: epsilonDecay,
+            mutationRate: mutationRate,
             learningRate: learningRate,
             sensorCount: sensorCount,
             actionCount: actionCount,
@@ -63,7 +65,7 @@ const TrainConfigForm = props => {
                 <h4 className="p-3">Training Parameters</h4>
                 <ProgressBar now={episodeCounter} max={numEpisodes} />
                 <Form>
-                    <Row className="py-2 mb-3">
+                    <Row className="py-2 my-1">
                         <Col>
                             <div className="form-floating">
                                 <input
@@ -81,9 +83,11 @@ const TrainConfigForm = props => {
                                     className="form-control"
                                     defaultValue={numSteps}
                                     onChange={e => setNumSteps(parseInt(e.target.value))}></input>
-                                <label htmlFor="timeLimitInput">Time Limit (per simulation)</label>
+                                <label htmlFor="timeLimitInput">Steps per Simulation</label>
                             </div>
                         </Col>
+                    </Row>
+                    <Row className="my-1">
                         <Col>
                             <div className="form-floating">
                                 <input
@@ -92,6 +96,16 @@ const TrainConfigForm = props => {
                                     defaultValue={epsilonDecay}
                                     onChange={e => setEpsilonDecay(parseFloat(e.target.value))}></input>
                                 <label htmlFor="epsilonDecayInput">Epsilon Decay Rate</label>
+                            </div>
+                        </Col>
+                        <Col>
+                            <div className="form-floating">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    defaultValue={mutationRate}
+                                    onChange={e => setMutationRate(parseFloat(e.target.value))}></input>
+                                <label htmlFor="mutationRateInput">Mutation Rate</label>
                             </div>
                         </Col>
                         <Col>
