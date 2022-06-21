@@ -64,7 +64,7 @@ const TrainConfigForm = props => {
         <div className="trainForm">
             <div id="trainParams" className="container text-center text-bg-light">
                 <Form>
-                    <Accordion defaultActiveKey="0" flush alwaysOpen className="py-2 my-1">
+                    <Accordion defaultActiveKey="0" flush className="py-2 my-1">
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>Training Parameters</Accordion.Header>
                             <Accordion.Body>
