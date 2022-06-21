@@ -39,7 +39,7 @@ const TrainConfigForm = props => {
     }
 
     const updateLayer = (id, activation, inputs, outputs) => {
-        let newLayers = [...layers];
+        const newLayers = [...layers];
         newLayers[id].activation = activation;
         newLayers[id].inputs = parseInt(inputs);
         newLayers[id].outputs = parseInt(outputs);
@@ -54,6 +54,14 @@ const TrainConfigForm = props => {
             id: counter + 1
         }]);
         setCounter(counter + 1);
+    }
+
+    const setAction = val => {
+        setActionCount(val);
+        const newLayers = [...layers];
+        if (!isFinite(val)) val = 0;
+        newLayers[newLayers.length - 1].outputs = val;
+        setLayers(newLayers);
     }
 
     useEffect(() => {
@@ -79,7 +87,7 @@ const TrainConfigForm = props => {
                                             <input
                                                 type="text"
                                                 className="form-control"
-                                                defaultValue={epsilonDecay}
+                                                defaultValue={props.modelConfig.epsilonDecay}
                                                 onChange={e => setEpsilonDecay(parseFloat(e.target.value))}></input>
                                             <label htmlFor="epsilonDecayInput">Epsilon Decay Rate</label>
                                         </div>
@@ -89,7 +97,7 @@ const TrainConfigForm = props => {
                                             <input
                                                 type="text"
                                                 className="form-control"
-                                                defaultValue={mutationRate}
+                                                defaultValue={props.modelConfig.mutationRate}
                                                 onChange={e => setMutationRate(parseFloat(e.target.value))}></input>
                                             <label htmlFor="mutationRateInput">Mutation Rate</label>
                                         </div>
@@ -99,7 +107,7 @@ const TrainConfigForm = props => {
                                             <input
                                                 type="text"
                                                 className="form-control"
-                                                defaultValue={learningRate}
+                                                defaultValue={props.modelConfig.lr}
                                                 onChange={e => setLearningRate(parseFloat(e.target.value))}></input>
                                             <label htmlFor="learningRateInput">Learning Rate</label>
                                         </div>
@@ -111,7 +119,7 @@ const TrainConfigForm = props => {
                                             <input
                                                 type="number"
                                                 className="form-control"
-                                                defaultValue={sensorCount}
+                                                defaultValue={props.modelConfig.sensorCount}
                                                 onChange={e => setSensorCount(parseInt(e.target.value))}></input>
                                             <label htmlFor="sensorCountInput">Sensor Count</label>
                                         </div>
@@ -121,8 +129,8 @@ const TrainConfigForm = props => {
                                             <input
                                                 type="number"
                                                 className="form-control"
-                                                defaultValue={actionCount}
-                                                onChange={e => setActionCount(parseInt(e.target.value))}></input>
+                                                defaultValue={props.modelConfig.actionCount}
+                                                onChange={e => setAction(parseInt(e.target.value))}></input>
                                             <label htmlFor="actionCountInput">Action Count</label>
                                         </div>
                                     </Col>

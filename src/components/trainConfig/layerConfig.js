@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Form, Button, Table } from "react-bootstrap";
 
 const NetworkLayerList = props => {
+
     return (
         <Table borderless size="sm">
             <thead>
@@ -34,24 +35,30 @@ const NetworkLayerItem = props => {
         props.updateLayer(id, activation, inputs, outputs);
     }
 
+    useEffect(() => {
+        setActivation(props.item.activation);
+        setInputs(props.item.inputs);
+        setOutputs(props.item.outputs);
+    }, [props.item.activation, props.item.inputs, props.item.outputs]);
+
     return (
         <tr>
             <td>
                 <input
                     type="text"
                     className="form-control"
-                    defaultValue={inputs}
+                    defaultValue={props.item.inputs}
                     onChange={e => updateLayer(activation, e.target.value, outputs)} ></input>
             </td>
             <td>
                 <input
                     type="text"
                     className="form-control"
-                    defaultValue={outputs}
+                    defaultValue={props.item.outputs}
                     onChange={e => updateLayer(activation, inputs, e.target.value)} ></input>
             </td>
             <td>
-                <Form.Select defaultValue={activation} onChange={e => updateLayer(e.target.value, inputs, outputs)}>
+                <Form.Select defaultValue={props.item.activation} onChange={e => updateLayer(e.target.value, inputs, outputs)}>
                     <option value="Linear">Linear</option>
                     <option value="Relu">Relu</option>
                     <option value="LeakyRelu">LeakyRelu</option>
