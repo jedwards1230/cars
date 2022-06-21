@@ -76,6 +76,7 @@ function beginTrain(config) {
 	modelConfig.actionCount = config.actionCount;
 	modelConfig.name = "trainBrain";
 	modelConfig.alias = "fsd";
+	modelConfig.save();
 	console.log("Model config inputs: ", modelConfig);
 
 	// reset environment
