@@ -9,7 +9,7 @@ const NetworkLayerList = props => {
                     <th>Input</th>
                     <th>Output</th>
                     <th>Activation</th>
-                    <th><Button variant="success" onClick={props.addLayer} >+</Button></th>
+                    <th><Button variant="success" onClick={props.addLayer}>+</Button></th>
                 </tr>
             </thead>
             <tbody>

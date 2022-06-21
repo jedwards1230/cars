@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import WelcomeView from "./welcome";
-import TrainConfigForm from "./trainConfigForm";
+import TrainConfigForm from "./trainConfig/trainConfigForm";
 import MetricsTable from "./metrics";
 import LossChart from "./lossChart";
 

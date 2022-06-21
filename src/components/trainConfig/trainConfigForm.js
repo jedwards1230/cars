@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import NetworkLayerList from "./layer";
+import NetworkLayerList from "./layerConfig";
+import SimConfig from "./simConfig";
 import { Form, Row, Col, ProgressBar, Accordion } from "react-bootstrap";
 
 const TrainConfigForm = props => {
@@ -67,28 +68,11 @@ const TrainConfigForm = props => {
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>Training Parameters</Accordion.Header>
                             <Accordion.Body>
-                                <Row>
-                                    <Col>
-                                        <div className="form-floating">
-                                            <input
-                                                type="number"
-                                                className="form-control"
-                                                defaultValue={numEpisodes}
-                                                onChange={e => setNumEpisodes(parseInt(e.target.value))} ></input>
-                                            <label htmlFor="episodeCountInput">Number of Simulations</label>
-                                        </div>
-                                    </Col>
-                                    <Col>
-                                        <div className="form-floating">
-                                            <input
-                                                type="number"
-                                                className="form-control"
-                                                defaultValue={numSteps}
-                                                onChange={e => setNumSteps(parseInt(e.target.value))}></input>
-                                            <label htmlFor="timeLimitInput">Steps per Simulation</label>
-                                        </div>
-                                    </Col>
-                                </Row>
+                                <SimConfig 
+                                    numEpisodes={numEpisodes}
+                                    setNumEpisodes={setNumEpisodes}
+                                    numSteps={numSteps}
+                                    setNumSteps={setNumSteps} />
                                 <Row className="py-3">
                                     <Col>
                                         <div className="form-floating">
