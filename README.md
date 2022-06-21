@@ -2,31 +2,28 @@
  
 Inspired by [this](https://www.youtube.com/watch?v=Rs_rAxEsAvI).
 
-Requires live server to test due to js modules.
+Compiled as a static site with Node.js
 
 ## Model
 
-#### Input: 5
-Adjust these in car.js, sensor.js, and network.js
-* 5 inputs from its forward rays
-  * 0: no obstacles detected
-  * 1: collision
+Input: Rays projected from front of the car
 
-#### Output: 2
-Adjust these in car.js and network.js
-* 0: move forward
-* 1: move backward
+Output:
+  * 0,1 = forward, backward
+  * 2,3 = left, right
+
+Only one action at a time. (toggle this?)
 
 ## Todo
 ### UI
-* Better handling of episodes
-  * better storing model history. episodes currently cap at around 1000 stored. way too small. 
-* add web worker to handle training
-* service worker for offline use
-* Form: Layer composition 
-  * load default values
-  * alert if model is different than model in-use
-  * save/load models by name
+* Add web worker to handle training?
+* Input validation for forms
+  * Ensure network inputs/outputs are anchored to sensor inputs/action counts output
+  * Add input for mutation rate
+  * Establish better defaults
+  * Tooltips or help would be cool
+* Save/load specific networks
+  * View of all saved models. editable?
 * Allow user control of car
   * Save user data as training data
 

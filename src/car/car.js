@@ -11,8 +11,6 @@ export class Car {
      * @param {number} maxSpeed - The maximum speed of the car.
      * @param {string} controller - dummy, network, or player
      * @param {string} color - The color of the car.
-     * @param {number} width - The width of the car.
-     * @param {number} height - The height of the car.
      */
     constructor(id, x, y, maxspeed = 2, controller = "dummy", color = "blue") {
         this.id = id;

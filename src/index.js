@@ -30,11 +30,9 @@ const reactBody = ReactDOM.createRoot(document.getElementById('reactBody'));
 let welcomed = false;
 const setWelcomed = (val) => welcomed = val;
 
-// prepare road canvas
+// prepare canvases
 const carCanvas = document.getElementById("carCanvas");
 const carCtx = carCanvas.getContext("2d");
-
-// prepare visualizer canvas
 const visualizer = new Visualizer();
 
 // environment config
@@ -44,11 +42,9 @@ const brainCount = 1;
 let smartTraffic = false;
 
 // init for training loop
+let numSteps, numEpisodes, info, animFrame;
 let breakLoop = false;
-let numSteps, numEpisodes;
 let episodeCounter = 0;
-let info;
-let animFrame;
 
 // init default config
 const modelConfig = new ModelConfig("trainBrain", "fsd");
@@ -65,7 +61,7 @@ function setTrainView() {
 	document.getElementById("networkCanvas").style.display = "none";
 }
 
-// Prepare for training
+// Prepare for training. This is called when the user submits the train config form.
 function beginTrain(config) {
 	// these params come form the form on the page
 	numEpisodes = config.numEpisodes;
@@ -148,6 +144,31 @@ async function episodeLoop() {
 	}
 }
 
+/** Reset environment and model
+ * @param {boolean} breakL - whether to break the training loop
+ */
+function reset(breakL = true) {
+	// break training loop
+	breakLoop = breakL;
+	if (breakL) episodeCounter = numEpisodes;
+
+	// reset environment
+	carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
+	env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
+
+	// reset model
+	const x = 0;
+	const y = env.road.getLaneCenter(env.startLane);
+	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
+	// load saved config
+	modelConfig.load();
+	model.loadBrainConfig(modelConfig);
+
+	// reset animation
+	cancelAnimationFrame(animFrame);
+	animate();
+}
+
 /** Draw all cars in the environment, plus the model */
 function drawCars() {
 	carCtx.save();
@@ -173,31 +194,6 @@ function toggleView() {
 	} else {
 		setTrainView();
 	}
-}
-
-/** Reset environment and model
- * @param {boolean} breakL - whether to break the training loop
- */
-function reset(breakL = true) {
-	// break training loop
-	breakLoop = breakL;
-	if (breakL) episodeCounter = numEpisodes;
-
-	// reset environment
-	carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
-	env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
-
-	// reset model
-	const x = 0;
-	const y = env.road.getLaneCenter(env.startLane);
-	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-	// load saved config
-	modelConfig.load();
-	model.loadBrainConfig(modelConfig);
-
-	// reset animation
-	cancelAnimationFrame(animFrame);
-	animate();
 }
 
 const destroyModel = () => {
