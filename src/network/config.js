@@ -14,6 +14,7 @@ export class ModelConfig {
     }
 
     destroy() {
+        this.generations = [];
         localStorage.removeItem(this.name);
     }
 
