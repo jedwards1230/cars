@@ -157,7 +157,7 @@ function reset(breakL = true) {
 
 	// reset model
 	const x = 0;
-	const y = env.road.getLaneCenter(env.startLane);
+	const y = env.road.getLaneCenter(1);
 	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
 	// load saved config
 	modelConfig.load();

@@ -60,21 +60,27 @@ const defaultTrainBrain = {
     "alias": "fsd",
     "lr": 0.001,
     "epsilonDecay": 0.9,
-    "mutationRate": 0.1,
-    "sensorCount": 3,
-    "actionCount": 2,
+    "mutationRate": 0.05,
+    "sensorCount": 5,
+    "actionCount": 4,
     "layers": [
         {
             "id": 0,
             "activation": "Tanh",
-            "inputs": 3,
-            "outputs": 5
+            "inputs": 5,
+            "outputs": 8
         },
         {
             "id": 1,
+            "activation": "LeakyRelu",
+            "inputs": 8,
+            "outputs": 5
+        },
+        {
+            "id": 2,
             "activation": "Sigmoid",
             "inputs": 5,
-            "outputs": 2
+            "outputs": 4
         }
     ],
     "generations": []
@@ -85,7 +91,7 @@ const defaultForwardBrain = {
     "alias": "forward",
     "lr": 0.001,
     "epsilonDecay": 0.99,
-    "mutationRate": 0.1,
+    "mutationRate": 0.05,
     "sensorCount": 3,
     "actionCount": 2,
     "layers": [

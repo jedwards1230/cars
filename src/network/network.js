@@ -134,6 +134,13 @@ export class Network {
                     )
                 }
             }
+            for (let i=0; i < level.outputs.length; i++) {
+                level.biases[i] = lerp(
+                    level.biases[i],
+                    Math.random() * 2 - 1,
+                    amount
+                )
+            }
         });
     }
 }
