@@ -1,18 +1,19 @@
 # Miles' Driving School
- 
-Inspired by [this](https://www.youtube.com/watch?v=Rs_rAxEsAvI).
 
-Compiled as a static site with Node.js
+The project began with [this](https://www.youtube.com/watch?v=Rs_rAxEsAvI) tutorial, but I wanted to expand with a network that could teach itself to navigate the traffic, and I wanted it to be configurable from the web page.
+
+Working demo is [here](https://jedwards1230.github.io/cars/)
 
 ## Model
 
-Input: Rays projected from front of the car
+Input: 
+  * Rays projected from front of the car
 
 Output:
   * 0,1 = forward, backward
   * 2,3 = left, right
 
-Only one action at a time. (toggle this?)
+Only one action at a time.
 
 ## Todo
 ### UI
@@ -27,5 +28,4 @@ Only one action at a time. (toggle this?)
   * Save user data as training data
 
 ### Network
-* optimize how rewards/expected values are calculated
-* make it work
+* better system for how rewards/expected values are calculated
