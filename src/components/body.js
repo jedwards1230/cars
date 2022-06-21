@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import WelcomeView from "./welcome";
 import TrainConfigForm from "./trainConfig/trainConfigForm";
-import MetricsTable from "./metrics";
-import LossChart from "./lossChart";
+import MetricsTable from "./metricsTable";
+import LossChart from "./metricsChart";
 
 const BodyComponent = props => {
     const [showStats, setShowStats] = useState(props.generations > 0);
