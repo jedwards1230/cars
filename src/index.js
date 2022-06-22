@@ -151,7 +151,6 @@ function drawCars() {
 	env.road.draw(carCtx);
 	for (let i = 0; i < env.traffic.length; i++) {
 		env.traffic[i].draw(carCtx);
-		carCtx.globalAlpha = 1;
 	}
 	model.draw(carCtx, true);
 	carCtx.restore();

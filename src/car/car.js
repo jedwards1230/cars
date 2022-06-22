@@ -129,7 +129,6 @@ export class Car {
         }
     }
 
-
     getSensorData(roadBorders, traffic) {
         let sensorOffsets = [];
         // update each sensor
@@ -137,14 +136,6 @@ export class Car {
         const offsets = this.sensors.getSensorOffsets();
         sensorOffsets = sensorOffsets.concat(offsets)
         return sensorOffsets
-    }
-
-    /** Get observation of environment */
-    getObservation(borders, traffic) {
-        if (!traffic) return;
-        this.sensorOffsets = this.getSensorData(borders, traffic)
-        const observation = [this.speed].concat(this.sensorOffsets);
-        return observation
     }
 
     getMetrics(action) {
@@ -288,7 +279,8 @@ export class Car {
 
     draw(ctx, drawSensors = false) {
         if (this.damaged) {
-            ctx.fillStyle = "gray";
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = 0.5;
         } else {
             ctx.fillStyle = this.color;
             if (this.sensors && drawSensors) {
@@ -302,5 +294,6 @@ export class Car {
             ctx.lineTo(this.polygon[i].x, this.polygon[i].y)
         }
         ctx.fill();
+        ctx.globalAlpha = 1;
     }
 }
