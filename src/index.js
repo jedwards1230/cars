@@ -11,7 +11,7 @@ import BodyComponent from './components/body';
 import { Environment } from "./car/environment.js";
 import { Visualizer } from "./network/visualizer.js";
 import { Car } from "./car/car.js";
-import { train } from "./network/train.js";
+import { SGD, batchTrain } from "./network/train.js";
 import { ModelConfig } from './network/config';
 
 // hook into DOM
@@ -81,7 +81,8 @@ async function episodeLoop() {
 	model.brain.mutate(modelConfig.mutationRate);
 
 	// collect episode info for training run
-	info = await train(model, env, numSteps);
+	//info = await SGD(model, env, numSteps);
+	info = await batchTrain(model, env, numSteps);
 
 	// save max distance so we can mark model improvement
 	// the main goal is distance without crashing
@@ -91,7 +92,7 @@ async function episodeLoop() {
 	// good entries are models that are an improvement in the right direction.
 	// these get saved for future generations to evolve from.
 	const checkGoodEntry = () => {
-		if (info.speed < 1) return false;
+		if (info.speed < 0) return false;
 		if (info.distance > distanceMax * 0.9) return true;
 		return false;
 	};

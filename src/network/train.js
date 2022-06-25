@@ -8,7 +8,7 @@
  * 6. Update Car with action
  * 7. Backprop network with reward
  */
-export async function train(model, env, maxTimeSteps) {
+export async function SGD(model, env, maxTimeSteps) {
     let speeds = [];
     let rLoss = 1;
     let count = 0;
@@ -25,39 +25,41 @@ export async function train(model, env, maxTimeSteps) {
      */
     const backprop = () => {
         const target = reward;
+        const gamma = 0.99;
 
         // find average loss
         rLoss = model.brain.lossFunction(target, output);
 
-        // derivate of loss function
+        // derivative of loss function (how much gradient needs to be adjusted)
         const d = new Array(output.length);
         for (let i = 0; i < output.length; i++) {
             d[i] = (target[i] - output[i]) * 2;
         }
 
+        const td = new Array(output.length);
+        for (let i = 0; i < output.length; i++) {
+            td[i] = target[i] + (gamma * output[i]) - prevOutput[i];
+        }
+
         // backward pass to update weights
-        model.brain.backward(d);
+        model.brain.backward(td);
     }
 
     for (let i = 0; i < maxTimeSteps; i++) {
         // update environment
         env.update();
         //const observation = model.getObservation(env.road.borders, env.traffic);
-        const sData = model.getSensorData(env.road.borders, env.traffic);
+        const input = model.getSensorData(env.road.borders, env.traffic);
 
         // forward pass to get action
         prevOutput = JSON.parse(JSON.stringify(output));
-        output = model.brain.forward(sData, true);
+        output = model.brain.forward(input, true);
         const epsilonGreedy = true;
         action = model.brain.makeChoice(output, epsilonGreedy);
 
         // update metrics
         const metrics = model.getMetrics(action);
         reward = metrics.reward;
-
-        // maybe use for reward or input?
-        //const time = 1 - (1 / (i + 1));
-        //const distance = 2 - (1 / (model.distance + 1));
 
         // apply action to model
         model.update(env.traffic, env.road.borders, action);
@@ -70,6 +72,102 @@ export async function train(model, env, maxTimeSteps) {
 
         if (model.damaged) break;
     }
+
+    return {
+        time: count,
+        loss: rLoss,
+        speed: speeds.reduce((a, b) => a + b, 0) / speeds.length,
+        distance: model.distance,
+        damaged: model.damaged,
+        model: model.brain,
+    };
+}
+
+export async function batchTrain(model, env, maxTimeSteps) {
+    let speeds = [];
+    let rLoss = 0;
+    let count = 0;
+    const batchSize = 32;
+    const memory = [];
+    let output = [];
+    let prevOutput = [];
+    let action;
+
+    /**
+     * Backpropagate the network with the reward
+     * 1. Get the target output of the network
+     * 2. Calculate the loss between the target and the output
+     * 3. Find derivative of loss with respect to the output
+     * 4. Backward propagate the loss
+     */
+    const backprop = (output, target) => {
+        const gamma = 0.99;
+        // find average loss
+        rLoss = model.brain.lossFunction(target, output);
+
+        // derivative of loss function (how much gradient needs to be adjusted)
+        const d = new Array(output.length);
+        for (let i = 0; i < output.length; i++) {
+            d[i] = (target[i] - output[i]) * 2;
+        }
+
+        const td = new Array(output.length);
+        for (let i = 0; i < output.length; i++) {
+            td[i] = target[i] + (gamma * output[i]) - prevOutput[i];
+        }
+
+        // backward pass to update weights
+        if (rLoss !== 0) model.brain.backward(td);
+        return rLoss
+    }
+
+    const experienceReplay = () => {
+        if (memory.length < batchSize) return;
+        let loss = 0;
+
+        // get random batch from memory
+        const index = Math.floor(Math.random() * memory.length);
+        const batch = memory.slice(index, batchSize);
+        batch.forEach(({ input, output, metrics }) => {
+            loss += backprop(output, metrics.reward);
+        });
+        console.log(`Loss: ${loss / batchSize}`);
+    }
+
+    for (let i = 0; i < maxTimeSteps; i++) {
+        // update environment
+        env.update();
+        //const observation = model.getObservation(env.road.borders, env.traffic);
+        const input = model.getSensorData(env.road.borders, env.traffic);
+
+        // forward pass to get action
+        prevOutput = JSON.parse(JSON.stringify(output));
+        output = model.brain.forward(input, true);
+        const epsilonGreedy = true;
+        action = model.brain.makeChoice(output, epsilonGreedy);
+
+        // update metrics
+        const metrics = model.getMetrics(action);
+
+        memory.push({ input, output, metrics });
+        experienceReplay();
+
+        // apply action to model
+        model.update(env.traffic, env.road.borders, action);
+
+        // metrics
+        speeds.push(model.speed);
+        count++;
+
+        if (model.damaged) break;
+    }
+
+    // splice out the last batch
+    const batch = memory.splice(memory.length - batchSize, batchSize);
+
+    batch.forEach(({ input, output, metrics }) => {
+        backprop(output, metrics.reward);
+    });
 
     return {
         time: count,

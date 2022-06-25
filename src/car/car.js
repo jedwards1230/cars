@@ -83,7 +83,7 @@ export class Car {
         if (action != null) this.updateControls(action);
         this.#move();
 
-        if (this.distance < -1000) this.damaged = true;
+        if (this.distance < -100) this.damaged = true;
 
         if (!this.damaged) {
             this.polygon = this.#createPolygon();
@@ -116,11 +116,15 @@ export class Car {
                 break;
             case 2:
                 // left 
+                this.controls.forward = false;
+                this.controls.backward = false;
                 this.controls.left = true;
                 this.controls.right = false;
                 break;
             case 3:
                 // right
+                this.controls.forward = false;
+                this.controls.backward = false;
                 this.controls.left = false;
                 this.controls.right = true;
                 break;
@@ -147,29 +151,43 @@ export class Car {
     }
 
     /** Get reward for current state */
-    // todo: make this more robust. split up by actions. get explicit.
     getReward(action) {
-        const reward = new Array(this.actionCount).fill(0);
-        reward[1] = 1;
+        const forward = 0;
+        const backward = 1;
+        const left = 2;
+        const right = 3;
 
-        //if (this.damaged) reward[1] -= 1;
-        if (this.damaged || this.speed < 1 || this.distance < 0) {
-            reward[0] += 1;
-            reward[1] -= 1;
+        const mOffset = Math.max(...this.sensorOffsets);
+        const reward = new Array(this.actionCount).fill(0);
+        
+        //reward[forward] = 1;
+
+        if (this.damaged) {
+            reward[forward] -= 1;
+            reward[left] += 1;
+            reward[right] += 1;
+        }
+
+        if (this.speed < 2 || this.distance < 0) {
+            reward[forward] += 1;
+            reward[left] -= 1;
+            reward[right] -= 1;
+            //reward[backward] -= 1;
         }
         if (this.actionCount > 2) {
             if (this.angle > 0.1) {
-                reward[2] -= 0.5;
+                reward[left] -= 0.5;
             }
             else if (this.angle < -0.1) {
-                reward[3] -= 0.5;
+                reward[right] -= 0.5;
             }
         }
 
-        const mOffset = Math.max(...this.sensorOffsets);
         if (mOffset > 0) {
-            reward[0] -= mOffset;
-            reward[1] += mOffset;
+            reward[forward] -= mOffset;
+            reward[left] += mOffset;
+            reward[right] += mOffset;
+            reward[backward] += mOffset;
         }
 
         return reward;
