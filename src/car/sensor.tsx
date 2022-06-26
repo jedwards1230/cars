@@ -2,9 +2,18 @@ import {
     getIntersection,
     lerp
 } from "../utils.js";
+import { Car } from "./car";
 
 export class Sensor {
-    constructor(car, rays, direction) {
+    car: Car;
+    rayCount: number;
+    rayLength: number;
+    raySpread: number;
+    direction: string;
+    rays: any[];
+    readings: any[];
+
+    constructor(car: Car, rays: number, direction: string) {
         this.car = car;
         this.rayCount = rays;
         this.rayLength = 175;
@@ -16,7 +25,7 @@ export class Sensor {
         this.readings = [];
     }
 
-    update(roadBorders, traffic) {
+    update(roadBorders: any, traffic: any) {
         this.#castRays();
         this.readings = [];
         for (let i = 0; i < this.rays.length; i++) {
@@ -36,7 +45,7 @@ export class Sensor {
         );
     }
 
-    #getReading(ray, roadBorders, traffic) {
+    #getReading(ray: any[], roadBorders: any[], traffic: Car[]) {
         let touches = [];
 
         // check overlap with borders
@@ -127,7 +136,7 @@ export class Sensor {
         }
     }
 
-    draw(ctx) {
+    draw(ctx: CanvasRenderingContext2D) {
         for (let i = 0; i < this.rayCount; i++) {
             let end = this.rays[i][1];
             if (this.readings[i]) {

@@ -1,11 +1,25 @@
-class Layer {
-    constructor(config, lr) {
+import { LayerConfig } from "./config";
+
+export class Layer {
+    inputs: number[];
+    outputs: number[];
+    weights: number[][];
+    biases: number[];
+    id: number;
+    lr: number;
+    name!: string;
+
+    activation!: any;
+    deactivation!: any;
+
+    constructor(config: LayerConfig) {
         this.inputs = new Array(config.inputs);
         this.weights = new Array(config.inputs);
         for (let i = 0; i < config.inputs; i++) {
             this.weights[i] = new Array(config.outputs).fill(0);
         }
-        this.lr = lr;
+        this.id = -1;
+        this.lr = config.lr;
 
         this.biases = new Array(config.outputs).fill(0.1);
         this.outputs = new Array(config.outputs);
@@ -17,7 +31,7 @@ class Layer {
     }
 
     /** Forward propagation */
-    forward(inputs, backprop = false) {
+    forward(inputs: number[], backprop = false) {
         const m = this.weights;
         const x = inputs;
 
@@ -45,7 +59,7 @@ class Layer {
     }
 
     /** Backward propagation */
-    backward(delta) {
+    backward(delta: any[]) {
         const weights = this.weights;
         const x = this.inputs;
         const y = this.outputs;
@@ -84,7 +98,7 @@ class Layer {
         return dZ;
     }
 
-    updateWeights(gradient) {
+    updateWeights(gradient: number[][]) {
         const m = 1 / gradient.length;
         for (let i = 0; i < gradient.length; i++) {
             for (let j = 0; j < this.outputs.length; j++) {
@@ -93,7 +107,7 @@ class Layer {
         }
     }
 
-    updateBiases(gradient) {
+    updateBiases(gradient: number[]) {
         const m = 1 / gradient.length;
         for (let i = 0; i < this.biases.length; i++) {
             this.biases[i] -= m * gradient[i] * this.lr;
@@ -122,10 +136,10 @@ class Layer {
 }
 
 export class SoftMax extends Layer {
-    constructor(config, lr) {
-        super(config, lr);
+    constructor(config: LayerConfig) {
+        super(config);
         this.name = "SoftMax";
-        this.activation = (x) => {
+        this.activation = (x: number[]) => {
             const maxLogit = Math.max(...x);
             const scores = x.map(l => Math.exp(l - maxLogit));
             const denom = scores.reduce((a, b) => a + b);
@@ -135,77 +149,81 @@ export class SoftMax extends Layer {
 }
 
 export class Sigmoid extends Layer {
-    constructor(config, lr) {
-        super(config, lr);
+    constructor(config: LayerConfig) {
+        super(config);
         this.name = "Sigmoid";
-        this.activation = x => {
+        this.activation = (x: number[]) => {
             return x.map(x => 1 / (1 + Math.exp(-x)));
         }
-        this.deactivation = x => {
+        this.deactivation = (x: number[]) => {
             return x.map(x => x * (1 - x));
         }
     }
 }
 
 export class LeakyRelu extends Layer {
-    constructor(config, lr, alpha = 0.01) {
-        super(config, lr);
+    alpha: number;
+
+    constructor(config: LayerConfig, alpha = 0.01) {
+        super(config);
         this.name = "LeakyRelu";
         this.alpha = alpha;
-        this.activation = x => {
+        this.activation = (x: number[]) => {
             return x.map(x => x > 0 ? x : x * this.alpha);
         }
-        this.deactivation = x => {
+        this.deactivation = (x: number[]) => {
             return x.map(x => x > 0 ? 1 : this.alpha);
         }
     }
 }
 
 export class DropOut extends Layer {
-    constructor(config, lr, dropRate = 0.5) {
-        super(config, lr);
+    dropRate: number;
+
+    constructor(config: LayerConfig, dropRate = 0.5) {
+        super(config);
         this.name = "DropOut";
         this.dropRate = dropRate;
-        this.activation = x => {
+        this.activation = (x: number[]) => {
             return x.map(x => Math.random() < this.dropRate ? 0 : x);
         }
     }
 }
 
 export class Tanh extends Layer {
-    constructor(config, lr) {
-        super(config, lr);
+    constructor(config: LayerConfig) {
+        super(config);
         this.name = "Tanh";
-        this.activation = x => {
+        this.activation = (x: number[]) => {
             return x.map(x => Math.tanh(x));
         }
-        this.deactivation = x => {
+        this.deactivation = (x: number[]) => {
             return x.map(x => 1 - x ** 2);
         }
     }
 }
 
 export class Linear extends Layer {
-    constructor(config, lr) {
-        super(config, lr);
+    constructor(config: LayerConfig) {
+        super(config);
         this.name = "Linear";
-        this.activation = x => {
+        this.activation = (x: number[]) => {
             return x;
         }
-        this.deactivation = x => {
+        this.deactivation = (x: number[]) => {
             return x;
         }
     }
 }
 
 export class Relu extends Layer {
-    constructor(config, lr) {
-        super(config, lr);
+    constructor(config: LayerConfig) {
+        super(config);
         this.name = "Relu";
-        this.activation = x => {
+        this.activation = (x: number[]) => {
             return x.map(x => x > 0 ? x : 0);
         }
-        this.deactivation = x => {
+        this.deactivation = (x: number[]) => {
             return x.map(x => x > 0 ? 1 : 0);
         }
     }

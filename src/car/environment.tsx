@@ -1,14 +1,26 @@
-import { Road } from "./road.js";
+import { Road } from "./road";
 import { getRandomInt } from "../utils.js";
-import { Car } from "./car.js";
-import { ModelConfig } from "../network/config.js";
+import { Car } from "./car";
+import { ModelConfig } from "../network/config";
 
 export class Environment {
-    constructor(trafficCount, brainCount, carCanvas, smart = false) {
+    canvas: any;
+    trafficCount: number;
+    brainCount: number;
+    smart: boolean;
+    traffic: Car[];
+    modelConfig: ModelConfig;
+    driverSpeed: number;
+    laneCount: number;
+    road: Road;
+    startLane: number;
+
+    constructor(trafficCount: number, brainCount: number, carCanvas: any, smart = false) {
         this.canvas = carCanvas;
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
         this.smart = smart;
+        this.traffic = [];
 
         this.modelConfig = new ModelConfig("trafficForward", "forward");
         this.modelConfig.load();
@@ -25,13 +37,13 @@ export class Environment {
         this.generateTraffic();
     }
 
-    render() {
+    /* render() {
         const navbarHeight = document.getElementById("nav").offsetHeight;
 
         // update dimensions
         this.canvas.style.top = navbarHeight + "px";
         this.canvas.width = window.innerWidth;
-    }
+    } */
 
     update() {
         for (let i = 0; i < this.traffic.length; i++) {
@@ -49,9 +61,8 @@ export class Environment {
         let placed = new Array(this.road.laneCount).fill(100);
 
         // randomize lane
-        const getStartPosition = (i) => {
+        const getStartPosition = () => {
             const lane = getRandomInt(0, this.road.laneCount - 1);
-            //const nextLane = placed[lane - 1] ? lane - 1 : lane + 1;
             placed[lane] = placed[lane] + getRandomInt(200, 350);
             const x = placed[lane];
             const y = this.road.getLaneCenter(lane);
@@ -61,7 +72,7 @@ export class Environment {
         let car;
         for (let i = 0; i < N; i++) {
             const idx = i + this.brainCount;
-            const [x, y] = getStartPosition(i);
+            const [x, y] = getStartPosition();
 
             if (this.smart) {
                 car = new Car(idx, x, y, getRandomInt(2, 3), "network");

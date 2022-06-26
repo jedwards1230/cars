@@ -1,3 +1,6 @@
+import { Car } from "../car/car";
+import { Environment } from "../car/environment";
+
 /**
  * Training Loop
  * 1. Update environment
@@ -8,13 +11,14 @@
  * 6. Update Car with action
  * 7. Backprop network with reward
  */
-export async function SGD(model, env, maxTimeSteps) {
+export async function SGD(model: Car, env: Environment, maxTimeSteps: number) {
     let speeds = [];
     let rLoss = 1;
     let count = 0;
-    let output = [];
-    let action, reward;
-    let prevOutput;
+    let output: number[] = [];
+    let action: number;
+    let reward: number[];
+    let prevOutput: number[];
 
     /**
      * Backpropagate the network with the reward
@@ -83,14 +87,14 @@ export async function SGD(model, env, maxTimeSteps) {
     };
 }
 
-export async function batchTrain(model, env, maxTimeSteps) {
+export async function batchTrain(model: Car, env: Environment, maxTimeSteps: number) {
     let speeds = [];
     let rLoss = 0;
     let count = 0;
     const batchSize = 32;
-    const memory = [];
-    let output = [];
-    let prevOutput = [];
+    const memory: any[] = [];
+    let output: number[] = [];
+    let prevOutput: number[] = [];
     let action;
 
     /**
@@ -100,7 +104,7 @@ export async function batchTrain(model, env, maxTimeSteps) {
      * 3. Find derivative of loss with respect to the output
      * 4. Backward propagate the loss
      */
-    const backprop = (output, target) => {
+    const backprop = (output: number[], target: number[]) => {
         const gamma = 0.99;
         // find average loss
         rLoss = model.brain.lossFunction(target, output);

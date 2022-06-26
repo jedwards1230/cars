@@ -1,9 +1,21 @@
-import {
-    lerp
-} from "../utils.js";
+import { lerp } from "../utils.js";
+
+type Point = {
+    x: number;
+    y: number;
+};
 
 export class Road {
-    constructor(y, width, laneCount = 4) {
+    y: number;
+    width: number;
+    laneCount: number;
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+    borders: Point[][];
+
+    constructor(y: number, width: number, laneCount = 4) {
         this.y = y;
         this.width = width;
         this.laneCount = laneCount;
@@ -37,13 +49,13 @@ export class Road {
         ];
     }
 
-    getLaneCenter(laneIndex) {
+    getLaneCenter(laneIndex: number) {
         const laneWidth = this.width / this.laneCount;
         return this.top + laneWidth / 2 +
             Math.min(laneIndex, this.laneCount - 1) * laneWidth;
     }
 
-    draw(ctx) {
+    draw(ctx: CanvasRenderingContext2D) {
         ctx.lineWidth = 5;
         ctx.strokeStyle = "white";
 

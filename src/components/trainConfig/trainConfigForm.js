@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import NetworkLayerList from "./layerConfig";
 import SimConfig from "./simConfig";
+import { ModelConfig, LayerConfig } from "../../network/config";
 import { Form, Row, Col, ProgressBar, Accordion } from "react-bootstrap";
 
 const TrainConfigForm = props => {
     const [episodeCounter, setEpisodeCounter] = useState(props.episodeCounter);
     const [numEpisodes, setNumEpisodes] = useState(1000);
-    const [numSteps, setNumSteps] = useState(50000);
+    const [numSteps, setNumSteps] = useState(2000);
     const [epsilonDecay, setEpsilonDecay] = useState(props.modelConfig.epsilonDecay);
     const [mutationRate, setMutationRate] = useState(props.modelConfig.mutationRate);
     const [learningRate, setLearningRate] = useState(props.modelConfig.lr);
@@ -17,16 +18,16 @@ const TrainConfigForm = props => {
     const [layers, setLayers] = useState(props.modelConfig.layers);
 
     const submitForm = () => {
-        const modelConfig = {
-            numEpisodes: numEpisodes,
-            numSteps: numSteps,
-            epsilonDecay: epsilonDecay,
-            mutationRate: mutationRate,
-            learningRate: learningRate,
-            sensorCount: sensorCount,
-            actionCount: actionCount,
-            layers: layers
-        }
+        const modelConfig = new ModelConfig(props.modelConfig.name, props.modelConfig.alias);
+        modelConfig.epsilonDecay = epsilonDecay;
+        modelConfig.mutationRate = mutationRate;
+        modelConfig.lr = learningRate;
+        modelConfig.sensorCount = sensorCount;
+        modelConfig.actionCount = actionCount;
+        modelConfig.layers = layers;
+        modelConfig.numEpisodes = numEpisodes;
+        modelConfig.numSteps = numSteps;
+
         props.beginTrain(modelConfig);
     }
 

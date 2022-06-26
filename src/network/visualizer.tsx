@@ -2,22 +2,28 @@ import {
     getRGBA,
     lerp
 } from "../utils.js";
+import { Layer } from "./layers.js";
+import { Network } from "./network";
 
 export class Visualizer {
+    canvas: HTMLCanvasElement;
+    context: CanvasRenderingContext2D;
+    active: boolean;
+
     constructor() {
-        this.canvas = document.getElementById("networkCanvas");
-        this.context = this.canvas.getContext("2d");
+        this.canvas = document.getElementById("networkCanvas")! as HTMLCanvasElement;
+        this.context = this.canvas.getContext("2d")!;
         this.canvas.height = 450;
         this.active = false;
     }
 
-    draw(brain, time) {
+    draw(brain: Network, time: number) {
         this.canvas.width = window.innerWidth;
         this.context.lineDashOffset = -time / 40;
         this.drawNetwork(brain)
     }
 
-    drawNetwork(network) {
+    drawNetwork(network: Network) {
         const ctx = this.context;
         const margin = 50;
         const width = ctx.canvas.width - margin * 2;
@@ -62,7 +68,7 @@ export class Visualizer {
         ctx.scale(-1, 1);
     }
 
-    drawLevel(level, top, left, width, height, outputLabels) {
+    drawLevel(level: Layer, top: number, left: number, width: number, height: number, outputLabels: string[]) {
         const ctx = this.context;
         const right = left + width;
         const bottom = top + height;
@@ -138,7 +144,7 @@ export class Visualizer {
         }
     }
 
-    #getNodeY(nodes, index, bottom, top) {
+    #getNodeY(nodes: number[], index: number, bottom: any, top: any) {
         return lerp(
             bottom,
             top,

@@ -2,6 +2,7 @@ import {
     lerp,
     MSE
 } from "../utils.js";
+import { ModelConfig } from "./config.js";
 import {
     Linear,
     Sigmoid,
@@ -9,10 +10,20 @@ import {
     LeakyRelu,
     Tanh,
     SoftMax,
-} from "./layers.js";
+    Layer,
+} from "./layers";
 
 export class Network {
-    constructor(modelConfig) {
+    name!: string;
+    epsilon!: number;
+    lr!: number;
+    alias!: string;
+    memory: any[];
+    layers: Layer[];
+    confidence: number;
+    lossFunction: (targets: number[], outputs: number[]) => number;
+
+    constructor(modelConfig: ModelConfig) {
         this.memory = [];
         this.layers = [];
         this.confidence = 0.5;
@@ -28,7 +39,7 @@ export class Network {
     }
 
     /** Forward pass each layer */
-    forward(inputs, backprop = false) {
+    forward(inputs: number[], backprop = false) {
         let outputs = this.layers[0].forward(inputs, backprop);
         for (let i = 1; i < this.layers.length; i++) {
             outputs = this.layers[i].forward(outputs, backprop);
@@ -37,14 +48,14 @@ export class Network {
     }
 
     /** Backward pass each layer */
-    backward(delta) {
+    backward(delta: any[]) {
         for (let i = this.layers.length - 1; i >= 0; i--) {
             delta = this.layers[i].backward(delta);
         }
     }
 
     /** Choose action based on confidence or with epsilon greedy */
-    makeChoice(outputValues, greedy = false) {
+    makeChoice(outputValues: number[], greedy = false) {
         // choose random
         const random = Math.random();
         let choice;
@@ -59,7 +70,7 @@ export class Network {
     }
 
     saveLayers() {
-        const layers = [];
+        const layers: any[] = [];
         this.layers.forEach((level, index) => {
             level.id = index;
             layers.push(level.save());
@@ -68,39 +79,36 @@ export class Network {
         return layers
     }
 
-    loadBrain(saved) {
-        this.name = saved.name;
-        this.lr = saved.lr;
-        this.epsilon = saved.epsilonDecay;
-        this.alias = saved.alias;
-        this.setModelLayers(saved.layers);
+    loadBrain(config: ModelConfig) {
+        this.name = config.name;
+        this.lr = config.lr;
+        this.epsilon = config.epsilonDecay;
+        this.alias = config.alias;
+        this.setModelLayers(config.layers);
     }
 
-    /**
-     * Set model layers
-     * @param {array} layers - array of layer configs
-     */
-    setModelLayers = layers => {
+    /** Set model layers */
+    setModelLayers = (layers: string | any[]) => {
         let preparedLayers = new Array(layers.length);
         for (let i = 0; i < layers.length; i++) {
             switch (layers[i].activation) {
                 case "Linear":
-                    preparedLayers[i] = new Linear(layers[i], this.lr);
+                    preparedLayers[i] = new Linear(layers[i]);
                     break;
                 case "Sigmoid":
-                    preparedLayers[i] = new Sigmoid(layers[i], this.lr);
+                    preparedLayers[i] = new Sigmoid(layers[i]);
                     break;
                 case "Relu":
-                    preparedLayers[i] = new Relu(layers[i], this.lr);
+                    preparedLayers[i] = new Relu(layers[i]);
                     break;
                 case "LeakyRelu":
-                    preparedLayers[i] = new LeakyRelu(layers[i], this.lr);
+                    preparedLayers[i] = new LeakyRelu(layers[i]);
                     break;
                 case "Tanh":
-                    preparedLayers[i] = new Tanh(layers[i], this.lr);
+                    preparedLayers[i] = new Tanh(layers[i]);
                     break;
                 case "SoftMax":
-                    preparedLayers[i] = new SoftMax(layers[i], this.lr);
+                    preparedLayers[i] = new SoftMax(layers[i]);
                     break;
                 default:
                     console.log("Unknown activation function");

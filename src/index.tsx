@@ -1,67 +1,80 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import './App.css';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import "./App.css";
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
+import reportWebVitals from "./reportWebVitals";
 
-import NavComponent from './components/nav';
-import BodyComponent from './components/body';
+import NavComponent from "./components/nav";
+import BodyComponent from "./components/body";
 
-import { Environment } from "./car/environment.js";
-import { Visualizer } from "./network/visualizer.js";
-import { Car } from "./car/car.js";
-import { SGD, batchTrain } from "./network/train.js";
-import { ModelConfig } from './network/config';
+import { Environment } from "./car/environment";
+import { Visualizer } from "./network/visualizer";
+import { Car } from "./car/car";
+import { SGD } from "./network/train";
+import { ModelConfig } from "./network/config";
 
 // hook into DOM
-const reactHeader = ReactDOM.createRoot(document.getElementById('reactHeader'));
-const reactBody = ReactDOM.createRoot(document.getElementById('reactBody'));
+const reactHeader = ReactDOM.createRoot(
+	document.getElementById("reactHeader")!
+);
+const reactBody = ReactDOM.createRoot(document.getElementById("reactBody")!);
 
 // prepare guests
 let welcomed = false;
-const setWelcomed = (val) => welcomed = val;
+const setWelcomed = (val: boolean) => (welcomed = val);
 
 // prepare canvases
-const carCanvas = document.getElementById("carCanvas");
-const carCtx = carCanvas.getContext("2d");
+const carCanvas = document.getElementById("carCanvas")! as HTMLCanvasElement;
+const carCtx = carCanvas.getContext("2d")! as CanvasRenderingContext2D;
 const visualizer = new Visualizer();
 
 // environment config
-let env, model;
+let env: Environment
+let model: Car;
 const trafficCount = 50;
 const brainCount = 1;
 let smartTraffic = false;
 
 // init for training loop
-let numSteps, numEpisodes, info, animFrame;
+let numSteps: number;
+let numEpisodes: number;
+let info: {
+	speed: any;
+	distance: any;
+	time?: number;
+	loss?: number;
+	damaged?: any;
+	model?: any;
+};
+let animFrame: number;
 let breakLoop = false;
 let episodeCounter = 0;
 
 // init default config
-const modelConfig = new ModelConfig("trainBrain", "fsd");
+let modelConfig = new ModelConfig("trainBrain", "fsd");
 modelConfig.load();
 
 // Prepare for training. This is called when the user submits the train config form.
-function beginTrain(config) {
+function beginTrain(config: ModelConfig) {
 	// these params come form the form on the page
 	numEpisodes = config.numEpisodes;
 	numSteps = config.numSteps;
 	episodeCounter = 0;
 
-	modelConfig.learningRate = config.learningRate;
-	modelConfig.epsilonDecay = config.epsilonDecay;
-	modelConfig.mutationRate = config.mutationRate;
-	modelConfig.layers = config.layers;
-	modelConfig.sensorCount = config.sensorCount;
-	modelConfig.actionCount = config.actionCount;
-	modelConfig.name = "trainBrain";
-	modelConfig.alias = "fsd";
+	modelConfig = config;
 	modelConfig.save();
 	console.log("Model config inputs: ", modelConfig);
 
 	// beging training loop
-	console.log("Training | Episodes: ", numEpisodes, " | Steps: ", numSteps, " | Learning Rate: ", modelConfig.learningRate);
+	console.log(
+		"Training | Episodes: ",
+		numEpisodes,
+		" | Steps: ",
+		numSteps,
+		" | Learning Rate: ",
+		modelConfig.lr
+	);
 	episodeLoop();
 }
 
@@ -82,16 +95,25 @@ async function episodeLoop() {
 
 	// collect episode info for training run
 	//info = await SGD(model, env, numSteps);
-	info = await batchTrain(model, env, numSteps);
+	info = await SGD(model, env, numSteps);
 
 	// save max distance so we can mark model improvement
 	// the main goal is distance without crashing
-	const distanceMap = model.modelConfig.generations.map((e) => e.distance);
+	const distanceMap = model.modelConfig.generations.map(
+		(e: { distance: number }) => e.distance
+	);
 	const distanceMax = Math.max(...distanceMap, 1000);
 
 	// good entries are models that are an improvement in the right direction.
 	// these get saved for future generations to evolve from.
-	const checkGoodEntry = () => {
+	const checkGoodEntry = (info: {
+		speed: any;
+		distance: any;
+		time?: number | undefined;
+		loss?: number | undefined;
+		damaged?: any;
+		model?: any;
+	}) => {
 		if (info.speed < 0) return false;
 		if (info.distance > distanceMax * 0.9) return true;
 		return false;
@@ -105,8 +127,7 @@ async function episodeLoop() {
 
 	// break loop if we've reached the max number of episodes
 	episodeCounter++;
-	if (episodeCounter >= numEpisodes || episodeCounter < 0)
-		breakLoop = true;
+	if (episodeCounter >= numEpisodes || episodeCounter < 0) breakLoop = true;
 
 	// if we're not breaking loop, continue training
 	if (!breakLoop) {
@@ -150,8 +171,8 @@ function drawCars() {
 	// this is basically the tracker, so any car can be dropped in here
 	carCtx.translate(carCanvas.height * 0.7 - model.x, 0);
 	env.road.draw(carCtx);
-	for (let i = 0; i < env.traffic.length; i++) {
-		env.traffic[i].draw(carCtx);
+	for (let i = 0; i < env.traffic!.length; i++) {
+		env.traffic![i].draw(carCtx);
 	}
 	model.draw(carCtx, true);
 	carCtx.restore();
@@ -160,12 +181,12 @@ function drawCars() {
 // Set play view
 function setPlayView() {
 	if (visualizer.active)
-		document.getElementById("networkCanvas").style.display = "inline";
+		document.getElementById("networkCanvas")!.style.display = "inline";
 }
 
 // Set train view
 function setTrainView() {
-	document.getElementById("networkCanvas").style.display = "none";
+	document.getElementById("networkCanvas")!.style.display = "none";
 }
 
 /** Toggle between training and visualizing network */
@@ -183,10 +204,10 @@ function toggleView() {
 const destroyModel = () => {
 	modelConfig.destroy();
 	reset();
-}
+};
 
 function setMainView() {
-	document.getElementById("carCanvas").style.display = "inline";
+	document.getElementById("carCanvas")!.style.display = "inline";
 	reset();
 }
 
@@ -194,13 +215,13 @@ const startTrain = () => {
 	visualizer.active = false;
 	setTrainView();
 	setMainView();
-}
+};
 
 const startVisualizer = () => {
 	visualizer.active = true;
 	setPlayView();
 	setMainView();
-}
+};
 
 const drawUI = () => {
 	// not sure if i wanna toggle nav with the welcome screen or not
@@ -212,7 +233,8 @@ const drawUI = () => {
 					model={model}
 					destroy={destroyModel}
 					reset={reset}
-					toggleView={toggleView} />
+					toggleView={toggleView}
+				/>
 			</React.StrictMode>
 		);
 	}
@@ -230,13 +252,14 @@ const drawUI = () => {
 				model={model}
 				episodeCounter={episodeCounter}
 				modelConfig={modelConfig}
-				generations={generations} />
+				generations={generations}
+			/>
 		</React.StrictMode>
 	);
-}
+};
 
 // animate model
-function animate(time) {
+function animate(time: number = 0) {
 	// update cars
 	env.update();
 	// only perform action if car is not crashed

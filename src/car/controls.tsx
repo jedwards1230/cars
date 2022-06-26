@@ -1,5 +1,11 @@
 export class Controls {
-    constructor(controller) {
+    forward: boolean;
+    backward: boolean;
+    left: boolean;
+    right: boolean;
+
+
+    constructor(controller: string) {
         this.forward = true;
         this.backward = false;
         this.left = false;
