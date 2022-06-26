@@ -3,20 +3,8 @@ import WelcomeView from "./welcome";
 import TrainConfigForm from "./trainConfig/trainConfigForm";
 import MetricsTable from "./metricsTable";
 import LossChart from "./metricsChart";
-import { Car } from "../car/car";
 
-const BodyComponent = (props: {
-  generations: any;
-  welcomed: any;
-  model: Car;
-  showVisualizer: any;
-  beginTrain: any;
-  modelConfig: any;
-  episodeCounter: any;
-  setPlay: any;
-  setTrain: any;
-  setWelcomed: any;
-}) => {
+const BodyComponent = (props) => {
   const [showStats, setShowStats] = useState(props.generations > 0);
 
   useEffect(() => {
