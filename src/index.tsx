@@ -62,7 +62,9 @@ function beginTrain(config: ModelConfig) {
 	numSteps = config.numSteps;
 	episodeCounter = 0;
 
+	const generations = modelConfig.generations
 	modelConfig = config;
+	modelConfig.generations = generations;
 	modelConfig.save();
 	console.log("Model config inputs: ", modelConfig);
 
@@ -139,9 +141,7 @@ async function episodeLoop() {
 	}
 }
 
-/** Reset environment and model
- * @param {boolean} breakL - whether to break the training loop
- */
+/** Reset environment and model */
 function reset(breakL = true) {
 	// break training loop
 	breakLoop = breakL;
@@ -224,7 +224,6 @@ const startVisualizer = () => {
 };
 
 const drawUI = () => {
-	// not sure if i wanna toggle nav with the welcome screen or not
 	if (welcomed) {
 		reactHeader.render(
 			<React.StrictMode>
@@ -239,20 +238,17 @@ const drawUI = () => {
 		);
 	}
 
-	const generations = model.modelConfig.generations;
 	reactBody.render(
 		<React.StrictMode>
 			<BodyComponent
 				welcomed={welcomed}
 				setWelcomed={setWelcomed}
-				showVisualizer={visualizer.active}
 				setTrain={startTrain}
 				setPlay={startVisualizer}
 				beginTrain={beginTrain}
-				model={model}
+				showVisualizer={visualizer.active}
 				episodeCounter={episodeCounter}
 				modelConfig={modelConfig}
-				generations={generations}
 			/>
 		</React.StrictMode>
 	);

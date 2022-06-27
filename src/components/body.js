@@ -5,11 +5,11 @@ import MetricsTable from "./metricsTable";
 import LossChart from "./metricsChart";
 
 const BodyComponent = (props) => {
-  const [showStats, setShowStats] = useState(props.generations > 0);
+  const [showStats, setShowStats] = useState(props.modelConfig.generations > 0);
 
   useEffect(() => {
-    setShowStats(props.generations.length > 0);
-  }, [props.generations]);
+    setShowStats(props.modelConfig.generations.length > 0);
+  }, [props.modelConfig.generations]);
 
   if (props.welcomed && !props.showVisualizer) {
     return (
@@ -22,8 +22,8 @@ const BodyComponent = (props) => {
         {showStats && (
           <div id="trainStats" className=" py-2 my-2">
             <h5 className="p-3 text-center">Training Stats</h5>
-            <MetricsTable episodes={props.generations} />
-            <LossChart episodes={props.generations} />
+            <MetricsTable episodes={props.modelConfig.generations} />
+            <LossChart episodes={props.modelConfig.generations} />
           </div>
         )}
       </div>
