@@ -25,7 +25,8 @@ Only one action at a time.
 * Save/load specific networks
   * View of all saved models. editable?
 * Allow user control of car
-  * Save user data as training data
+  * Save as training data to teach model
 
 ### Network
 * better system for how rewards/expected values are calculated
+* create better default model that actually works
