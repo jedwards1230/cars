@@ -1,8 +1,8 @@
 import {
     getRGBA,
     lerp
-} from "../utils.js";
-import { Layer } from "./layers.js";
+} from "../utils";
+import { Layer } from "./layers";
 import { Network } from "./network";
 
 export class Visualizer {

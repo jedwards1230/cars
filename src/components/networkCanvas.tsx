@@ -5,7 +5,7 @@ import { Car } from "../car/car"
 import {
     getRGBA,
     lerp
-} from "../utils.js";
+} from "../utils";
 
 const NetworkCanvas = (props: { model: Car; animTime: number; reset: any }) => {
     const drawNetwork = (network: Network) => {

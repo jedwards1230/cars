@@ -1,17 +1,23 @@
 import 'chart.js/auto';
 import { Chart } from 'react-chartjs-2';
 import { useState, useEffect } from 'react';
+import React from 'react';
 
-const LossChart = props => {
-    const [chartData, setChartData] = useState([]);
-    const [labels, setLabels] = useState([]);
+const LossChart = (props: { episodes: any[]; }) => {
+    const blank: any[] = [];
+
+    const [chartData, setChartData] = useState(blank);
+    const [labels, setLabels] = useState(blank);
 
     const options = {
         normalized: true,
         responsive: true,
     };
 
-    const data = {
+    const data: {
+        labels: string[];
+        datasets: any[];
+    } = {
         labels,
         datasets: [{
             type: 'line',
@@ -56,9 +62,9 @@ const LossChart = props => {
         }]
     };
 
-    const draw = (episodes) => {
-        const d = [];
-        const l = [];
+    const draw = (episodes: any[]) => {
+        const d: any[] = [];
+        const l: number[] = [];
         for (let i = 0; i < episodes.length; i++) {
             const episodeInfo = episodes[i];
             l.push(i);

@@ -1,8 +1,8 @@
 import {
     lerp,
     MSE
-} from "../utils.js";
-import { ModelConfig } from "./config.js";
+} from "../utils";
+import { ModelConfig } from "./config";
 import {
     Linear,
     Sigmoid,

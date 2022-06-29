@@ -1,11 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import './App.css';
 import NavComponent from "./components/nav";
 import WelcomeView from "./components/welcome";
 import TrainView from "./components/trainView";
 import VisualView from "./components/visualView";
 
-const App = (props) => {
+const App = (props: {
+	toggleView: () => void;
+	reset: () => void;
+	beginTrain: any;
+	modelConfig: any;
+	model: any;
+	destroyModel: any;
+	env: any;
+	episodeCounter: any;
+	animTime: any;
+}) => {
 	const [showVisualizer, setShowVisualizer] = useState(false);
 	const [welcomed, setWelcomed] = useState(false);
 
@@ -23,10 +33,6 @@ const App = (props) => {
 		setShowVisualizer(true);
 		props.reset();
 	}
-
-	useEffect(() => {
-		setShowVisualizer(props.showVisualizer);
-	}, [props.showVisualizer]);
 
 	if (welcomed && !showVisualizer) {
 		return (
@@ -64,15 +70,11 @@ const App = (props) => {
 			</div>
 		)
 	} else if (!welcomed) {
-		return (
-			<div id="mainView">
-				<WelcomeView
-					setPlay={setVisuals}
-					setTrain={setTrain}
-					setWelcomed={setWelcomed}
-				/>
-			</div>
-		)
+		return <WelcomeView
+			setPlay={setVisuals}
+			setTrain={setTrain}
+			setWelcomed={setWelcomed}
+		/>
 	}
 	return null
 };

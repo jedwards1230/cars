@@ -1,5 +1,5 @@
 import { Road } from "./road";
-import { getRandomInt } from "../utils.js";
+import { getRandomInt } from "../utils";
 import { Car } from "./car";
 import { ModelConfig } from "../network/config";
 

@@ -1,10 +1,18 @@
 import React, { useRef, useEffect, useState } from "react";
-import { lerp } from "../utils.js";
+import { lerp } from "../utils";
 
-const RoadCanvas = props => {
-    const drawSensor = (sensor) => {
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
+import { Car } from "../car/car";
+import { Environment } from "../car/environment";
+import { Road } from "../car/road";
+import { Sensor } from "../car/sensor";
+
+const RoadCanvas = (props: {
+    model: Car;
+    env: Environment;
+}) => {
+    const drawSensor = (sensor: Sensor) => {
+        const canvas = canvasRef.current! as HTMLCanvasElement;
+        const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
         for (let i = 0; i < sensor.rayCount; i++) {
             if (!sensor.rays[i]) continue;
@@ -41,9 +49,9 @@ const RoadCanvas = props => {
         }
     }
 
-    const drawCar = (car, drawSensors = false) => {
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
+    const drawCar = (car: Car, drawSensors = false) => {
+        const canvas = canvasRef.current! as HTMLCanvasElement;
+        const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
         if (car.damaged) {
             context.fillStyle = "gray";
@@ -62,9 +70,9 @@ const RoadCanvas = props => {
         context.fill();
     }
 
-    const drawRoad = (road) => {
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
+    const drawRoad = (road: Road) => {
+        const canvas = canvasRef.current! as HTMLCanvasElement;
+        const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
         context.lineWidth = 5;
         context.strokeStyle = "white";
@@ -93,9 +101,9 @@ const RoadCanvas = props => {
         })
     }
 
-    const drawCars = (model, env) => {
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
+    const drawCars = (model: Car, env: Environment) => {
+        const canvas = canvasRef.current! as HTMLCanvasElement;
+        const context = canvas.getContext("2d") as CanvasRenderingContext2D;
         context.save();
         context.translate(canvas.height * 0.7 - model.x, 0);
         drawRoad(env.road);
@@ -106,14 +114,14 @@ const RoadCanvas = props => {
         drawCar(model, true);
         context.restore();
     }
-    
+
     const canvasRef = useRef(null)
     const [model, setModel] = useState(props.model);
     const [env, setEnv] = useState(props.env);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        const canvas = canvasRef.current;
+        const canvas = canvasRef.current! as HTMLCanvasElement;
         canvas.width = window.innerWidth;
 
         setModel(props.model);
@@ -121,7 +129,7 @@ const RoadCanvas = props => {
 
         drawCars(model, env)
     })
-    
+
     return (
         <canvas ref={canvasRef} id="carCanvas" width={window.innerWidth} height="250" />
     )

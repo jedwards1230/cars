@@ -1,7 +1,7 @@
 import {
     getIntersection,
     lerp
-} from "../utils.js";
+} from "../utils";
 import { Car } from "./car";
 
 export class Sensor {

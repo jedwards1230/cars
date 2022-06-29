@@ -1,8 +1,13 @@
-export function lerp(A, B, t) {
+export function lerp(A: number, B: number, t: number) {
     return A + (B - A) * t;
 }
 
-export function getIntersection(A, B, C, D) {
+export function getIntersection(
+    A: { y: number; x: number; },
+    B: { x: number; y: number; },
+    C: { x: any; y: any; },
+    D: { x: any; y: any; }
+) {
     const tTop = (D.x - C.x) * (A.y - C.y) - (D.y - C.y) * (A.x - C.x);
     const uTop = (C.y - A.y) * (A.x - B.x) - (C.x - A.x) * (A.y - B.y);
     const bottom = (D.y - C.y) * (B.x - A.x) - (D.x - C.x) * (B.y - A.y);
@@ -22,7 +27,7 @@ export function getIntersection(A, B, C, D) {
     return null;
 }
 
-export function polysIntersect(poly1, poly2) {
+export function polysIntersect(poly1: any[], poly2: any[]) {
     for (let i = 0; i < poly1.length; i++) {
         for (let j = 0; j < poly2.length; j++) {
             const touch = getIntersection(
@@ -37,7 +42,7 @@ export function polysIntersect(poly1, poly2) {
     return false;
 }
 
-export function getRGBA(value) {
+export function getRGBA(value: number) {
     const alpha = Math.abs(value);
     const R = value > 0 ? 0 : 255;
     const B = value < 0 ? 0 : 255;
@@ -45,19 +50,15 @@ export function getRGBA(value) {
     return "rgba(" + R + "," + G + "," + B + "," + alpha + ")";
 }
 
-export function getRandomInt(min, max) {
+export function getRandomInt(min: number, max: number) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/* function normalize(val, max, min) {
-    return (val - min) / (max - min);
-} */
-
 // dot product of two arrays
-export function dotProduct(A, B) {
-    return A.reduce((acc, cur, i) => acc + cur * B[i], 0);
+export function dotProduct(A: any[], B: { [x: string]: number; }) {
+    return A.reduce((acc: number, cur: number, i: string | number) => acc + cur * B[i], 0);
 }
 
 /**
@@ -65,6 +66,6 @@ export function dotProduct(A, B) {
  * @param {number} outputs 
  * @param {number} targets 
  */
-export function MSE(targets, outputs) {
+export function MSE(targets: number, outputs: number) {
     return (targets - outputs) ** 2;
 }

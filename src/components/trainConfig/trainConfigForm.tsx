@@ -1,10 +1,23 @@
 import React, { useEffect, useState } from "react";
 import NetworkLayerList from "./layerConfig";
 import SimConfig from "./simConfig";
-import { ModelConfig, LayerConfig } from "../../network/config";
+import { ModelConfig } from "../../network/config";
 import { Form, Row, Col, ProgressBar, Accordion } from "react-bootstrap";
 
-const TrainConfigForm = props => {
+const TrainConfigForm = (props: {
+    episodeCounter: number;
+    modelConfig: {
+        epsilonDecay: number;
+        mutationRate: number;
+        lr: number;
+        sensorCount: number;
+        actionCount: number;
+        layers: any[];
+        name: string;
+        alias: string;
+    };
+    beginTrain: (arg0: ModelConfig) => void;
+}) => {
     const [episodeCounter, setEpisodeCounter] = useState(props.episodeCounter);
     const [numEpisodes, setNumEpisodes] = useState(1000);
     const [numSteps, setNumSteps] = useState(2000);
@@ -31,15 +44,15 @@ const TrainConfigForm = props => {
         props.beginTrain(modelConfig);
     }
 
-    const removeLayer = (id) => {
+    const removeLayer = (id: number) => {
         if (layers.length > 1) {
-            const newList = layers.filter((item) => item.id !== id);
+            const newList = layers.filter((item: { id: number; }) => item.id !== id);
             setLayers(newList);
             setCounter(newList.length - 1);
         }
     }
 
-    const updateLayer = (id, activation, inputs, outputs) => {
+    const updateLayer = (id: number, activation: string, inputs: string, outputs: string) => {
         const newLayers = [...layers];
         newLayers[id].activation = activation;
         newLayers[id].inputs = parseInt(inputs);
@@ -57,7 +70,7 @@ const TrainConfigForm = props => {
         setCounter(counter + 1);
     }
 
-    const setAction = val => {
+    const setAction = (val: number) => {
         setActionCount(val);
         const newLayers = [...layers];
         if (!isFinite(val)) val = 0;
@@ -77,7 +90,7 @@ const TrainConfigForm = props => {
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>Training Parameters</Accordion.Header>
                             <Accordion.Body>
-                                <SimConfig 
+                                <SimConfig
                                     numEpisodes={numEpisodes}
                                     setNumEpisodes={setNumEpisodes}
                                     numSteps={numSteps}

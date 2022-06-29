@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from "react";
 
-const NavComponent = (props) => {
+const NavComponent = (props: {
+    activeModel: string;
+    model: {
+        speed: number;
+        distance: number;
+    };
+    destroy: () => void;
+    reset: () => void;
+    toggleView: () => void;
+}) => {
     const [activeModel, setActiveModel] = useState(props.activeModel);
     const [speed, setSpeed] = useState(0);
     const [distance, setDistance] = useState(0);
 
     useEffect(() => {
         setActiveModel(props.activeModel);
-        setSpeed(props.model.speed.toFixed(1));
-        setDistance(props.model.distance.toFixed(0));
+        setSpeed(parseFloat(props.model.speed.toFixed(1)));
+        setDistance(parseFloat(props.model.distance.toFixed(0)));
     }, [props.model.speed, props.model.distance, props.activeModel]);
 
     return (

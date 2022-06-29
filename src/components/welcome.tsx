@@ -1,4 +1,10 @@
-const WelcomeView = (props) => {
+import React from "react";
+
+const WelcomeView = (props: {
+    setWelcomed: (arg0: boolean) => void;
+    setPlay: () => void;
+    setTrain: () => void;
+}) => {
     const setPlay = () => {
         props.setWelcomed(true);
         props.setPlay();

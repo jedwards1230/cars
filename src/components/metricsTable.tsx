@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const MetricsTable = props => {
+const MetricsTable = (props: { episodes: any[]; }) => {
     const [timeMax, setTimeMax] = useState(0);
     const [timeMin, setTimeMin] = useState(0);
     const [timeAvg, setTimeAvg] = useState(0);
@@ -24,24 +24,48 @@ const MetricsTable = props => {
         setModelCount(episodes.length);
 
         const timeMap = episodes.map(e => e.time);
-        setTimeAvg((timeMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(0));
-        setTimeMax(Math.max(...timeMap).toFixed(0));
-        setTimeMin(Math.min(...timeMap).toFixed(0));
+        setTimeAvg(
+            parseFloat((timeMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(0))
+        );
+        setTimeMax(
+            parseFloat(Math.max(...timeMap).toFixed(0))
+        );
+        setTimeMin(
+            parseFloat(Math.min(...timeMap).toFixed(0))
+        );
 
         const distanceMap = episodes.map(e => e.distance);
-        setDistanceAvg((distanceMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(0));
-        setDistanceMin(Math.min(...distanceMap).toFixed(0));
-        setDistanceMax(Math.max(...distanceMap).toFixed(0));
+        setDistanceAvg(
+            parseFloat((distanceMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(0))
+        );
+        setDistanceMin(
+            parseFloat(Math.min(...distanceMap).toFixed(0))
+        );
+        setDistanceMax(
+            parseFloat(Math.max(...distanceMap).toFixed(0))
+        );
 
         const speedMap = episodes.map(e => e.speed);
-        setSpeedAvg((speedMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(1));
-        setSpeedMin(Math.min(...speedMap).toFixed(1));
-        setSpeedMax(Math.max(...speedMap).toFixed(1));
+        setSpeedAvg(
+            parseFloat((speedMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(1))
+        );
+        setSpeedMin(
+            parseFloat(Math.min(...speedMap).toFixed(1))
+        );
+        setSpeedMax(
+            parseFloat(Math.max(...speedMap).toFixed(1))
+        );
 
         const lossMap = episodes.map(e => e.loss);
-        setLossAvg((lossMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(4));
-        setLossMin(Math.min(...lossMap).toFixed(4));
-        setLossMax(Math.max(...lossMap).toFixed(4));
+        setLossAvg(
+            parseFloat((lossMap.reduce((a, b) => a + b, 0) / episodes.length).toFixed(4))
+        );
+        setLossMin(
+            parseFloat(Math.min(...lossMap).toFixed(4))
+        );
+        setLossMax(
+            parseFloat(Math.max(...lossMap).toFixed(4))
+        );
     }, [props.episodes]);
 
     return (

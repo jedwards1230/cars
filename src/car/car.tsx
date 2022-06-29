@@ -1,7 +1,7 @@
 import { Controls } from "./controls";
 import { Sensor } from "./sensor";
 import { Network } from "../network/network";
-import { polysIntersect } from "../utils.js";
+import { polysIntersect } from "../utils";
 import { ModelConfig } from "../network/config";
 
 type Point = {

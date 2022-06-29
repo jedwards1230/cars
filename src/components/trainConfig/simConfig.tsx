@@ -1,7 +1,13 @@
+import React from "react";
 import { Row, Col } from "react-bootstrap";
 
 /** Number of simulations and steps per simulation */
-const SimConfig = props => {
+const SimConfig = (props: {
+    setNumEpisodes: (arg0: number) => void;
+    setNumSteps: (arg0: number) => void;
+    numEpisodes: number;
+    numSteps: number;
+}) => {
     return (
         <Row>
             <Col>

@@ -1,7 +1,13 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import { Form, Button, Table } from "react-bootstrap";
 
-const NetworkLayerList = props => {
+const NetworkLayerList = (props: {
+    addLayer: () => void;
+    layers: any[];
+    onRemove: any;
+    updateLayer: any;
+}) => {
 
     return (
         <Table borderless size="sm">
@@ -14,7 +20,7 @@ const NetworkLayerList = props => {
                 </tr>
             </thead>
             <tbody>
-                {props.layers.map((layer, index) => (
+                {props.layers.map((layer: any) => (
                     <NetworkLayerItem key={layer.id} item={layer} onRemove={props.onRemove} updateLayer={props.updateLayer} />
                 ))}
             </tbody>
@@ -22,13 +28,22 @@ const NetworkLayerList = props => {
     )
 }
 
-const NetworkLayerItem = props => {
+const NetworkLayerItem = (props: {
+    item: {
+        activation: string;
+        inputs: string;
+        outputs: string;
+        id: number;
+    };
+    updateLayer: (id: number, activation: string, inputs: string, outputs: string) => void;
+    onRemove: (id: number) => void;
+}) => {
     const [activation, setActivation] = useState(props.item.activation);
     const [inputs, setInputs] = useState(props.item.inputs);
     const [outputs, setOutputs] = useState(props.item.outputs);
     const id = props.item.id;
 
-    const updateLayer = (activation, inputs, outputs) => {
+    const updateLayer = (activation: string, inputs: string, outputs: string) => {
         setActivation(activation);
         setInputs(inputs);
         setOutputs(outputs);
