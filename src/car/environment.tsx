@@ -4,7 +4,6 @@ import { Car } from "./car";
 import { ModelConfig } from "../network/config";
 
 export class Environment {
-    canvas: any;
     trafficCount: number;
     brainCount: number;
     smart: boolean;
@@ -15,8 +14,7 @@ export class Environment {
     road: Road;
     startLane: number;
 
-    constructor(trafficCount: number, brainCount: number, carCanvas: any, smart = false) {
-        this.canvas = carCanvas;
+    constructor(trafficCount: number, brainCount: number, smart = false) {
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
         this.smart = smart;
@@ -28,22 +26,10 @@ export class Environment {
         this.driverSpeed = 3;
         this.laneCount = 3;
 
-        this.road = new Road(
-            this.canvas.height / 2,
-            this.canvas.height * 0.9,
-            this.laneCount
-        );
+        this.road = new Road(this.laneCount);
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
         this.generateTraffic();
     }
-
-    /* render() {
-        const navbarHeight = document.getElementById("nav").offsetHeight;
-
-        // update dimensions
-        this.canvas.style.top = navbarHeight + "px";
-        this.canvas.width = window.innerWidth;
-    } */
 
     update() {
         for (let i = 0; i < this.traffic.length; i++) {

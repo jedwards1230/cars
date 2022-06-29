@@ -5,29 +5,14 @@ import "./App.css";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import reportWebVitals from "./reportWebVitals";
 
-import NavComponent from "./components/nav";
-import BodyComponent from "./components/body";
+import App from "./App";
 
 import { Environment } from "./car/environment";
-import { Visualizer } from "./network/visualizer";
 import { Car } from "./car/car";
 import { SGD } from "./network/train";
 import { ModelConfig } from "./network/config";
 
-// hook into DOM
-const reactHeader = ReactDOM.createRoot(
-	document.getElementById("reactHeader")!
-);
-const reactBody = ReactDOM.createRoot(document.getElementById("reactBody")!);
-
-// prepare guests
-let welcomed = false;
-const setWelcomed = (val: boolean) => (welcomed = val);
-
-// prepare canvases
-const carCanvas = document.getElementById("carCanvas")! as HTMLCanvasElement;
-const carCtx = carCanvas.getContext("2d")! as CanvasRenderingContext2D;
-const visualizer = new Visualizer();
+const reactRoot = ReactDOM.createRoot(document.getElementById("root")!);
 
 // environment config
 let env: Environment
@@ -48,6 +33,7 @@ let info: {
 	model?: any;
 };
 let animFrame: number;
+let animTime: number;
 let breakLoop = false;
 let episodeCounter = 0;
 
@@ -148,8 +134,7 @@ function reset(breakL = true) {
 	if (breakL) episodeCounter = numEpisodes;
 
 	// reset environment
-	carCtx.clearRect(0, 0, carCanvas.width, carCanvas.height);
-	env = new Environment(trafficCount, brainCount, carCanvas, smartTraffic);
+	env = new Environment(trafficCount, brainCount, smartTraffic);
 
 	// reset model
 	const x = 0;
@@ -164,41 +149,10 @@ function reset(breakL = true) {
 	animate();
 }
 
-/** Draw all cars in the environment, plus the model */
-function drawCars() {
-	carCtx.save();
-	// translate based on model position.
-	// this is basically the tracker, so any car can be dropped in here
-	carCtx.translate(carCanvas.height * 0.7 - model.x, 0);
-	env.road.draw(carCtx);
-	for (let i = 0; i < env.traffic!.length; i++) {
-		env.traffic![i].draw(carCtx);
-	}
-	model.draw(carCtx, true);
-	carCtx.restore();
-}
-
-// Set play view
-function setPlayView() {
-	if (visualizer.active)
-		document.getElementById("networkCanvas")!.style.display = "inline";
-}
-
-// Set train view
-function setTrainView() {
-	document.getElementById("networkCanvas")!.style.display = "none";
-}
-
 /** Toggle between training and visualizing network */
 function toggleView() {
-	visualizer.active = !visualizer.active;
 	episodeCounter = numEpisodes;
 	breakLoop = true;
-	if (visualizer.active) {
-		setPlayView();
-	} else {
-		setTrainView();
-	}
 }
 
 const destroyModel = () => {
@@ -206,49 +160,18 @@ const destroyModel = () => {
 	reset();
 };
 
-function setMainView() {
-	document.getElementById("carCanvas")!.style.display = "inline";
-	reset();
-}
-
-const startTrain = () => {
-	visualizer.active = false;
-	setTrainView();
-	setMainView();
-};
-
-const startVisualizer = () => {
-	visualizer.active = true;
-	setPlayView();
-	setMainView();
-};
-
-const drawUI = () => {
-	if (welcomed) {
-		reactHeader.render(
-			<React.StrictMode>
-				<NavComponent
-					activeModel={modelConfig.name}
-					model={model}
-					destroy={destroyModel}
-					reset={reset}
-					toggleView={toggleView}
-				/>
-			</React.StrictMode>
-		);
-	}
-
-	reactBody.render(
+const drawUI = () => {reactRoot.render(
 		<React.StrictMode>
-			<BodyComponent
-				welcomed={welcomed}
-				setWelcomed={setWelcomed}
-				setTrain={startTrain}
-				setPlay={startVisualizer}
+			<App
 				beginTrain={beginTrain}
-				showVisualizer={visualizer.active}
+				animTime={animTime}
 				episodeCounter={episodeCounter}
 				modelConfig={modelConfig}
+				model={model}
+				env={env}
+				reset={reset}
+				destroyModel={destroyModel}
+				toggleView={toggleView}
 			/>
 		</React.StrictMode>
 	);
@@ -256,6 +179,8 @@ const drawUI = () => {
 
 // animate model
 function animate(time: number = 0) {
+	animTime = time;
+	
 	// update cars
 	env.update();
 	// only perform action if car is not crashed
@@ -264,16 +189,7 @@ function animate(time: number = 0) {
 		model.update(env.traffic, env.road.borders, action);
 	}
 
-	// draw cars, visualizer, and update UI
-	env.canvas.width = window.innerWidth;
-	drawCars();
-	visualizer.draw(model.brain, time);
 	drawUI();
-
-	// reset animation on welcome screen when car crashes
-	if (visualizer.active && model.damaged) setTimeout(reset, 0);
-
-	// loop animation
 	animFrame = requestAnimationFrame(animate);
 }
 
