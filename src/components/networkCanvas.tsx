@@ -160,9 +160,7 @@ const NetworkCanvas = (props: { model: Car; animTime: number; reset: () => void 
         drawNetwork(brain)
     })
 
-    return (
-        <canvas ref={canvasRef} id="networkCanvas" width={window.innerWidth} height="450" />
-    )
+    return <canvas ref={canvasRef} id="networkCanvas" width={window.innerWidth} height="450" />
 }
 
 export default NetworkCanvas;
