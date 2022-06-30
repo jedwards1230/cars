@@ -34,49 +34,39 @@ const App = (props: {
 		props.reset();
 	}
 
-	if (welcomed && !showVisualizer) {
-		return (
-			<div>
-				<NavComponent
-					activeModel={props.modelConfig.name}
-					model={props.model}
-					destroy={props.destroyModel}
-					reset={props.reset}
-					toggleView={toggleView}
-				/>
-				<TrainView
-					modelConfig={props.modelConfig}
-					model={props.model}
-					env={props.env}
-					beginTrain={props.beginTrain}
-					episodeCount={props.episodeCounter} />
-			</div>
-		)
-	} else if (welcomed && showVisualizer) {
-		return (
-			<div>
-				<NavComponent
-					activeModel={props.modelConfig.name}
-					model={props.model}
-					destroy={props.destroyModel}
-					reset={props.reset}
-					toggleView={toggleView}
-				/>
-				<VisualView
-					animTime={props.animTime}
-					model={props.model}
-					env={props.env}
-					reset={props.reset} />
-			</div>
-		)
-	} else if (!welcomed) {
+	if (!welcomed) {
 		return <WelcomeView
 			setPlay={setVisuals}
 			setTrain={setTrain}
 			setWelcomed={setWelcomed}
 		/>
 	}
-	return null
+
+	const body = showVisualizer ?
+		<VisualView
+			animTime={props.animTime}
+			model={props.model}
+			env={props.env}
+			reset={props.reset} /> :
+		<TrainView
+			modelConfig={props.modelConfig}
+			model={props.model}
+			env={props.env}
+			beginTrain={props.beginTrain}
+			episodeCount={props.episodeCounter} />
+
+	return (
+		<div>
+			<NavComponent
+				activeModel={props.modelConfig.name}
+				model={props.model}
+				destroy={props.destroyModel}
+				reset={props.reset}
+				toggleView={toggleView}
+			/>
+			{body}
+		</div>
+	)
 };
 
 export default App;

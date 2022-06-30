@@ -159,7 +159,19 @@ const destroyModel = () => {
 	reset();
 };
 
-const drawUI = () => {reactRoot.render(
+// animate model
+function animate(time: number = 0) {
+	animTime = time;
+
+	// update cars
+	env.update();
+	// only perform action if car is not crashed
+	if (!model.damaged) {
+		const action = model.lazyAction(env.road.borders, env.traffic, true);
+		model.update(env.traffic, env.road.borders, action);
+	}
+
+	reactRoot.render(
 		<React.StrictMode>
 			<App
 				beginTrain={beginTrain}
@@ -174,21 +186,7 @@ const drawUI = () => {reactRoot.render(
 			/>
 		</React.StrictMode>
 	);
-};
 
-// animate model
-function animate(time: number = 0) {
-	animTime = time;
-	
-	// update cars
-	env.update();
-	// only perform action if car is not crashed
-	if (!model.damaged) {
-		const action = model.lazyAction(env.road.borders, env.traffic, true);
-		model.update(env.traffic, env.road.borders, action);
-	}
-
-	drawUI();
 	animFrame = requestAnimationFrame(animate);
 }
 
