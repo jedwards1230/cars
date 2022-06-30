@@ -5,8 +5,8 @@ export function lerp(A: number, B: number, t: number) {
 export function getIntersection(
     A: { y: number; x: number; },
     B: { x: number; y: number; },
-    C: { x: any; y: any; },
-    D: { x: any; y: any; }
+    C: { x: number; y: number; },
+    D: { x: number; y: number; }
 ) {
     const tTop = (D.x - C.x) * (A.y - C.y) - (D.y - C.y) * (A.x - C.x);
     const uTop = (C.y - A.y) * (A.x - B.x) - (C.x - A.x) * (A.y - B.y);
@@ -61,11 +61,7 @@ export function dotProduct(A: any[], B: { [x: string]: number; }) {
     return A.reduce((acc: number, cur: number, i: string | number) => acc + cur * B[i], 0);
 }
 
-/**
- * (outputs - targets) ** 2
- * @param {number} outputs 
- * @param {number} targets 
- */
+/** (targets - outputs) ** 2 */
 export function MSE(targets: number, outputs: number) {
     return (targets - outputs) ** 2;
 }

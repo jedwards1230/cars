@@ -7,7 +7,7 @@ import {
     lerp
 } from "../utils";
 
-const NetworkCanvas = (props: { model: Car; animTime: number; reset: any }) => {
+const NetworkCanvas = (props: { model: Car; animTime: number; reset: () => void }) => {
     const drawNetwork = (network: Network) => {
         const canvas = canvasRef.current! as HTMLCanvasElement;
         const ctx = canvas.getContext("2d")! as CanvasRenderingContext2D;
@@ -152,7 +152,7 @@ const NetworkCanvas = (props: { model: Car; animTime: number; reset: any }) => {
         canvas.width = window.innerWidth;
         ctx.lineDashOffset = -props.animTime / 40;
 
-        if (props.model.damaged) setTimeout(props.reset(), 0);
+        if (props.model.damaged) props.reset();
 
         setBrain(props.model.brain);
 

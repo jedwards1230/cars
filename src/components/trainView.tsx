@@ -6,9 +6,10 @@ import RoadCanvas from "./roadCanvas";
 
 import { Car } from "../car/car";
 import { Environment } from "../car/environment";
+import { ModelConfig } from "../network/config";
 
 const TrainView = (props: {
-  beginTrain: () => void;
+  beginTrain: (config: ModelConfig) => void;
   modelConfig: any;
   model: Car;
   env: Environment;

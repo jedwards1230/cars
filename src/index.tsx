@@ -10,6 +10,7 @@ import { Environment } from "./car/environment";
 import { Car } from "./car/car";
 import { SGD } from "./network/train";
 import { ModelConfig } from "./network/config";
+import { Network } from "./network/network";
 
 const reactRoot = ReactDOM.createRoot(document.getElementById("root")!);
 
@@ -24,12 +25,12 @@ let smartTraffic = false;
 let numSteps: number;
 let numEpisodes: number;
 let info: {
-	speed: any;
-	distance: any;
+	speed: number;
+	distance: number;
 	time?: number;
 	loss?: number;
-	damaged?: any;
-	model?: any;
+	damaged?: boolean;
+	model?: Network;
 };
 let animFrame: number;
 let animTime: number;
@@ -93,14 +94,7 @@ async function episodeLoop() {
 
 	// good entries are models that are an improvement in the right direction.
 	// these get saved for future generations to evolve from.
-	const checkGoodEntry = (info: {
-		speed: any;
-		distance: any;
-		time?: number | undefined;
-		loss?: number | undefined;
-		damaged?: any;
-		model?: any;
-	}) => {
+	const checkGoodEntry = (info: any) => {
 		if (info.speed < 0) return false;
 		if (info.distance > distanceMax * 0.9) return true;
 		return false;
@@ -154,11 +148,6 @@ function toggleView() {
 	breakLoop = true;
 }
 
-const destroyModel = () => {
-	modelConfig.destroy();
-	reset();
-};
-
 // animate model
 function animate(time: number = 0) {
 	animTime = time;
@@ -175,14 +164,13 @@ function animate(time: number = 0) {
 		<React.StrictMode>
 			<App
 				beginTrain={beginTrain}
+				reset={reset}
+				toggleView={toggleView}
 				animTime={animTime}
 				episodeCounter={episodeCounter}
 				modelConfig={modelConfig}
 				model={model}
 				env={env}
-				reset={reset}
-				destroyModel={destroyModel}
-				toggleView={toggleView}
 			/>
 		</React.StrictMode>
 	);

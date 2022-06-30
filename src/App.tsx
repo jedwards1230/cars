@@ -4,17 +4,19 @@ import NavComponent from "./components/nav";
 import WelcomeView from "./components/welcome";
 import TrainView from "./components/trainView";
 import VisualView from "./components/visualView";
+import { ModelConfig } from "./network/config";
+import { Environment } from "./car/environment";
+import { Car } from "./car/car";
 
 const App = (props: {
-	toggleView: () => void;
+	beginTrain: (config: ModelConfig) => void;
 	reset: () => void;
-	beginTrain: any;
-	modelConfig: any;
-	model: any;
-	destroyModel: any;
-	env: any;
-	episodeCounter: any;
-	animTime: any;
+	toggleView: () => void;
+	modelConfig: ModelConfig;
+	model: Car;
+	env: Environment;
+	episodeCounter: number;
+	animTime: number;
 }) => {
 	const [showVisualizer, setShowVisualizer] = useState(false);
 	const [welcomed, setWelcomed] = useState(false);
@@ -31,6 +33,11 @@ const App = (props: {
 
 	const setVisuals = () => {
 		setShowVisualizer(true);
+		props.reset();
+	}
+
+	const destroyModel = () => {
+		props.modelConfig.destroy();
 		props.reset();
 	}
 
@@ -60,7 +67,7 @@ const App = (props: {
 			<NavComponent
 				activeModel={props.modelConfig.name}
 				model={props.model}
-				destroy={props.destroyModel}
+				destroy={destroyModel}
 				reset={props.reset}
 				toggleView={toggleView}
 			/>

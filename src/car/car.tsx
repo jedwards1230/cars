@@ -108,7 +108,7 @@ export class Car {
 
 	// update car object
 	// if damaged, only process slow down and sensors
-	update(traffic: any, borders: any, action?: number) {
+	update(traffic: any[], borders: any[], action?: number) {
 		if (action != null) this.updateControls(action);
 		this.#move();
 
@@ -230,7 +230,7 @@ export class Car {
 	}
 
 	#checkDamage(roadBorders: any, traffic: any) {
-		const damaged: any = [];
+		const damaged: Car[] = [];
 		// check collision with road borders
 		for (let i = 0; i < roadBorders.length; i++) {
 			if (polysIntersect(this.polygon, roadBorders[i])) {
