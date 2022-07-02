@@ -59,7 +59,7 @@ export class Layer {
     }
 
     /** Backward propagation */
-    backward(delta: any[]) {
+    backward(delta: number[]) {
         const weights = this.weights;
         const x = this.inputs;
         const y = this.outputs;

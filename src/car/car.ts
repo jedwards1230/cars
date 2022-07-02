@@ -3,30 +3,28 @@ import { Sensor } from "./sensor";
 import { Network } from "../network/network";
 import { polysIntersect } from "../utils";
 import { ModelConfig } from "../network/config";
-
-type Point = {
-	x: number;
-	y: number;
-};
+import { Point } from "../utils";
 
 export class Car {
-	id: number;
-	x: number;
-	y: number;
 	readonly width: number;
 	readonly height: number;
 	readonly color: string;
+	readonly maxSpeed: number;
+	readonly controller: string;
+	readonly controls: Controls;
+	readonly id: number;
+	readonly acceleration: number;
+	readonly friction: number;
+	
+	x: number;
+	y: number;
 	angle: number;
 	speed: number;
-	readonly maxSpeed: number;
-	acceleration: number;
-	friction: number;
+
 	onTrack: number;
 	distance: number;
 	damaged: boolean;
 	useBrain: boolean;
-	readonly controller: string;
-	readonly controls: Controls;
 	actionCount: number;
 	polygon: Point[];
 	sensors!: Sensor;
@@ -108,7 +106,7 @@ export class Car {
 
 	// update car object
 	// if damaged, only process slow down and sensors
-	update(traffic: any[], borders: any[], action?: number) {
+	update(traffic: Car[], borders: Point[][], action?: null | number) {
 		if (action != null) this.updateControls(action);
 		this.#move();
 
@@ -162,7 +160,7 @@ export class Car {
 		}
 	}
 
-	getSensorData(roadBorders: any, traffic: any) {
+	getSensorData(roadBorders: Point[][], traffic: Car[]) {
 		let sensorOffsets: number[] = [];
 		// update each sensor
 		this.sensors.update(roadBorders, traffic);
@@ -221,7 +219,7 @@ export class Car {
 		return reward;
 	}
 
-	lazyAction(borders: any, traffic: any, backprop = false): number {
+	lazyAction(borders: Point[][], traffic: Car[], backprop = false): number {
 		if (!this.useBrain) return -1;
 		const sData = this.getSensorData(borders, traffic);
 		this.sensorOffsets = sData;
@@ -229,8 +227,9 @@ export class Car {
 		return this.brain.makeChoice(action);
 	}
 
-	#checkDamage(roadBorders: any, traffic: any) {
+	#checkDamage(roadBorders: Point[][], traffic: Car[]) {
 		const damaged: Car[] = [];
+
 		// check collision with road borders
 		for (let i = 0; i < roadBorders.length; i++) {
 			if (polysIntersect(this.polygon, roadBorders[i])) {
@@ -249,12 +248,7 @@ export class Car {
 		}
 
 		damaged.forEach(
-			(car: {
-				damaged: boolean;
-				model: string;
-				speed: number;
-				controls: { forward: boolean };
-			}) => {
+			(car: Car) => {
 				car.damaged = true;
 				car.damaged = true;
 				if (car.model === "fsd") car.speed = 0;

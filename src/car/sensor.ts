@@ -1,8 +1,15 @@
 import {
     getIntersection,
-    lerp
+    lerp,
+    Point
 } from "../utils";
 import { Car } from "./car";
+
+type SensorReading = {
+    x: number;
+    y: number;
+    offset: number;
+};
 
 export class Sensor {
     car: Car;
@@ -10,8 +17,8 @@ export class Sensor {
     rayLength: number;
     raySpread: number;
     direction: string;
-    rays: any[];
-    readings: any[];
+    rays: Point[][];
+    readings: SensorReading[];
 
     constructor(car: Car, rays: number, direction: string) {
         this.car = car;
@@ -25,7 +32,7 @@ export class Sensor {
         this.readings = [];
     }
 
-    update(roadBorders: any, traffic: any) {
+    update(roadBorders: Point[][], traffic: Car[]) {
         this.#castRays();
         this.readings = [];
         for (let i = 0; i < this.rays.length; i++) {
@@ -34,7 +41,7 @@ export class Sensor {
                     this.rays[i],
                     roadBorders,
                     traffic,
-                ),
+                )!,
             );
         };
     }
@@ -45,7 +52,7 @@ export class Sensor {
         );
     }
 
-    #getReading(ray: any[], roadBorders: any[], traffic: Car[]) {
+    #getReading(ray: Point[], roadBorders: Point[][], traffic: Car[]) : null | SensorReading {
         let touches = [];
 
         // check overlap with borders
@@ -86,7 +93,7 @@ export class Sensor {
 
         const offsets = touches.map(e => e.offset);
         const minOffset = Math.min(...offsets);
-        return touches.find(e => e.offset === minOffset);
+        return touches.find(e => e.offset === minOffset)!;
     }
 
     #castRays() {
@@ -98,35 +105,30 @@ export class Sensor {
                 this.rayCount === 1 ? 0.5 : i / (this.rayCount - 1),
             ) + this.car.angle;
 
-            const start = {
+            const start: Point = {
                 x: this.car.x,
                 y: this.car.y
             };
-            let end = {}
+            const end: Point = {
+                x: this.car.x,
+                y: this.car.y
+            }
             switch (this.direction) {
                 case "left":
-                    end = {
-                        x: this.car.x - Math.sin(rayAngle) * this.rayLength,
-                        y: this.car.y - Math.cos(rayAngle) * this.rayLength,
-                    }
+                    end.x = this.car.x - Math.sin(rayAngle) * this.rayLength
+                    end.y = this.car.y - Math.cos(rayAngle) * this.rayLength
                     break;
                 case "right":
-                    end = {
-                        x: this.car.x - Math.sin(rayAngle) * this.rayLength * -1,
-                        y: this.car.y - Math.cos(rayAngle) * this.rayLength * -1,
-                    }
+                    end.x = this.car.x - Math.sin(rayAngle) * this.rayLength * -1
+                    end.y = this.car.y - Math.cos(rayAngle) * this.rayLength * -1
                     break;
                 case "backward":
-                    end = {
-                        x: this.car.x - Math.cos(rayAngle) * this.rayLength,
-                        y: this.car.y - Math.sin(rayAngle) * this.rayLength,
-                    }
+                    end.x = this.car.x - Math.cos(rayAngle) * this.rayLength
+                    end.y = this.car.y - Math.sin(rayAngle) * this.rayLength
                     break;
                 case "forward":
-                    end = {
-                        x: this.car.x - Math.cos(rayAngle) * this.rayLength * -1,
-                        y: this.car.y - Math.sin(rayAngle) * this.rayLength * -1,
-                    }
+                    end.x = this.car.x - Math.cos(rayAngle) * this.rayLength * -1
+                    end.y = this.car.y - Math.sin(rayAngle) * this.rayLength * -1
                     break;
                 default:
                     break;

@@ -156,7 +156,10 @@ function animate(time: number = 0) {
 	env.update();
 	// only perform action if car is not crashed
 	if (!model.damaged) {
-		const action = model.lazyAction(env.road.borders, env.traffic, true);
+		let action = null;
+		if (model.controller !== "player") {
+			action = model.lazyAction(env.road.borders, env.traffic, true);
+		}
 		model.update(env.traffic, env.road.borders, action);
 	}
 

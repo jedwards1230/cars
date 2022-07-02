@@ -43,10 +43,16 @@ html {
 	height: 100%;
 }
 
+body::-webkit-scrollbar {
+	display: none;
+}
+
 body {
 	margin: 0;
 	justify-content: center;
 	align-items: center;
+	-ms-overflow-style: none; 
+	scrollbar-width: none;
 }
 
 .container {
@@ -60,23 +66,9 @@ body {
 	transform: translate(-50%, -50%);
 }
 
-#homeBtns {
-	display: flex;
-	flex-direction: row;
-}
-
 #activeModel {
 	display: inline-block
 }
-
-#saveBtn {
-	display: none;
-}
-
-/* #trainStats {
-    width: 60%;
-    margin: auto;
-} */
 
 #carCanvas {
 	background: black;
@@ -90,13 +82,4 @@ body {
 
 #lossChart {
 	width: 100%;
-}
-
-body::-webkit-scrollbar {
-	display: none;
-}
-
-body {
-	-ms-overflow-style: none; 
-	scrollbar-width: none; 
 }

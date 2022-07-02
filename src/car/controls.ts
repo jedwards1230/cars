@@ -4,7 +4,6 @@ export class Controls {
     left: boolean;
     right: boolean;
 
-
     constructor(controller: string) {
         this.forward = true;
         this.backward = false;
@@ -22,16 +21,16 @@ export class Controls {
         document.onkeydown = (event) => {
             switch (event.key) {
                 case "ArrowUp":
-                    this.forward = true;
+                    this.right = true;
                     break;
                 case "ArrowDown":
-                    this.backward = true;
-                    break;
-                case "ArrowLeft":
                     this.left = true;
                     break;
+                case "ArrowLeft":
+                    this.backward = true;
+                    break;
                 case "ArrowRight":
-                    this.right = true;
+                    this.forward = true;
                     break;
                 default:
                     break;
@@ -40,16 +39,16 @@ export class Controls {
         document.onkeyup = (event) => {
             switch (event.key) {
                 case "ArrowUp":
-                    this.forward = false;
+                    this.right = false;
                     break;
                 case "ArrowDown":
-                    this.backward = false;
-                    break;
-                case "ArrowLeft":
                     this.left = false;
                     break;
+                case "ArrowLeft":
+                    this.backward = false;
+                    break;
                 case "ArrowRight":
-                    this.right = false;
+                    this.forward = false;
                     break;
                 default:
                     break;

@@ -48,7 +48,7 @@ export class Network {
     }
 
     /** Backward pass each layer */
-    backward(delta: any[]) {
+    backward(delta: number[]) {
         for (let i = this.layers.length - 1; i >= 0; i--) {
             delta = this.layers[i].backward(delta);
         }
@@ -88,7 +88,7 @@ export class Network {
     }
 
     /** Set model layers */
-    setModelLayers = (layers: string | any[]) => {
+    setModelLayers = (layers: any[]) => {
         let preparedLayers = new Array(layers.length);
         for (let i = 0; i < layers.length; i++) {
             switch (layers[i].activation) {
@@ -128,10 +128,8 @@ export class Network {
         }
     }
 
-    /** Slightly mutate weights for model
-     * @param {number} amount - 0-1, how much to mutate
-     */
-    mutate(amount = 1) {
+    /** Slightly mutate weights for model */
+    mutate(amount: number = 1) {
         this.layers.forEach(level => {
             for (let i = 0; i < level.inputs.length; i++) {
                 for (let j = 0; j < level.outputs.length; j++) {

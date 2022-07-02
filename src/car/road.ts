@@ -1,7 +1,4 @@
-type Point = {
-    x: number;
-    y: number;
-};
+import { Point } from "../utils";
 
 export class Road {
     y: number;
@@ -26,19 +23,19 @@ export class Road {
         this.left = -infinity;
         this.right = infinity;
 
-        const topLeft = {
+        const topLeft: Point = {
             x: this.left,
             y: this.top
         };
-        const topRight = {
+        const topRight: Point = {
             x: this.right,
             y: this.top
         };
-        const bottomLeft = {
+        const bottomLeft: Point = {
             x: this.left,
             y: this.bottom
         };
-        const bottomRight = {
+        const bottomRight: Point = {
             x: this.right,
             y: this.bottom
         };

@@ -42,7 +42,6 @@ export class Environment {
     }
 
     generateTraffic() {
-        const N = this.trafficCount;
         this.traffic = [];
         let placed = new Array(this.road.laneCount).fill(100);
 
@@ -56,7 +55,7 @@ export class Environment {
         };
 
         let car;
-        for (let i = 0; i < N; i++) {
+        for (let i = 0; i < this.trafficCount; i++) {
             const idx = i + this.brainCount;
             const [x, y] = getStartPosition();
 

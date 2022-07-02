@@ -41,6 +41,11 @@ const App = (props: {
 		props.reset();
 	}
 
+	const saveModel = () => {
+		props.modelConfig.save();
+		props.reset();
+	}
+
 	if (!welcomed) {
 		return <WelcomeView
 			setPlay={setVisuals}
@@ -48,6 +53,15 @@ const App = (props: {
 			setWelcomed={setWelcomed}
 		/>
 	}
+
+	const nav = <NavComponent
+		activeModel={props.modelConfig.name}
+		model={props.model}
+		save={saveModel}
+		destroy={destroyModel}
+		reset={props.reset}
+		toggleView={toggleView}
+	/>
 
 	const body = showVisualizer ?
 		<VisualView
@@ -64,13 +78,7 @@ const App = (props: {
 
 	return (
 		<div>
-			<NavComponent
-				activeModel={props.modelConfig.name}
-				model={props.model}
-				destroy={destroyModel}
-				reset={props.reset}
-				toggleView={toggleView}
-			/>
+			{nav}
 			{body}
 		</div>
 	)

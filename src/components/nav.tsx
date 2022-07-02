@@ -6,6 +6,7 @@ const NavComponent = (props: {
         speed: number;
         distance: number;
     };
+    save: () => void;
     destroy: () => void;
     reset: () => void;
     toggleView: () => void;
@@ -33,7 +34,7 @@ const NavComponent = (props: {
                 <span id="activeModel" className="px-2 me-auto navbar-text">
                     model = "{activeModel}"
                 </span>
-                <button id="saveBtn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Save Weights"
+                <button id="saveBtn" onClick={props.save} data-bs-toggle="tooltip" data-bs-placement="bottom" title="Save Weights"
                     className="btn btn-outline-primary">💾</button>
                 <button id="destroyBtn" onClick={props.destroy} data-bs-toggle="tooltip" data-bs-placement="bottom" title="Discard Weights"
                     className="btn btn-outline-danger">🗑️</button>
