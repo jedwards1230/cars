@@ -42,7 +42,7 @@ const App = (props: {
 	}
 
 	const saveModel = () => {
-		props.modelConfig.save();
+		bestCar.saveModelConfig();
 		props.reset();
 	}
 
@@ -61,6 +61,7 @@ const App = (props: {
 	const nav = <NavComponent
 		activeModel={props.modelConfig.name}
 		model={bestCar}
+		env={props.env}
 		save={saveModel}
 		destroy={destroyModel}
 		reset={props.reset}

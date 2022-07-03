@@ -1,3 +1,4 @@
+import { lerp } from "../utils";
 import { LayerConfig } from "./config";
 
 export class Layer {
@@ -26,8 +27,8 @@ export class Layer {
 
         this.#randomize();
 
-        if (config.biases) this.biases = config.biases;
-        if (config.weights) this.weights = config.weights;
+        if (config.biases) this.biases = [...config.biases];
+        if (config.weights) this.weights = [...config.weights];
     }
 
     /** Forward propagation */
@@ -114,14 +115,15 @@ export class Layer {
         }
     }
 
-    save() {
+    save(): LayerConfig {
         return {
             id: this.id,
             activation: this.name,
             inputs: this.inputs.length,
             outputs: this.outputs.length,
             weights: this.weights,
-            biases: this.biases
+            biases: this.biases,
+            lr: this.lr,
         }
     }
 
@@ -131,6 +133,25 @@ export class Layer {
             for (let j = 0; j < this.outputs.length; j++) {
                 this.weights[i][j] = Math.random() * 2 - 1;
             }
+        }
+    }
+
+    mutate(amount: number) {
+        for (let i = 0; i < this.inputs.length; i++) {
+            for (let j = 0; j < this.outputs.length; j++) {
+                this.weights[i][j] = lerp(
+                    this.weights[i][j],
+                    Math.random() * 2 - 1,
+                    amount,
+                )
+            }
+        }
+        for (let i=0; i < this.outputs.length; i++) {
+            this.biases[i] = lerp(
+                this.biases[i],
+                Math.random() * 2 - 1,
+                amount
+            )
         }
     }
 }

@@ -1,8 +1,5 @@
-import {
-    lerp,
-    MSE
-} from "../utils";
-import { ModelConfig } from "./config";
+import { MSE } from "../utils";
+import { LayerConfig, ModelConfig } from "./config";
 import {
     Linear,
     Sigmoid,
@@ -74,7 +71,7 @@ export class Network {
     }
 
     saveLayers() {
-        const layers: any[] = [];
+        const layers: LayerConfig[] = [];
         this.layers.forEach((level, index) => {
             level.id = index;
             layers.push(level.save());
@@ -92,33 +89,34 @@ export class Network {
     }
 
     /** Set model layers */
-    setModelLayers = (layers: any[]) => {
-        let preparedLayers = new Array(layers.length);
-        for (let i = 0; i < layers.length; i++) {
-            switch (layers[i].activation) {
+    setModelLayers = (layers: LayerConfig[]) => {
+        const preparedLayers = new Array(layers.length);
+        layers.forEach((layerConfig, i) => {
+            layerConfig.lr = this.lr;
+            switch (layerConfig.activation) {
                 case "Linear":
-                    preparedLayers[i] = new Linear(layers[i]);
+                    preparedLayers[i] = new Linear(layerConfig);
                     break;
                 case "Sigmoid":
-                    preparedLayers[i] = new Sigmoid(layers[i]);
+                    preparedLayers[i] = new Sigmoid(layerConfig);
                     break;
                 case "Relu":
-                    preparedLayers[i] = new Relu(layers[i]);
+                    preparedLayers[i] = new Relu(layerConfig);
                     break;
                 case "LeakyRelu":
-                    preparedLayers[i] = new LeakyRelu(layers[i]);
+                    preparedLayers[i] = new LeakyRelu(layerConfig);
                     break;
                 case "Tanh":
-                    preparedLayers[i] = new Tanh(layers[i]);
+                    preparedLayers[i] = new Tanh(layerConfig);
                     break;
                 case "SoftMax":
-                    preparedLayers[i] = new SoftMax(layers[i]);
+                    preparedLayers[i] = new SoftMax(layerConfig);
                     break;
                 default:
                     console.log("Unknown activation function");
                     break;
             }
-        }
+        })
         this.layers = preparedLayers;
     }
 
@@ -134,23 +132,8 @@ export class Network {
 
     /** Slightly mutate weights for model */
     mutate(amount: number = 1) {
-        this.layers.forEach(level => {
-            for (let i = 0; i < level.inputs.length; i++) {
-                for (let j = 0; j < level.outputs.length; j++) {
-                    level.weights[i][j] = lerp(
-                        level.weights[i][j],
-                        Math.random() * 2 - 1,
-                        amount,
-                    )
-                }
-            }
-            for (let i=0; i < level.outputs.length; i++) {
-                level.biases[i] = lerp(
-                    level.biases[i],
-                    Math.random() * 2 - 1,
-                    amount
-                )
-            }
-        });
+        this.layers.forEach((layer) => {
+            layer.mutate(amount);
+        })
     }
 }

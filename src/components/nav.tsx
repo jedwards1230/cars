@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Environment } from "../car/environment";
 
 const NavComponent = (props: {
     activeModel: string;
@@ -6,6 +7,7 @@ const NavComponent = (props: {
         speed: number;
         distance: number;
     };
+    env: Environment
     save: () => void;
     destroy: () => void;
     reset: () => void;
@@ -14,12 +16,17 @@ const NavComponent = (props: {
     const [activeModel, setActiveModel] = useState(props.activeModel);
     const [speed, setSpeed] = useState(0);
     const [distance, setDistance] = useState(0);
+    const [activeBrains, setActiveBrains] = useState(props.env.activeBrains);
 
     useEffect(() => {
         setActiveModel(props.activeModel);
         setSpeed(parseFloat(props.model.speed.toFixed(1)));
         setDistance(parseFloat(props.model.distance.toFixed(0)));
     }, [props.model.speed, props.model.distance, props.activeModel]);
+
+    useEffect(() => {
+        setActiveBrains(props.env.activeBrains);
+    }, [props.env.activeBrains]);
 
     return (
         <nav id="nav" className="navbar px-3 navbar-expand bg-light">
@@ -30,6 +37,9 @@ const NavComponent = (props: {
                 </span>
                 <span id="activeSpeed" className="px-2 navbar-text">
                     speed = {speed}
+                </span>
+                <span id="activeBrains" className="px-2 navbar-text">
+                    active brains = {activeBrains}
                 </span>
                 <span id="activeModel" className="px-2 me-auto navbar-text">
                     model = "{activeModel}"

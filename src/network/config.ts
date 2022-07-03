@@ -264,6 +264,37 @@ const defaultTrainBrain = {
 	generations: [],
 };
 
+const defaultTrainBrain1 = {
+	name: "trainBrain",
+	alias: "fsd",
+	lr: 0.001,
+	epsilonDecay: 0.9,
+	mutationRate: 0.1,
+	sensorCount: 5,
+	actionCount: 4,
+	layers: [
+		{
+			id: 0,
+			activation: "Tanh",
+			inputs: 5,
+			outputs: 8,
+		},
+		{
+			id: 1,
+			activation: "LeakyRelu",
+			inputs: 8,
+			outputs: 5,
+		},
+		{
+			id: 2,
+			activation: "Sigmoid",
+			inputs: 5,
+			outputs: 4,
+		},
+	],
+	generations: [],
+};
+
 const defaultForwardBrain = {
 	name: "trafficForward",
 	alias: "forward",
@@ -303,7 +334,7 @@ const defaultForwardBrain = {
 
 const trainBrain = localStorage.getItem("trainBrain");
 if (!trainBrain) {
-	const trainData = JSON.stringify(defaultTrainBrain, null, "\t");
+	const trainData = JSON.stringify(defaultTrainBrain1, null, "\t");
 	localStorage.setItem("trainBrain", trainData);
 }
 const forwardBrain = localStorage.getItem("forwardBrain");

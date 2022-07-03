@@ -15,9 +15,8 @@ const reactRoot = ReactDOM.createRoot(document.getElementById("root")!);
 
 // environment config
 let env: Environment
-
 const trafficCount = 50;
-const brainCount = 1;
+const brainCount = 100;
 let smartTraffic = false;
 //let teach = false;
 
@@ -33,7 +32,6 @@ let info: {
 	model?: Network;
 };
 let animFrame: number;
-let animTime: number;
 let breakLoop = false;
 let episodeCounter = 0;
 
@@ -78,7 +76,7 @@ async function episodeLoop() {
 	// reset environment
 	reset(false);
 
-	const model = env.brains[0];
+	const model = env.smartCars[0];
 
 	// mutate the weights slightly to help with diversity
 	model.brain.mutate(modelConfig.mutationRate);
@@ -144,8 +142,6 @@ function toggleView() {
 
 // animate model
 function animate(time: number = 0) {
-	animTime = time;
-
 	// update cars
 	env.update();
 
@@ -155,7 +151,7 @@ function animate(time: number = 0) {
 				beginTrain={beginTrain}
 				reset={reset}
 				toggleView={toggleView}
-				animTime={animTime}
+				animTime={time}
 				episodeCounter={episodeCounter}
 				modelConfig={modelConfig}
 				env={env}

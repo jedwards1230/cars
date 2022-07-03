@@ -152,7 +152,7 @@ const NetworkCanvas = (props: { model: Car; animTime: number; reset: () => void 
         canvas.width = window.innerWidth;
         ctx.lineDashOffset = -props.animTime / 40;
 
-        if (props.model.damaged) props.reset();
+        //if (props.model.damaged) props.reset();
 
         drawNetwork(brain)
     })

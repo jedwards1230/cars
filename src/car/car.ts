@@ -26,7 +26,7 @@ export class Car {
 	useBrain: boolean;
 	actionCount: number;
 	polygon!: Point[];
-	sensors!: Sensor;
+	sensor!: Sensor;
 	modelConfig!: ModelConfig;
 	brain!: Network;
 	model!: string;
@@ -65,16 +65,6 @@ export class Car {
 		this.#createPolygon();
 	}
 
-	reset(x: number, y: number) {
-		this.x = x;
-		this.y = y;
-		this.speed = 0;
-		this.distance = 0;
-		this.damaged = false;
-		this.angle = 0;
-		this.#createPolygon();
-	}
-
 	saveModelConfig() {
 		this.modelConfig.layers = this.brain.saveLayers();
 		this.modelConfig.save();
@@ -89,11 +79,11 @@ export class Car {
 
 		switch (this.model) {
 			case "fsd":
-				this.sensors = new Sensor(this, config.sensorCount, "forward");
+				this.sensor = new Sensor(this, config.sensorCount, "forward");
 				break;
 
 			case "forward":
-				this.sensors = new Sensor(this, config.sensorCount, "forward");
+				this.sensor = new Sensor(this, config.sensorCount, "forward");
 				break;
 
 			default:
@@ -103,7 +93,7 @@ export class Car {
 
 	// update car object
 	// if damaged, only process slow down and sensors
-	update(traffic: Car[], borders: Point[][], action?: null | number) {
+	update(borders: Point[][], traffic: Car[], action?: null | number) {
 		if (action != null) this.updateControls(action);
 		this.#move();
 
@@ -155,11 +145,11 @@ export class Car {
 		}
 	}
 
-	getSensorData(roadBorders: Point[][], traffic: Car[]) {
+	getSensorData(borders: Point[][], traffic: Car[]) {
 		let sensorOffsets: number[] = [];
 		// update each sensor
-		this.sensors.update(roadBorders, traffic);
-		const offsets = this.sensors.getSensorOffsets();
+		this.sensor.update(borders, traffic);
+		const offsets = this.sensor.getSensorOffsets();
 		sensorOffsets = sensorOffsets.concat(offsets);
 		return sensorOffsets;
 	}
@@ -225,18 +215,18 @@ export class Car {
 		this.brain.recordPlay(this.sensorOffsets, outputs);
 	}
 
-	#checkDamage(roadBorders: Point[][], traffic: Car[]) {
+	#checkDamage(borders: Point[][], traffic: Car[]) {
 		const damagedCars: Car[] = [];
 
 		// check collision with road borders
-		roadBorders.forEach((border) => {
+		borders.forEach((border) => {
 			if (polysIntersect(this.polygon, border)) {
 				damagedCars.push(this);
 			}
 		});
 
 		// check collision with traffic
-		traffic.forEach((car) => {
+		traffic.forEach(car => {
 			if (car !== this && polysIntersect(this.polygon, car.polygon)) {
 				damagedCars.push(this);
 				damagedCars.push(car);
@@ -244,7 +234,7 @@ export class Car {
 		});
 
 		// apply damage and stop controls
-		damagedCars.forEach((car: Car) => {
+		damagedCars.forEach(car => {
 			car.damaged = true;
 			if (car.model === "fsd") car.speed = 0;
 			car.controls.stop();
@@ -334,14 +324,11 @@ export class Car {
 		}
 	}
 
-	draw(ctx: CanvasRenderingContext2D, drawSensors = false) {
+	draw(ctx: CanvasRenderingContext2D) {
         if (this.damaged) {
             ctx.fillStyle = "gray";
         } else {
             ctx.fillStyle = this.color;
-            if (this.sensors && drawSensors) {
-                this.sensors.draw(ctx);
-            }
         }
 
         ctx.beginPath();

@@ -66,7 +66,7 @@ export async function SGD(model: Car, env: Environment, maxTimeSteps: number) {
         reward = metrics.reward;
 
         // apply action to model
-        model.update(env.traffic, env.road.borders, action);
+        model.update(env.road.borders, env.traffic, action);
 
         // metrics
         speeds.push(model.speed);
@@ -157,7 +157,7 @@ export async function batchTrain(model: Car, env: Environment, maxTimeSteps: num
         experienceReplay();
 
         // apply action to model
-        model.update(env.traffic, env.road.borders, action);
+        model.update(env.road.borders, env.traffic, action);
 
         // metrics
         speeds.push(model.speed);
