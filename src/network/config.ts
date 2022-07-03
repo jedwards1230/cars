@@ -10,6 +10,7 @@ export class ModelConfig {
 	actionCount: number;
 	numEpisodes: number;
 	numSteps: number;
+	numBrains: number;
 
 	constructor(name: string, alias: string) {
 		this.name = name;
@@ -23,6 +24,7 @@ export class ModelConfig {
 		this.actionCount = 0;
 		this.numEpisodes = 0;
 		this.numSteps = 0;
+		this.numBrains = 0;
 	}
 
 	/** Save config to localStorage */
@@ -91,7 +93,7 @@ const defaultTrainBrain = {
 	alias: "fsd",
 	lr: 0.001,
 	epsilonDecay: 0.9,
-	mutationRate: 0.05,
+	mutationRate: 0.1,
 	sensorCount: 5,
 	actionCount: 4,
 	layers: [

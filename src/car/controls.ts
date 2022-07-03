@@ -17,6 +17,18 @@ export class Controls {
         }
     }
 
+    getOutputs(): number[] {
+        const outputStates = [this.forward, this.backward, this.left, this.right];
+        return outputStates.map((state) => state ? 1 : 0);
+    }
+
+    stop() {
+        this.forward = false;
+        this.backward = false;
+        this.left = false;
+        this.right = false;
+    }
+
     #addKeyboardListeners() {
         document.onkeydown = (event) => {
             switch (event.key) {

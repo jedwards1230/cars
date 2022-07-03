@@ -2,16 +2,13 @@ import React, { useEffect, useState } from "react";
 import TrainConfigForm from "./trainConfig/trainConfigForm";
 import MetricsTable from "./metricsTable";
 import LossChart from "./metricsChart";
-import RoadCanvas from "./roadCanvas";
 
-import { Car } from "../car/car";
 import { Environment } from "../car/environment";
 import { ModelConfig } from "../network/config";
 
 const TrainView = (props: {
   beginTrain: (config: ModelConfig) => void;
   modelConfig: any;
-  model: Car;
   env: Environment;
   episodeCount: number;
 }) => {
@@ -23,9 +20,6 @@ const TrainView = (props: {
 
   return (
     <div>
-      <RoadCanvas
-        model={props.model}
-        env={props.env} />
       <TrainConfigForm
         beginTrain={props.beginTrain}
         modelConfig={props.modelConfig}

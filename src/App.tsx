@@ -1,25 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import './App.css';
 import NavComponent from "./components/nav";
+import RoadCanvas from "./components/roadCanvas";
 import WelcomeView from "./components/welcome";
 import TrainView from "./components/trainView";
 import VisualView from "./components/visualView";
 import { ModelConfig } from "./network/config";
 import { Environment } from "./car/environment";
-import { Car } from "./car/car";
 
 const App = (props: {
 	beginTrain: (config: ModelConfig) => void;
 	reset: () => void;
 	toggleView: () => void;
 	modelConfig: ModelConfig;
-	model: Car;
 	env: Environment;
 	episodeCounter: number;
 	animTime: number;
 }) => {
 	const [showVisualizer, setShowVisualizer] = useState(false);
 	const [welcomed, setWelcomed] = useState(false);
+	const [bestCar, setBestCar] = useState(props.env.getBestCar());
 
 	const toggleView = () => {
 		setShowVisualizer(!showVisualizer);
@@ -46,6 +46,10 @@ const App = (props: {
 		props.reset();
 	}
 
+	useEffect(() => {
+		setBestCar(props.env.getBestCar());
+	}, [props.env]);
+
 	if (!welcomed) {
 		return <WelcomeView
 			setPlay={setVisuals}
@@ -56,7 +60,7 @@ const App = (props: {
 
 	const nav = <NavComponent
 		activeModel={props.modelConfig.name}
-		model={props.model}
+		model={bestCar}
 		save={saveModel}
 		destroy={destroyModel}
 		reset={props.reset}
@@ -66,12 +70,10 @@ const App = (props: {
 	const body = showVisualizer ?
 		<VisualView
 			animTime={props.animTime}
-			model={props.model}
 			env={props.env}
 			reset={props.reset} /> :
 		<TrainView
 			modelConfig={props.modelConfig}
-			model={props.model}
 			env={props.env}
 			beginTrain={props.beginTrain}
 			episodeCount={props.episodeCounter} />
@@ -79,6 +81,8 @@ const App = (props: {
 	return (
 		<div>
 			{nav}
+			<RoadCanvas
+				env={props.env} />
 			{body}
 		</div>
 	)

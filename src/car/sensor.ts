@@ -23,7 +23,7 @@ export class Sensor {
     constructor(car: Car, rays: number, direction: string) {
         this.car = car;
         this.rayCount = rays;
-        this.rayLength = 175;
+        this.rayLength = 200;
         this.raySpread = Math.PI / 4;
 
         this.direction = direction;
@@ -135,6 +135,42 @@ export class Sensor {
             }
 
             this.rays.push([start, end]);
+        }
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        for (let i = 0; i < this.rayCount; i++) {
+            if (!this.rays[i]) continue;
+            let end = this.rays[i][1];
+            if (this.readings[i]) {
+                end = this.readings[i];
+            }
+
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'teal';
+            ctx.moveTo(
+                this.rays[i][0].x,
+                this.rays[i][0].y,
+            );
+            ctx.lineTo(
+                end.x,
+                end.y,
+            )
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'red';
+            ctx.moveTo(
+                this.rays[i][1].x,
+                this.rays[i][1].y,
+            );
+            ctx.lineTo(
+                end.x,
+                end.y,
+            )
+            ctx.stroke();
         }
     }
 }

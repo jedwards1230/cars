@@ -8,25 +8,24 @@ import { Point } from "../utils";
 export class Car {
 	readonly width: number;
 	readonly height: number;
-	readonly color: string;
 	readonly maxSpeed: number;
 	readonly controller: string;
 	readonly controls: Controls;
 	readonly id: number;
 	readonly acceleration: number;
 	readonly friction: number;
-	
+
 	x: number;
 	y: number;
 	angle: number;
 	speed: number;
+	color!: string;
 
-	onTrack: number;
 	distance: number;
 	damaged: boolean;
 	useBrain: boolean;
 	actionCount: number;
-	polygon: Point[];
+	polygon!: Point[];
 	sensors!: Sensor;
 	modelConfig!: ModelConfig;
 	brain!: Network;
@@ -39,14 +38,12 @@ export class Car {
 		y: number,
 		maxspeed: number = 2,
 		controller: string = "dummy",
-		color: string = "blue"
 	) {
 		this.id = id;
 		this.x = x;
 		this.y = y;
 		this.width = 30;
 		this.height = 50;
-		this.color = color;
 
 		this.angle = 0;
 
@@ -54,7 +51,6 @@ export class Car {
 		this.maxSpeed = maxspeed;
 		this.acceleration = 0.2;
 		this.friction = 0.05;
-		this.onTrack = 1;
 
 		this.distance = 0;
 		this.damaged = false;
@@ -65,7 +61,8 @@ export class Car {
 		this.controls = new Controls(controller);
 		this.actionCount = 2;
 
-		this.polygon = this.#createPolygon();
+		this.#setColor();
+		this.#createPolygon();
 	}
 
 	reset(x: number, y: number) {
@@ -75,7 +72,7 @@ export class Car {
 		this.distance = 0;
 		this.damaged = false;
 		this.angle = 0;
-		this.polygon = this.#createPolygon();
+		this.#createPolygon();
 	}
 
 	saveModelConfig() {
@@ -113,10 +110,8 @@ export class Car {
 		if (this.distance < -100) this.damaged = true;
 
 		if (!this.damaged) {
-			this.polygon = this.#createPolygon();
-			const prev_distance = this.distance;
+			this.#createPolygon();
 			this.distance += this.speed;
-			this.onTrack = this.distance > prev_distance ? 1 : 0;
 			this.#checkDamage(borders, traffic);
 		}
 	}
@@ -173,12 +168,12 @@ export class Car {
 		return {
 			action: action,
 			damaged: this.damaged,
-			reward: this.getReward(action),
+			reward: this.getReward(),
 		};
 	}
 
 	/** Get reward for current state */
-	getReward(action: number) {
+	getReward() {
 		const forward = 0;
 		const backward = 1;
 		const left = 2;
@@ -186,8 +181,6 @@ export class Car {
 
 		const mOffset = Math.max(...this.sensorOffsets);
 		const reward = new Array(this.actionCount).fill(0);
-
-		//reward[forward] = 1;
 
 		if (this.damaged) {
 			reward[forward] -= 1;
@@ -199,7 +192,6 @@ export class Car {
 			reward[forward] += 1;
 			reward[left] -= 1;
 			reward[right] -= 1;
-			//reward[backward] -= 1;
 		}
 		if (this.actionCount > 2) {
 			if (this.angle > 0.1) {
@@ -227,34 +219,36 @@ export class Car {
 		return this.brain.makeChoice(action);
 	}
 
+	recordPlay(borders: Point[][], traffic: Car[]) {
+		this.sensorOffsets = this.getSensorData(borders, traffic);
+		const outputs = this.controls.getOutputs();
+		this.brain.recordPlay(this.sensorOffsets, outputs);
+	}
+
 	#checkDamage(roadBorders: Point[][], traffic: Car[]) {
-		const damaged: Car[] = [];
+		const damagedCars: Car[] = [];
 
 		// check collision with road borders
-		for (let i = 0; i < roadBorders.length; i++) {
-			if (polysIntersect(this.polygon, roadBorders[i])) {
-				damaged.push(this);
+		roadBorders.forEach((border) => {
+			if (polysIntersect(this.polygon, border)) {
+				damagedCars.push(this);
 			}
-		}
-		// check collision with traffic
-		for (let i = 0; i < traffic.length; i++) {
-			const car = traffic[i];
-			if (car.id !== this.id) {
-				if (polysIntersect(this.polygon, car.polygon)) {
-					damaged.push(this);
-					damaged.push(car);
-				}
-			}
-		}
+		});
 
-		damaged.forEach(
-			(car: Car) => {
-				car.damaged = true;
-				car.damaged = true;
-				if (car.model === "fsd") car.speed = 0;
-				car.controls.forward = false;
+		// check collision with traffic
+		traffic.forEach((car) => {
+			if (car !== this && polysIntersect(this.polygon, car.polygon)) {
+				damagedCars.push(this);
+				damagedCars.push(car);
 			}
-		);
+		});
+
+		// apply damage and stop controls
+		damagedCars.forEach((car: Car) => {
+			car.damaged = true;
+			if (car.model === "fsd") car.speed = 0;
+			car.controls.stop();
+		});
 	}
 
 	#createPolygon() {
@@ -278,7 +272,7 @@ export class Car {
 			y: this.y - Math.sin(Math.PI + this.angle + alpha) * rad,
 		});
 
-		return points;
+		this.polygon = points;
 	}
 
 	#move() {
@@ -325,4 +319,36 @@ export class Car {
 		this.x += Math.cos(this.angle) * this.speed;
 		this.y += Math.sin(this.angle) * this.speed;
 	}
+
+	#setColor() {
+		switch (this.controller) {
+			case "network":
+				this.color = "rgba(255, 0, 0, 1)";
+				break;
+			case "player":
+				this.color = "rgba(0, 255, 0, 1)";
+				break;
+			default:
+				this.color = "rgba(0, 0, 255, 1)";
+				break;
+		}
+	}
+
+	draw(ctx: CanvasRenderingContext2D, drawSensors = false) {
+        if (this.damaged) {
+            ctx.fillStyle = "gray";
+        } else {
+            ctx.fillStyle = this.color;
+            if (this.sensors && drawSensors) {
+                this.sensors.draw(ctx);
+            }
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+        for (let i = 1; i < this.polygon.length; i++) {
+            ctx.lineTo(this.polygon[i].x, this.polygon[i].y)
+        }
+        ctx.fill();
+    }
 }

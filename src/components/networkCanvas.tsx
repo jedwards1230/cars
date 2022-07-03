@@ -154,11 +154,12 @@ const NetworkCanvas = (props: { model: Car; animTime: number; reset: () => void 
 
         if (props.model.damaged) props.reset();
 
-        setBrain(props.model.brain);
-
-        console.log("model or env updated")
         drawNetwork(brain)
     })
+
+    useEffect(() => {
+        setBrain(props.model.brain);
+    }, [props.model.brain])
 
     return <canvas ref={canvasRef} id="networkCanvas" width={window.innerWidth} height="450" />
 }

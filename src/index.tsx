@@ -7,7 +7,6 @@ import reportWebVitals from "./reportWebVitals";
 import App from "./App";
 
 import { Environment } from "./car/environment";
-import { Car } from "./car/car";
 import { SGD } from "./network/train";
 import { ModelConfig } from "./network/config";
 import { Network } from "./network/network";
@@ -16,10 +15,11 @@ const reactRoot = ReactDOM.createRoot(document.getElementById("root")!);
 
 // environment config
 let env: Environment
-let model: Car;
+
 const trafficCount = 50;
 const brainCount = 1;
 let smartTraffic = false;
+//let teach = false;
 
 // init for training loop
 let numSteps: number;
@@ -78,6 +78,8 @@ async function episodeLoop() {
 	// reset environment
 	reset(false);
 
+	const model = env.brains[0];
+
 	// mutate the weights slightly to help with diversity
 	model.brain.mutate(modelConfig.mutationRate);
 
@@ -129,14 +131,6 @@ function reset(breakL = true) {
 	// reset environment
 	env = new Environment(trafficCount, brainCount, smartTraffic);
 
-	// reset model
-	const x = 0;
-	const y = env.road.getLaneCenter(1);
-	model = new Car(-1, x, y, env.driverSpeed + 1, "network", "red");
-	// load saved config
-	modelConfig.load();
-	model.loadBrainConfig(modelConfig);
-
 	// reset animation
 	cancelAnimationFrame(animFrame);
 	animate();
@@ -154,14 +148,6 @@ function animate(time: number = 0) {
 
 	// update cars
 	env.update();
-	// only perform action if car is not crashed
-	if (!model.damaged) {
-		let action = null;
-		if (model.controller !== "player") {
-			action = model.lazyAction(env.road.borders, env.traffic, true);
-		}
-		model.update(env.traffic, env.road.borders, action);
-	}
 
 	reactRoot.render(
 		<React.StrictMode>
@@ -172,7 +158,6 @@ function animate(time: number = 0) {
 				animTime={animTime}
 				episodeCounter={episodeCounter}
 				modelConfig={modelConfig}
-				model={model}
 				env={env}
 			/>
 		</React.StrictMode>
