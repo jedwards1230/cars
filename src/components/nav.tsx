@@ -1,59 +1,83 @@
 import React, { useEffect, useState } from "react";
-import { Environment } from "../car/environment";
+import { Button, Nav, Navbar } from "react-bootstrap";
+import { Car } from "../car/car";
+import { Simulator } from "../car/simulator";
+import { ModelConfig } from "../network/config";
+import ConfigForm from "./trainConfig/configForm";
 
 const NavComponent = (props: {
-    activeModel: string;
-    model: {
-        speed: number;
-        distance: number;
-    };
-    env: Environment
+    modelConfig: ModelConfig;
+    model: Car;
+    sim: Simulator
+    state: string;
     save: () => void;
     destroy: () => void;
     reset: () => void;
     toggleView: () => void;
 }) => {
-    const [activeModel, setActiveModel] = useState(props.activeModel);
+    const [activeModel, setActiveModel] = useState(props.modelConfig.name);
     const [speed, setSpeed] = useState(0);
     const [distance, setDistance] = useState(0);
-    const [activeBrains, setActiveBrains] = useState(props.env.activeBrains);
+    const [activeBrains, setActiveBrains] = useState(props.sim.activeBrains);
+
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
     useEffect(() => {
-        setActiveModel(props.activeModel);
+        setActiveModel(props.modelConfig.name);
         setSpeed(parseFloat(props.model.speed.toFixed(1)));
         setDistance(parseFloat(props.model.distance.toFixed(0)));
-    }, [props.model.speed, props.model.distance, props.activeModel]);
-
-    useEffect(() => {
-        setActiveBrains(props.env.activeBrains);
-    }, [props.env.activeBrains]);
+        setActiveBrains(props.sim.activeBrains);
+    }, [props.model.speed, props.model.distance, props.modelConfig.name, props.sim.activeBrains]);
 
     return (
-        <nav id="nav" className="navbar px-3 navbar-expand bg-light">
-            <a className="navbar-brand" href="index.html">Miles' Driving School</a>
-            <div className="ms-auto navbar-text">
-                <span id="activeDistance" className="px-2 navbar-text">
-                    distance = {distance}
-                </span>
-                <span id="activeSpeed" className="px-2 navbar-text">
-                    speed = {speed}
-                </span>
-                <span id="activeBrains" className="px-2 navbar-text">
-                    active brains = {activeBrains}
-                </span>
-                <span id="activeModel" className="px-2 me-auto navbar-text">
-                    model = "{activeModel}"
-                </span>
-                <button id="saveBtn" onClick={props.save} data-bs-toggle="tooltip" data-bs-placement="bottom" title="Save Weights"
-                    className="btn btn-outline-primary">💾</button>
-                <button id="destroyBtn" onClick={props.destroy} data-bs-toggle="tooltip" data-bs-placement="bottom" title="Discard Weights"
-                    className="btn btn-outline-danger">🗑️</button>
-                <button id="resetBtn" onClick={props.reset} data-bs-toggle="tooltip" data-bs-placement="bottom" title="Break Loop"
-                    className="btn btn-outline-success">♻️</button>
-                <button id="toggleView" onClick={props.toggleView} data-bs-toggle="tooltip" data-bs-placement="bottom" title=""
-                    className="btn btn-outline-primary">View</button>
-            </div>
-        </nav>
+        <Navbar bg="light" className="px-3">
+            <Navbar.Brand href="index.html">Miles' Driving School</Navbar.Brand>
+            <Nav className="ms-auto">
+                <Navbar.Text
+                    id="activeDistance"
+                    className="px-2">distance = {distance}</Navbar.Text>
+                <Navbar.Text
+                    id="activeSpeed"
+                    className="px-2">speed = {speed}</Navbar.Text>
+                <Navbar.Text
+                    id="activeBrains"
+                    className="px-2">alive = {activeBrains}</Navbar.Text>
+                <Navbar.Text
+                    id="activeModel"
+                    className="px-2">model = {activeModel}</Navbar.Text>
+                <Button
+                    id="saveBtn"
+                    onClick={props.save}
+                    title={"Save Weights"}
+                    variant="outline-warning">💾</Button>
+                <Button
+                    id="destroyBtn"
+                    onClick={props.destroy}
+                    title={"Destroy Weights"}
+                    variant="outline-danger">🗑️</Button>
+                <Button
+                    id="resetBtn"
+                    onClick={props.reset}
+                    title={"Reset"}
+                    variant="outline-success">♻️</Button>
+                <Button
+                    id="configBtn"
+                    onClick={handleShow}
+                    title={"Config"}
+                    variant="outline-dark">⚙️</Button>
+                <Button
+                    id="toggleView"
+                    onClick={props.toggleView}
+                    title={"Config"}
+                    variant="outline-primary">View</Button>
+                <ConfigForm
+                    show={show}
+                    handleHide={handleClose}
+                    modelConfig={props.modelConfig} />
+            </Nav>
+        </Navbar>
     )
 }
 

@@ -3,7 +3,7 @@ import { getRandomInt } from "../utils";
 import { Car } from "./car";
 import { ModelConfig } from "../network/config";
 
-export class Environment {
+export class Simulator {
     trafficCount: number;
     brainCount: number;
     smartTraffic: boolean;
@@ -34,38 +34,44 @@ export class Environment {
 
         this.road = new Road(this.laneCount);
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
-        this.generateTraffic();
-        this.generateBrains();
+        this.#generateTraffic();
+        this.#generateBrains();
     }
 
     update() {
-        const traffic = this.traffic;
-        const borders = this.road.borders;
+        this.#updateTraffic();
+        this.#updateSmartCars();
 
-        this.traffic.forEach((car) => {
-            const action = this.smartTraffic ? car.lazyAction(borders, traffic) : null;
-            car.update(borders, traffic, action);
-        });
-        this.smartCars.forEach((car) => {
-            const action = car.lazyAction(borders, traffic, true);
-            car.update(borders, traffic, action);
-        });
         this.activeBrains = this.smartCars.filter(car => !car.damaged).length;
     }
 
-    generateBrains() {
+    #updateSmartCars() {
+        this.smartCars.forEach(car => {
+            const action = car.lazyAction(this.road.borders, this.traffic, true);
+            car.update(this.road.borders, this.traffic, action);
+        });
+    }
+
+    #updateTraffic() {
+        this.traffic.forEach((car) => {
+            const action = this.smartTraffic ? car.lazyAction(this.road.borders, this.traffic) : null;
+            car.update(this.road.borders, this.traffic, action);
+        });
+    }
+
+    #generateBrains() {
         const smartCars: Car[] = [];
         for (let i = 0; i < this.brainCount; i++) {
             const y = this.road.getLaneCenter(this.startLane);
             const car = new Car(i, 0, y, this.driverSpeed+1, "network");
             car.loadBrainConfig(this.brainConfig);
-            car.brain.mutate(this.brainConfig.mutationRate);
+            if (i !== 0) car.brain.mutate(this.brainConfig.mutationRate);
             smartCars.push(car);
         }
         this.smartCars = smartCars;
     }
 
-    generateTraffic() {
+    #generateTraffic() {
         this.traffic = [];
         let placed = new Array(this.road.laneCount).fill(100);
 
@@ -116,18 +122,20 @@ export class Environment {
         // draw road
         this.road.draw(ctx);
 
+        // draw smart cars
+        this.smartCars.forEach(car => {
+            car.draw(ctx);
+            ctx.globalAlpha = 1;
+        });
+
         // draw traffic
         this.traffic.forEach(car => {
             car.draw(ctx);
             ctx.globalAlpha = 1;
         });
 
-        // draw smart cars
         if (!bestCar.damaged) bestCar.sensor.draw(ctx);
-        this.smartCars.forEach(car => {
-            car.draw(ctx);
-            ctx.globalAlpha = 1;
-        });
+        bestCar.draw(ctx, true);
 
         ctx.restore();
     }

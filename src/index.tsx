@@ -6,31 +6,22 @@ import reportWebVitals from "./reportWebVitals";
 
 import App from "./App";
 
-import { Environment } from "./car/environment";
+import { Simulator } from "./car/simulator";
 import { SGD } from "./network/train";
 import { ModelConfig } from "./network/config";
-import { Network } from "./network/network";
 
 const reactRoot = ReactDOM.createRoot(document.getElementById("root")!);
 
-// environment config
-let env: Environment
+// simulator config
+let sim: Simulator
 const trafficCount = 50;
-const brainCount = 100;
+const brainCount = 300;
 let smartTraffic = false;
 //let teach = false;
 
 // init for training loop
 let numSteps: number;
 let numEpisodes: number;
-let info: {
-	speed: number;
-	distance: number;
-	time?: number;
-	loss?: number;
-	damaged?: boolean;
-	model?: Network;
-};
 let animFrame: number;
 let breakLoop = false;
 let episodeCounter = 0;
@@ -40,50 +31,40 @@ let modelConfig = new ModelConfig("trainBrain", "fsd");
 modelConfig.load();
 
 // Prepare for training. This is called when the user submits the train config form.
-function beginTrain(config: ModelConfig) {
-	// these params come form the form on the page
-	numEpisodes = config.numEpisodes;
-	numSteps = config.numSteps;
-	episodeCounter = 0;
-
+function beginTrain() {
 	const generations = modelConfig.generations
-	modelConfig = config;
+	modelConfig = new ModelConfig("trainBrain", "fsd");
+	modelConfig.load();
+
+	numEpisodes = modelConfig.numEpisodes;
+	numSteps = modelConfig.numSteps;
+	episodeCounter = 0;
 	modelConfig.generations = generations;
 	modelConfig.save();
 	console.log("Model config inputs: ", modelConfig);
 
 	// beging training loop
-	console.log(
-		"Training | Episodes: ",
-		numEpisodes,
-		" | Steps: ",
-		numSteps,
-		" | Learning Rate: ",
-		modelConfig.lr
-	);
+	breakLoop = false;
 	episodeLoop();
 }
 
 /** Run Training Loop
- * 1. Start with fresh environment and model
+ * 1. Start with fresh simulator and model
  * 2. Mutate brain weights slightly
  * 3. Train model for a n steps
  * 4. Save the model as a new generation if it is an improvement
- * 5. Reset environment and model
+ * 5. Reset simulator and model
  * 6. Repeat until all episodes are done
  */
 async function episodeLoop() {
-	// reset environment
-	reset(false);
+	// reset simulator
+	sim = new Simulator(trafficCount, 1, smartTraffic);
 
-	const model = env.smartCars[0];
-
-	// mutate the weights slightly to help with diversity
-	model.brain.mutate(modelConfig.mutationRate);
+	const model = sim.smartCars[0];
 
 	// collect episode info for training run
-	//info = await SGD(model, env, numSteps);
-	info = await SGD(model, env, numSteps);
+	//const info = await SGD(model, sim, numSteps);
+	const info = await SGD(model, sim, numSteps);
 
 	// save max distance so we can mark model improvement
 	// the main goal is distance without crashing
@@ -102,8 +83,7 @@ async function episodeLoop() {
 
 	// save only if model is labelled an improvement
 	if (checkGoodEntry(info)) {
-		model.modelConfig.generations.push(info);
-		model.saveModelConfig();
+		model.saveModelConfig(info);
 	}
 
 	// break loop if we've reached the max number of episodes
@@ -111,23 +91,23 @@ async function episodeLoop() {
 	if (episodeCounter >= numEpisodes || episodeCounter < 0) breakLoop = true;
 
 	// if we're not breaking loop, continue training
-	if (!breakLoop) {
-		setTimeout(episodeLoop, 10);
-	} else {
-		console.log("training complete");
+	if (breakLoop) {
+		console.log("training complete after ", episodeCounter, " episodes");
 		episodeCounter = 0;
 		reset(false);
+	} else {
+		setTimeout(episodeLoop, 10);
 	}
 }
 
-/** Reset environment and model */
+/** Reset simulator and model */
 function reset(breakL = true) {
 	// break training loop
 	breakLoop = breakL;
 	if (breakL) episodeCounter = numEpisodes;
 
-	// reset environment
-	env = new Environment(trafficCount, brainCount, smartTraffic);
+	// reset simulator
+	sim = new Simulator(trafficCount, brainCount, smartTraffic);
 
 	// reset animation
 	cancelAnimationFrame(animFrame);
@@ -142,8 +122,7 @@ function toggleView() {
 
 // animate model
 function animate(time: number = 0) {
-	// update cars
-	env.update();
+	sim.update();
 
 	reactRoot.render(
 		<React.StrictMode>
@@ -154,7 +133,8 @@ function animate(time: number = 0) {
 				animTime={time}
 				episodeCounter={episodeCounter}
 				modelConfig={modelConfig}
-				env={env}
+				sim={sim}
+				bestCar={sim.getBestCar()}
 			/>
 		</React.StrictMode>
 	);

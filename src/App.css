@@ -66,6 +66,10 @@ body {
 	transform: translate(-50%, -50%);
 }
 
+#trainStats {
+  width: 80%;
+}
+
 #activeModel {
 	display: inline-block
 }

@@ -1,13 +1,14 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import { Form, Button, Table } from "react-bootstrap";
 
-const NetworkLayerList = (props: {
-    addLayer: () => void;
-    layers: any[];
-    onRemove: any;
-    updateLayer: any;
-}) => {
+const LayerList = () => {
+    const { control } = useFormContext();
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "layers"
+    });
 
     return (
         <Table borderless size="sm">
@@ -16,64 +17,45 @@ const NetworkLayerList = (props: {
                     <th>Input</th>
                     <th>Output</th>
                     <th>Activation</th>
-                    <th><Button variant="success" onClick={props.addLayer}>+</Button></th>
+                    <th><Button
+                        variant="success"
+                        onClick={() => append({ inputs: "0", outputs: "0", activation: "Linear" })}>+</Button></th>
                 </tr>
             </thead>
             <tbody>
-                {props.layers.map((layer: any) => (
-                    <NetworkLayerItem key={layer.id} item={layer} onRemove={props.onRemove} updateLayer={props.updateLayer} />
-                ))}
+                {fields.map((item, index) => {
+                    return (
+                        <NetworkLayerItem key={item.id} index={index} remove={remove} />
+                    );
+                })}
             </tbody>
         </Table>
-    )
+    );
 }
 
 const NetworkLayerItem = (props: {
-    item: {
-        activation: string;
-        inputs: string;
-        outputs: string;
-        id: number;
-    };
-    updateLayer: (id: number, activation: string, inputs: string, outputs: string) => void;
-    onRemove: (id: number) => void;
+    index: number;
+    remove: (index: number) => void;
 }) => {
-    const [activation, setActivation] = useState(props.item.activation);
-    const [inputs, setInputs] = useState(props.item.inputs);
-    const [outputs, setOutputs] = useState(props.item.outputs);
-    const id = props.item.id;
-
-    const updateLayer = (activation: string, inputs: string, outputs: string) => {
-        setActivation(activation);
-        setInputs(inputs);
-        setOutputs(outputs);
-        props.updateLayer(id, activation, inputs, outputs);
-    }
-
-    useEffect(() => {
-        setActivation(props.item.activation);
-        setInputs(props.item.inputs);
-        setOutputs(props.item.outputs);
-    }, [props.item.activation, props.item.inputs, props.item.outputs]);
+    const { register } = useFormContext();
 
     return (
         <tr>
             <td>
                 <input
+                    {...register(`layers.${props.index}.inputs`)}
                     type="text"
-                    className="form-control"
-                    defaultValue={props.item.inputs}
-                    onChange={e => updateLayer(activation, e.target.value, outputs)} ></input>
+                    className="form-control" ></input>
             </td>
             <td>
                 <input
+                    {...register(`layers.${props.index}.outputs`)}
                     type="text"
-                    className="form-control"
-                    defaultValue={props.item.outputs}
-                    onChange={e => updateLayer(activation, inputs, e.target.value)} ></input>
+                    className="form-control" ></input>
             </td>
             <td>
-                <Form.Select defaultValue={props.item.activation} onChange={e => updateLayer(e.target.value, inputs, outputs)}>
+                <Form.Select
+                    {...register(`layers.${props.index}.activation`)}>
                     <option value="Linear">Linear</option>
                     <option value="Relu">Relu</option>
                     <option value="LeakyRelu">LeakyRelu</option>
@@ -82,10 +64,10 @@ const NetworkLayerItem = (props: {
                 </Form.Select>
             </td>
             <td>
-                <Button variant="danger" onClick={() => props.onRemove(id)}>-</Button>
+                <Button variant="danger" onClick={() => props.remove(props.index)}>-</Button>
             </td>
         </tr>
     )
 }
 
-export default NetworkLayerList;
+export default LayerList;

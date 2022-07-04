@@ -1,16 +1,17 @@
+import { TrainInfo } from "./train";
+
 export class ModelConfig {
 	name: string;
 	alias: string;
 	lr: number;
 	layers: LayerConfig[];
-	generations: any[];
+	generations: TrainInfo[];
 	epsilonDecay: number;
 	mutationRate: number;
 	sensorCount: number;
 	actionCount: number;
 	numEpisodes: number;
 	numSteps: number;
-	numBrains: number;
 
 	constructor(name: string, alias: string) {
 		this.name = name;
@@ -24,7 +25,6 @@ export class ModelConfig {
 		this.actionCount = 0;
 		this.numEpisodes = 0;
 		this.numSteps = 0;
-		this.numBrains = 0;
 	}
 
 	/** Save config to localStorage */
@@ -47,8 +47,8 @@ export class ModelConfig {
 		if (data) {
 			config = JSON.parse(data);
 		} else if (this.name === "trainBrain") {
-			console.log("loading defaultForwardBrain");
-			config = defaultForwardBrain;
+			console.log("loading defaultTrainBrain");
+			config = defaultTrainBrain;
 		}
 		if (!config) return;
 
@@ -84,8 +84,8 @@ export type LayerConfig = {
 	outputs: number;
 	lr: number;
 	id: number;
-	biases: number[];
-	weights: number[][];
+	biases?: number[];
+	weights?: number[][];
 }
 
 const defaultTrainBrain = {
@@ -264,12 +264,12 @@ const defaultTrainBrain = {
 	generations: [],
 };
 
-const defaultTrainBrain1 = {
+/* const defaultTrainBrain1 = {
 	name: "trainBrain",
 	alias: "fsd",
 	lr: 0.001,
 	epsilonDecay: 0.9,
-	mutationRate: 0.1,
+	mutationRate: 0.25,
 	sensorCount: 5,
 	actionCount: 4,
 	layers: [
@@ -293,7 +293,7 @@ const defaultTrainBrain1 = {
 		},
 	],
 	generations: [],
-};
+}; */
 
 const defaultForwardBrain = {
 	name: "trafficForward",
@@ -334,7 +334,7 @@ const defaultForwardBrain = {
 
 const trainBrain = localStorage.getItem("trainBrain");
 if (!trainBrain) {
-	const trainData = JSON.stringify(defaultTrainBrain1, null, "\t");
+	const trainData = JSON.stringify(defaultTrainBrain, null, "\t");
 	localStorage.setItem("trainBrain", trainData);
 }
 const forwardBrain = localStorage.getItem("forwardBrain");

@@ -1,22 +1,22 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Environment } from "../car/environment";
+import { Simulator } from "../car/simulator";
 
 const RoadCanvas = (props: {
-    env: Environment;
+    sim: Simulator;
 }) => {
     const canvasRef = useRef(null)
-    const [env, setEnv] = useState(props.env);
+    const [sim, setSim] = useState(props.sim);
 
     useEffect(() => {
         const canvas = canvasRef.current! as HTMLCanvasElement;
         canvas.width = window.innerWidth;
 
-        env.draw(canvas);
+        sim.draw(canvas);
     })
 
     useEffect(() => {
-        setEnv(props.env);
-    }, [props.env]);
+        setSim(props.sim);
+    }, [props.sim]);
 
     return <canvas ref={canvasRef} id="carCanvas" width={window.innerWidth} height="250" />
 }

@@ -1,39 +1,44 @@
-import React, { useEffect, useState } from "react";
-import TrainConfigForm from "./trainConfig/trainConfigForm";
+import React, { useState } from "react";
 import MetricsTable from "./metricsTable";
 import LossChart from "./metricsChart";
 
-import { Environment } from "../car/environment";
-import { ModelConfig } from "../network/config";
+import { Simulator } from "../car/simulator";
+import RoadCanvas from "./roadCanvas";
+import { Button, Container, ProgressBar } from "react-bootstrap";
 
 const TrainView = (props: {
-  beginTrain: (config: ModelConfig) => void;
-  modelConfig: any;
-  env: Environment;
-  episodeCount: number;
+	beginTrain: () => void;
+	modelConfig: any;
+	sim: Simulator;
+	episodeCount: number;
 }) => {
-  const [showStats, setShowStats] = useState(props.modelConfig.generations.length > 0);
+	const [started, setStarted] = useState(false);
 
-  useEffect(() => {
-    setShowStats(props.modelConfig.generations.length > 0);
-  }, [props.modelConfig.generations]);
+	const start = () => {
+		setStarted(true);
+		props.beginTrain();
+	}
 
-  return (
-    <div>
-      <TrainConfigForm
-        beginTrain={props.beginTrain}
-        modelConfig={props.modelConfig}
-        episodeCounter={props.episodeCount}
-      />
-      {showStats && (
-        <div id="trainStats" className=" py-2 my-2">
-          <h5 className="p-3 text-center">Training Stats</h5>
-          <MetricsTable episodes={props.modelConfig.generations} />
-          <LossChart episodes={props.modelConfig.generations} />
-        </div>
-      )}
-    </div>
-  )
+	return (
+		<div>
+			<RoadCanvas
+				sim={props.sim} />
+			<Container>
+				<Button
+					id="trainBtn"
+					variant="success"
+					onClick={start}>Start</Button>
+				{started && (
+					<div>
+						<ProgressBar now={props.modelConfig.episodeCounter} max={props.modelConfig.numEpisodes} className="my-2" />
+						<MetricsTable episodes={props.modelConfig.generations} />
+						<LossChart episodes={props.modelConfig.generations} />
+					</div>
+				)}
+			</Container>
+
+		</div>
+	)
 }
 
 export default TrainView;

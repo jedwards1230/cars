@@ -1,32 +1,27 @@
 import React from "react";
+import { useFormContext } from "react-hook-form";
 import { Row, Col } from "react-bootstrap";
 
 /** Number of simulations and steps per simulation */
-const SimConfig = (props: {
-    setNumEpisodes: (arg0: number) => void;
-    setNumSteps: (arg0: number) => void;
-    numEpisodes: number;
-    numSteps: number;
-}) => {
+const SimConfig = () => {
+    const { register } = useFormContext();
     return (
         <Row>
             <Col>
                 <div className="form-floating">
                     <input
+                        {...register("numEpisodes")}
                         type="number"
-                        className="form-control"
-                        defaultValue={props.numEpisodes}
-                        onChange={e => props.setNumEpisodes(parseInt(e.target.value))} ></input>
+                        className="form-control"></input>
                     <label htmlFor="episodeCountInput">Number of Simulations</label>
                 </div>
             </Col>
             <Col>
                 <div className="form-floating">
                     <input
+                        {...register("numSteps")}
                         type="number"
-                        className="form-control"
-                        defaultValue={props.numSteps}
-                        onChange={e => props.setNumSteps(parseInt(e.target.value))}></input>
+                        className="form-control"></input>
                     <label htmlFor="timeLimitInput">Steps per Simulation</label>
                 </div>
             </Col>

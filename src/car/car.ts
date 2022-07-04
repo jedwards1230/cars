@@ -4,6 +4,7 @@ import { Network } from "../network/network";
 import { polysIntersect } from "../utils";
 import { ModelConfig } from "../network/config";
 import { Point } from "../utils";
+import { TrainInfo } from "../network/train";
 
 export class Car {
 	readonly width: number;
@@ -61,11 +62,12 @@ export class Car {
 		this.controls = new Controls(controller);
 		this.actionCount = 2;
 
-		this.#setColor();
+		this.setColor();
 		this.#createPolygon();
 	}
 
-	saveModelConfig() {
+	saveModelConfig(info?: TrainInfo) {
+		if (info) this.modelConfig.generations.push(info);
 		this.modelConfig.layers = this.brain.saveLayers();
 		this.modelConfig.save();
 	}
@@ -229,7 +231,7 @@ export class Car {
 		traffic.forEach(car => {
 			if (car !== this && polysIntersect(this.polygon, car.polygon)) {
 				damagedCars.push(this);
-				damagedCars.push(car);
+				//damagedCars.push(car);
 			}
 		});
 
@@ -310,10 +312,10 @@ export class Car {
 		this.y += Math.sin(this.angle) * this.speed;
 	}
 
-	#setColor() {
+	setColor() {
 		switch (this.controller) {
 			case "network":
-				this.color = "rgba(255, 0, 0, 1)";
+				this.color = "rgba(255, 0, 0, 0.5)";
 				break;
 			case "player":
 				this.color = "rgba(0, 255, 0, 1)";
@@ -322,14 +324,17 @@ export class Car {
 				this.color = "rgba(0, 0, 255, 1)";
 				break;
 		}
+		
 	}
 
-	draw(ctx: CanvasRenderingContext2D) {
+	draw(ctx: CanvasRenderingContext2D, bestCar = false) {
         if (this.damaged) {
             ctx.fillStyle = "gray";
+        } else if (bestCar) {
+            ctx.fillStyle = "rgba(255, 0, 0, 1)";
         } else {
-            ctx.fillStyle = this.color;
-        }
+			ctx.fillStyle = this.color;
+		}
 
         ctx.beginPath();
         ctx.moveTo(this.polygon[0].x, this.polygon[0].y);

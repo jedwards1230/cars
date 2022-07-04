@@ -7,7 +7,7 @@ import {
     lerp
 } from "../utils";
 
-const NetworkCanvas = (props: { model: Car; animTime: number; reset: () => void }) => {
+const NetworkCanvas = (props: { bestCar: Car; animTime: number; reset: () => void }) => {
     const drawNetwork = (network: Network) => {
         const canvas = canvasRef.current! as HTMLCanvasElement;
         const ctx = canvas.getContext("2d")! as CanvasRenderingContext2D;
@@ -142,7 +142,7 @@ const NetworkCanvas = (props: { model: Car; animTime: number; reset: () => void 
     }
     
     const canvasRef = useRef(null)
-    const [brain, setBrain] = useState(props.model.brain);
+    const [brain, setBrain] = useState(props.bestCar.brain);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
@@ -152,14 +152,14 @@ const NetworkCanvas = (props: { model: Car; animTime: number; reset: () => void 
         canvas.width = window.innerWidth;
         ctx.lineDashOffset = -props.animTime / 40;
 
-        //if (props.model.damaged) props.reset();
+        //if (props.bestCar.damaged) props.reset();
 
         drawNetwork(brain)
     })
 
     useEffect(() => {
-        setBrain(props.model.brain);
-    }, [props.model.brain])
+        setBrain(props.bestCar.brain);
+    }, [props.bestCar.brain])
 
     return <canvas ref={canvasRef} id="networkCanvas" width={window.innerWidth} height="450" />
 }

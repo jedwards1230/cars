@@ -1,17 +1,27 @@
 import { Car } from "../car/car";
-import { Environment } from "../car/environment";
+import { Simulator } from "../car/simulator";
+import { Network } from "./network";
+
+export type TrainInfo = {
+    time: number,
+    loss: number,
+    speed: number,
+    distance: number,
+    damaged: boolean,
+    model: Network,
+}
 
 /**
  * Training Loop
- * 1. Update environment
- * 2. Have car observe environment
+ * 1. Update simulator
+ * 2. Have car observe simulator
  * 3. Process observation with neural network
  * 4. Get action from neural network
  * 5. Calculate reward
  * 6. Update Car with action
  * 7. Backprop network with reward
  */
-export async function SGD(model: Car, env: Environment, maxTimeSteps: number) {
+export async function SGD(model: Car, sim: Simulator, maxTimeSteps: number): Promise<TrainInfo> {
     let speeds = [];
     let rLoss = 1;
     let count = 0;
@@ -50,10 +60,10 @@ export async function SGD(model: Car, env: Environment, maxTimeSteps: number) {
     }
 
     for (let i = 0; i < maxTimeSteps; i++) {
-        // update environment
-        env.update();
-        //const observation = model.getObservation(env.road.borders, env.traffic);
-        const input = model.getSensorData(env.road.borders, env.traffic);
+        // update simulator
+        sim.update();
+        //const observation = model.getObservation(sim.road.borders, sim.traffic);
+        const input = model.getSensorData(sim.road.borders, sim.traffic);
 
         // forward pass to get action
         prevOutput = JSON.parse(JSON.stringify(output));
@@ -66,7 +76,7 @@ export async function SGD(model: Car, env: Environment, maxTimeSteps: number) {
         reward = metrics.reward;
 
         // apply action to model
-        model.update(env.road.borders, env.traffic, action);
+        model.update(sim.road.borders, sim.traffic, action);
 
         // metrics
         speeds.push(model.speed);
@@ -87,7 +97,7 @@ export async function SGD(model: Car, env: Environment, maxTimeSteps: number) {
     };
 }
 
-export async function batchTrain(model: Car, env: Environment, maxTimeSteps: number) {
+export async function batchTrain(model: Car, sim: Simulator, maxTimeSteps: number): Promise<TrainInfo> {
     let speeds = [];
     let rLoss = 0;
     let count = 0;
@@ -139,10 +149,10 @@ export async function batchTrain(model: Car, env: Environment, maxTimeSteps: num
     }
 
     for (let i = 0; i < maxTimeSteps; i++) {
-        // update environment
-        env.update();
-        //const observation = model.getObservation(env.road.borders, env.traffic);
-        const input = model.getSensorData(env.road.borders, env.traffic);
+        // update simulator
+        sim.update();
+        //const observation = model.getObservation(sim.road.borders, sim.traffic);
+        const input = model.getSensorData(sim.road.borders, sim.traffic);
 
         // forward pass to get action
         prevOutput = JSON.parse(JSON.stringify(output));
@@ -157,7 +167,7 @@ export async function batchTrain(model: Car, env: Environment, maxTimeSteps: num
         experienceReplay();
 
         // apply action to model
-        model.update(env.road.borders, env.traffic, action);
+        model.update(sim.road.borders, sim.traffic, action);
 
         // metrics
         speeds.push(model.speed);

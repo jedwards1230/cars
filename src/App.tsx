@@ -1,39 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import './App.css';
 import NavComponent from "./components/nav";
-import RoadCanvas from "./components/roadCanvas";
 import WelcomeView from "./components/welcome";
 import TrainView from "./components/trainView";
 import VisualView from "./components/visualView";
 import { ModelConfig } from "./network/config";
-import { Environment } from "./car/environment";
+import { Simulator } from "./car/simulator";
+import { Car } from "./car/car";
+
+export const states = {
+	welcome: "welcome",
+	train: "train",
+	visual: "visual",
+	config: "config"
+}
 
 const App = (props: {
-	beginTrain: (config: ModelConfig) => void;
+	beginTrain: () => void;
 	reset: () => void;
 	toggleView: () => void;
 	modelConfig: ModelConfig;
-	env: Environment;
+	sim: Simulator;
+	bestCar: Car;
 	episodeCounter: number;
 	animTime: number;
 }) => {
-	const [showVisualizer, setShowVisualizer] = useState(false);
-	const [welcomed, setWelcomed] = useState(false);
-	const [bestCar, setBestCar] = useState(props.env.getBestCar());
+	const [state, setState] = useState(states.welcome);
 
 	const toggleView = () => {
-		setShowVisualizer(!showVisualizer);
+		if (state === states.train) {
+			setState(states.visual);
+		} else if (state === states.visual) {
+			setState(states.train);
+		}
 		props.toggleView();
-	}
-
-	const setTrain = () => {
-		setShowVisualizer(false);
-		props.reset();
-	}
-
-	const setVisuals = () => {
-		setShowVisualizer(true);
-		props.reset();
 	}
 
 	const destroyModel = () => {
@@ -42,51 +42,51 @@ const App = (props: {
 	}
 
 	const saveModel = () => {
-		bestCar.saveModelConfig();
+		props.bestCar.saveModelConfig();
 		props.reset();
 	}
 
-	useEffect(() => {
-		setBestCar(props.env.getBestCar());
-	}, [props.env]);
-
-	if (!welcomed) {
-		return <WelcomeView
-			setPlay={setVisuals}
-			setTrain={setTrain}
-			setWelcomed={setWelcomed}
-		/>
-	}
-
 	const nav = <NavComponent
-		activeModel={props.modelConfig.name}
-		model={bestCar}
-		env={props.env}
+		modelConfig={props.modelConfig}
+		model={props.bestCar}
+		sim={props.sim}
+		state={state}
 		save={saveModel}
 		destroy={destroyModel}
 		reset={props.reset}
-		toggleView={toggleView}
-	/>
+		toggleView={toggleView} />
 
-	const body = showVisualizer ?
-		<VisualView
-			animTime={props.animTime}
-			env={props.env}
-			reset={props.reset} /> :
-		<TrainView
-			modelConfig={props.modelConfig}
-			env={props.env}
-			beginTrain={props.beginTrain}
-			episodeCount={props.episodeCounter} />
-
-	return (
-		<div>
-			{nav}
-			<RoadCanvas
-				env={props.env} />
-			{body}
-		</div>
-	)
+	switch (state) {
+		case states.welcome:
+			return (
+				<WelcomeView
+					setState={setState} />
+			)
+		case states.train:
+			return (
+				<>
+					{nav}
+					<TrainView
+						modelConfig={props.modelConfig}
+						sim={props.sim}
+						beginTrain={props.beginTrain}
+						episodeCount={props.episodeCounter} />
+				</>
+			)
+		case states.visual:
+			return (
+				<>
+					{nav}
+					<VisualView
+						animTime={props.animTime}
+						sim={props.sim}
+						bestCar={props.bestCar}
+						reset={props.reset} />
+				</>
+			)
+		default:
+			return <div>Error</div>
+	}
 };
 
 export default App;

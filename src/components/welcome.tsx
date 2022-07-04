@@ -1,18 +1,15 @@
 import React from "react";
+import { states } from "../App";
 
 const WelcomeView = (props: {
-    setWelcomed: (arg0: boolean) => void;
-    setPlay: () => void;
-    setTrain: () => void;
+    setState: (arg0: string) => void;
 }) => {
     const setPlay = () => {
-        props.setWelcomed(true);
-        props.setPlay();
+        props.setState(states.visual);
     }
 
     const setTrain = () => {
-        props.setWelcomed(true);
-        props.setTrain();
+        props.setState(states.train);
     }
 
     return (
