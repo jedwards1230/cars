@@ -1,6 +1,6 @@
 import { TrainInfo } from "./train";
 
-export class ModelConfig {
+export class AppConfig {
 	name: string;
 	alias: string;
 	lr: number;
@@ -12,6 +12,8 @@ export class ModelConfig {
 	actionCount: number;
 	numEpisodes: number;
 	numSteps: number;
+	smartCarCount: number;
+	trafficCount: number;
 
 	constructor(name: string, alias: string) {
 		this.name = name;
@@ -23,8 +25,10 @@ export class ModelConfig {
 		this.mutationRate = 0.1;
 		this.sensorCount = 0;
 		this.actionCount = 0;
-		this.numEpisodes = 0;
-		this.numSteps = 0;
+		this.numEpisodes = 500;
+		this.numSteps = 1000;
+		this.smartCarCount = 1;
+		this.trafficCount = 30;
 	}
 
 	/** Save config to localStorage */
@@ -52,6 +56,10 @@ export class ModelConfig {
 		}
 		if (!config) return;
 
+		this.numEpisodes = config.numEpisodes;
+		this.numSteps = config.numSteps;
+		this.smartCarCount = config.smartCarCount;
+		this.trafficCount = config.trafficCount;
 		this.name = config.name;
 		this.alias = config.alias;
 		this.lr = config.lr;
@@ -65,7 +73,7 @@ export class ModelConfig {
 	}
 
 	/** Compare configs to see if layers are compatible (by activation, input, and output count) */
-	compare(config: ModelConfig) {
+	compare(config: AppConfig) {
 		if (!config || !config.layers) return false;
 		if (this.layers.length !== config.layers.length) return false;
 		for (let i = 0; i < this.layers.length; i++) {
@@ -100,9 +108,29 @@ const defaultTrainBrain = {
 		{
 			id: 0,
 			activation: "Tanh",
-			inputs: 5,
+			inputs: 7,
 			outputs: 8,
 			weights: [
+				[
+					-0.02981603389895593,
+					-0.09332842184222967,
+					-0.14162173309707837,
+					-0.3771034866455114,
+					-0.7309341429915257,
+					0.34730166359630843,
+					0.5484715180381019,
+					0.5974728225045465
+				],
+				[
+					-0.02981603389895593,
+					-0.09332842184222967,
+					-0.14162173309707837,
+					-0.3771034866455114,
+					-0.7309341429915257,
+					0.34730166359630843,
+					0.5484715180381019,
+					0.5974728225045465
+				],
 				[
 					-0.7950787842731915,
 					0.6275914490202199,

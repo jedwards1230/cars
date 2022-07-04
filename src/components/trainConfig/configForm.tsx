@@ -3,14 +3,14 @@ import { useForm, FormProvider } from "react-hook-form";
 import CarConfig from "./carConfig";
 import SimConfig from "./simConfig";
 import NetworkConfig from "./modelConfig";
-import { ModelConfig } from "../../network/config";
+import { AppConfig } from "../../network/config";
 import { Button, Form, Modal } from "react-bootstrap";
 
 const ConfigForm = (props: {
     show: boolean;
     handleHide: () => void;
     setActiveModel: (model: string) => void;
-    modelConfig: ModelConfig;
+    modelConfig: AppConfig;
 }) => {
     const [modelConfig, setModelConfig] = useState(props.modelConfig);
 
@@ -21,6 +21,8 @@ const ConfigForm = (props: {
     const defaultValues = {
         numEpisodes: 1000,
         numSteps: 2000,
+        smartCarCount: 1,
+        trafficCount: 50,
         activeModel: modelConfig.name,
         alias: modelConfig.alias,
         epsilonDecay: modelConfig.epsilonDecay,
@@ -35,7 +37,7 @@ const ConfigForm = (props: {
     const onSubmit = (data: any) => {
         data = cleanData(data);
         console.log(data);
-        const config = new ModelConfig(data.activeModel, data.alias);
+        const config = new AppConfig(data.activeModel, data.alias);
         config.load();
         props.setActiveModel(data.activeModel);
         config.numEpisodes = data.numEpisodes;
@@ -63,11 +65,13 @@ const ConfigForm = (props: {
         return {
             numEpisodes: parseFloat(data.numEpisodes),
             numSteps: parseFloat(data.numSteps),
-            activeModel: data.activeModel.trim(),
+            smartCarCount: parseFloat(data.smartCarCount),
+            trafficCount: parseFloat(data.trafficCount),
+            name: data.activeModel.trim(),
             alias: data.alias.trim(),
             epsilonDecay: parseFloat(data.epsilonDecay),
             mutationRate: parseFloat(data.mutationRate),
-            learningRate: parseFloat(data.learningRate),
+            lr: parseFloat(data.learningRate),
             sensorCount: parseInt(data.sensorCount),
             actionCount: parseInt(data.actionCount),
             layers: layers

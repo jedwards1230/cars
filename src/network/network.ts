@@ -1,5 +1,5 @@
 import { MSE } from "../utils";
-import { LayerConfig, ModelConfig } from "./config";
+import { LayerConfig, AppConfig } from "./config";
 import {
     Linear,
     Sigmoid,
@@ -19,8 +19,9 @@ export class Network {
     layers: Layer[];
     confidence: number;
     lossFunction: (targets: number[], outputs: number[]) => number;
+    deriveLoss: (targets: number[], outputs: number[]) => number[];
 
-    constructor(modelConfig: ModelConfig) {
+    constructor(modelConfig: AppConfig) {
         this.memory = [];
         this.layers = [];
         this.confidence = 0.5;
@@ -33,10 +34,18 @@ export class Network {
             }
             return cost / outputs.length;
         };
+
+        this.deriveLoss = (targets, outputs) => {
+            const derivatives = [];
+            for (let i = 0; i < outputs.length; i++) {
+                derivatives[i] = (outputs[i] - targets[i]) * 2;
+            }
+            return derivatives;
+        }
     }
 
     /** Forward pass each layer */
-    forward(inputs: number[], backprop = false) {
+    forward(inputs: number[], backprop = false): number[] {
         let outputs = this.layers[0].forward(inputs, backprop);
         for (let i = 1; i < this.layers.length; i++) {
             outputs = this.layers[i].forward(outputs, backprop);
@@ -55,15 +64,13 @@ export class Network {
     makeChoice(outputValues: number[], greedy = false) {
         // choose random
         const random = Math.random();
-        let choice;
         if (greedy && (random < this.epsilon)) {
-            choice = Math.floor(Math.random() * outputValues.length);
-        } else {
-            const m = Math.max(...outputValues);
-            choice = outputValues.indexOf(m);
-        }
+            outputValues.forEach(value => {
+                value = Math.floor(Math.random() * outputValues.length);
+            })
+        } 
         this.decay();
-        return choice;
+        return outputValues;
     }
 
     recordPlay(inputs: number[], outputs: number[]) {
@@ -80,7 +87,7 @@ export class Network {
         return layers
     }
 
-    loadBrain(config: ModelConfig) {
+    loadBrain(config: AppConfig) {
         this.name = config.name;
         this.lr = config.lr;
         this.epsilon = config.epsilonDecay;

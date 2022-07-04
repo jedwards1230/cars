@@ -26,7 +26,7 @@ export async function SGD(model: Car, sim: Simulator, maxTimeSteps: number): Pro
     let rLoss = 1;
     let count = 0;
     let output: number[] = [];
-    let action: number;
+    let action: number[];
     let reward: number[];
     let prevOutput: number[];
 
@@ -39,24 +39,15 @@ export async function SGD(model: Car, sim: Simulator, maxTimeSteps: number): Pro
      */
     const backprop = () => {
         const target = reward;
-        const gamma = 0.99;
 
         // find average loss
         rLoss = model.brain.lossFunction(target, output);
 
         // derivative of loss function (how much gradient needs to be adjusted)
-        const d = new Array(output.length);
-        for (let i = 0; i < output.length; i++) {
-            d[i] = (target[i] - output[i]) * 2;
-        }
-
-        const td = new Array(output.length);
-        for (let i = 0; i < output.length; i++) {
-            td[i] = target[i] + (gamma * output[i]) - prevOutput[i];
-        }
+        const d = model.brain.deriveLoss(target, output);
 
         // backward pass to update weights
-        model.brain.backward(td);
+        model.brain.backward(d);
     }
 
     for (let i = 0; i < maxTimeSteps; i++) {

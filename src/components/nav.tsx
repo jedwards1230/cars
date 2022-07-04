@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Button, Nav, Navbar } from "react-bootstrap";
 import { Car } from "../car/car";
 import { Simulator } from "../car/simulator";
-import { ModelConfig } from "../network/config";
+import { AppConfig } from "../network/config";
 import ConfigForm from "./trainConfig/configForm";
 
 const NavComponent = (props: {
-    modelConfig: ModelConfig;
+    modelConfig: AppConfig;
     model: Car;
     sim: Simulator
     state: string;
@@ -14,12 +14,13 @@ const NavComponent = (props: {
     save: () => void;
     destroy: () => void;
     reset: () => void;
-    toggleView: () => void;
+    startPlay: () => void;
     setActiveModel: (model: string) => void;
 }) => {
     const [speed, setSpeed] = useState(0);
     const [distance, setDistance] = useState(0);
     const [activeBrains, setActiveBrains] = useState(props.sim.activeBrains);
+    const [loss, setLoss] = useState("0");
 
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -30,6 +31,10 @@ const NavComponent = (props: {
         setDistance(parseFloat(props.model.distance.toFixed(0)));
         setActiveBrains(props.sim.activeBrains);
     }, [props.model.speed, props.model.distance, props.sim.activeBrains]);
+
+    useEffect(() => {
+        setLoss((props.sim.loss.loss / props.sim.loss.count).toFixed(4));
+    }, [props.sim.loss.loss, props.sim.loss.count]);
 
     return (
         <Navbar bg="light" className="px-3">
@@ -45,22 +50,25 @@ const NavComponent = (props: {
                     id="activeBrains"
                     className="px-2">alive = {activeBrains}</Navbar.Text>
                 <Navbar.Text
+                    id="activeBrains"
+                    className="px-2">loss = {loss}</Navbar.Text>
+                <Navbar.Text
                     id="activeModel"
-                    className="px-2">model = {props.activeModel}</Navbar.Text>
+                    className="px-2">{props.activeModel}</Navbar.Text>
                 <Button
                     id="saveBtn"
                     onClick={props.save}
-                    title={"Save Weights"}
+                    title={"Save Model"}
                     variant="outline-warning">💾</Button>
                 <Button
                     id="destroyBtn"
                     onClick={props.destroy}
-                    title={"Destroy Weights"}
+                    title={"Destroy Model"}
                     variant="outline-danger">🗑️</Button>
                 <Button
                     id="resetBtn"
                     onClick={props.reset}
-                    title={"Reset"}
+                    title={"Reset Simulation"}
                     variant="outline-success">♻️</Button>
                 <Button
                     id="configBtn"
@@ -68,10 +76,10 @@ const NavComponent = (props: {
                     title={"Config"}
                     variant="outline-dark">⚙️</Button>
                 <Button
-                    id="toggleView"
-                    onClick={props.toggleView}
-                    title={"Config"}
-                    variant="outline-primary">View</Button>
+                    id="startPlay"
+                    onClick={props.startPlay}
+                    title={"Play"}
+                    variant="outline-primary">Play</Button>
                 <ConfigForm
                     show={show}
                     handleHide={handleClose}

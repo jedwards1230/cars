@@ -9,7 +9,7 @@ const WelcomeView = (props: {
     }
 
     const setTrain = () => {
-        props.setState(states.train);
+        props.setState(states.visual);
     }
 
     return (

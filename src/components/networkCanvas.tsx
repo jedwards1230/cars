@@ -19,13 +19,8 @@ const NetworkCanvas = (props: { bestCar: Car; animTime: number; reset: () => voi
 
         const last = network.layers.length - 1;
         let actionValues = network.layers[last].outputs;
-        const idx = actionValues.indexOf(Math.max(...actionValues));
         for (let j = 0; j < actionValues.length; j++) {
-            if (j === idx) {
-                actionValues[j] = 1;
-            } else {
-                actionValues[j] = 0;
-            }
+            actionValues[j] = actionValues[j] > 0.5 ? 1 : 0;
         }
         network.layers[last].outputs = actionValues;
 
@@ -144,15 +139,12 @@ const NetworkCanvas = (props: { bestCar: Car; animTime: number; reset: () => voi
     const canvasRef = useRef(null)
     const [brain, setBrain] = useState(props.bestCar.brain);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         const canvas = canvasRef.current! as HTMLCanvasElement;
         const ctx = canvas.getContext("2d")! as CanvasRenderingContext2D;
 
         canvas.width = window.innerWidth;
         ctx.lineDashOffset = -props.animTime / 40;
-
-        //if (props.bestCar.damaged) props.reset();
 
         drawNetwork(brain)
     })

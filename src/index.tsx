@@ -8,14 +8,14 @@ import App from "./App";
 
 import { Simulator } from "./car/simulator";
 import { SGD } from "./network/train";
-import { ModelConfig } from "./network/config";
+import { AppConfig } from "./network/config";
 
 const reactRoot = ReactDOM.createRoot(document.getElementById("root")!);
 
 // simulator config
 let sim: Simulator
 const trafficCount = 50;
-const brainCount = 300;
+const brainCount = 100;
 let smartTraffic = false;
 //let teach = false;
 
@@ -30,13 +30,17 @@ let episodeCounter = 0;
 let activeModel = "trainBrain";
 const setActiveModel = (model: string) => activeModel = model;
 let activeAlias = "fsd";
-let modelConfig = new ModelConfig(activeModel, activeAlias);
+let modelConfig = new AppConfig(activeModel, activeAlias);
 modelConfig.load();
+
+const startPlay = () => {
+	sim = new Simulator(trafficCount, brainCount, smartTraffic, true);
+}
 
 // Prepare for training. This is called when the user submits the train config form.
 function beginTrain() {
 	const generations = modelConfig.generations
-	modelConfig = new ModelConfig(activeModel, activeAlias);
+	modelConfig = new AppConfig(activeModel, activeAlias);
 	modelConfig.load();
 
 	numEpisodes = modelConfig.numEpisodes;
@@ -131,6 +135,7 @@ function animate(time: number = 0) {
 		<React.StrictMode>
 			<App
 				beginTrain={beginTrain}
+				startPlay={startPlay}
 				reset={reset}
 				toggleView={toggleView}
 				animTime={time}

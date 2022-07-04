@@ -2,16 +2,15 @@ import React, { useState } from "react";
 import './App.css';
 import NavComponent from "./components/nav";
 import WelcomeView from "./components/welcome";
-import TrainView from "./components/trainView";
 import VisualView from "./components/visualView";
-import { ModelConfig } from "./network/config";
+import { AppConfig } from "./network/config";
 import { Simulator } from "./car/simulator";
 import { Car } from "./car/car";
 
 export const states = {
 	welcome: "welcome",
-	train: "train",
 	visual: "visual",
+	play: "play",
 	config: "config"
 }
 
@@ -19,7 +18,8 @@ const App = (props: {
 	beginTrain: () => void;
 	reset: () => void;
 	toggleView: () => void;
-	modelConfig: ModelConfig;
+	startPlay: () => void;
+	modelConfig: AppConfig;
 	sim: Simulator;
 	bestCar: Car;
 	episodeCounter: number;
@@ -27,16 +27,7 @@ const App = (props: {
 	activeModel: string;
 	setActiveModel: (model: string) => void;
 }) => {
-	const [state, setState] = useState(states.welcome);
-
-	const toggleView = () => {
-		if (state === states.train) {
-			setState(states.visual);
-		} else if (state === states.visual) {
-			setState(states.train);
-		}
-		props.toggleView();
-	}
+	const [state, setState] = useState(states.visual);
 
 	const destroyModel = () => {
 		props.modelConfig.destroy();
@@ -58,24 +49,13 @@ const App = (props: {
 		save={saveModel}
 		destroy={destroyModel}
 		reset={props.reset}
-		toggleView={toggleView} />
+		startPlay={props.startPlay} />
 
 	switch (state) {
 		case states.welcome:
 			return (
 				<WelcomeView
 					setState={setState} />
-			)
-		case states.train:
-			return (
-				<>
-					{nav}
-					<TrainView
-						modelConfig={props.modelConfig}
-						sim={props.sim}
-						beginTrain={props.beginTrain}
-						episodeCount={props.episodeCounter} />
-				</>
 			)
 		case states.visual:
 			return (

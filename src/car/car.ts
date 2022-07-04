@@ -2,7 +2,7 @@ import { Controls } from "./controls";
 import { Sensor } from "./sensor";
 import { Network } from "../network/network";
 import { polysIntersect } from "../utils";
-import { ModelConfig } from "../network/config";
+import { AppConfig } from "../network/config";
 import { Point } from "../utils";
 import { TrainInfo } from "../network/train";
 
@@ -28,7 +28,7 @@ export class Car {
 	actionCount: number;
 	polygon!: Point[];
 	sensor!: Sensor;
-	modelConfig!: ModelConfig;
+	modelConfig!: AppConfig;
 	brain!: Network;
 	model!: string;
 	sensorOffsets!: number[];
@@ -72,7 +72,7 @@ export class Car {
 		this.modelConfig.save();
 	}
 
-	loadBrainConfig(config: ModelConfig) {
+	loadBrainConfig(config: AppConfig) {
 		this.modelConfig = config;
 		this.model = config.alias;
 		this.useBrain = true;
@@ -95,7 +95,7 @@ export class Car {
 
 	// update car object
 	// if damaged, only process slow down and sensors
-	update(borders: Point[][], traffic: Car[], action?: null | number) {
+	update(borders: Point[][], traffic: Car[], action?: null | number[]) {
 		if (action != null) this.updateControls(action);
 		this.#move();
 
@@ -108,55 +108,25 @@ export class Car {
 		}
 	}
 
-	/**
-	 * Update car controls
-	 * @param {number} a 0: forward, 1: backward, 2: left, 3: right
-	 */
-	updateControls(a: number) {
-		switch (a) {
-			case 0:
-				// forward
-				this.controls.forward = true;
-				this.controls.backward = false;
-				this.controls.left = false;
-				this.controls.right = false;
-				break;
-			case 1:
-				// backward
-				this.controls.forward = false;
-				this.controls.backward = true;
-				this.controls.left = false;
-				this.controls.right = false;
-				break;
-			case 2:
-				// left
-				this.controls.forward = false;
-				this.controls.backward = false;
-				this.controls.left = true;
-				this.controls.right = false;
-				break;
-			case 3:
-				// right
-				this.controls.forward = false;
-				this.controls.backward = false;
-				this.controls.left = false;
-				this.controls.right = true;
-				break;
-			default:
-				break;
-		}
+	/** Update car controls */
+	updateControls(input: number[]) {
+		this.controls.forward = input[0] > 0.5 ? true : false;
+		this.controls.backward = input[1] > 0.5 ? true : false;
+		this.controls.left = input[2] > 0.5 ? true : false;
+		this.controls.right = input[3] > 0.5 ? true : false;
 	}
 
 	getSensorData(borders: Point[][], traffic: Car[]) {
-		let sensorOffsets: number[] = [];
+		let sensorOffsets: number[] = [(this.y / 250), this.angle];
 		// update each sensor
 		this.sensor.update(borders, traffic);
 		const offsets = this.sensor.getSensorOffsets();
 		sensorOffsets = sensorOffsets.concat(offsets);
+		this.sensorOffsets = sensorOffsets;
 		return sensorOffsets;
 	}
 
-	getMetrics(action: number) {
+	getMetrics(action: number[]) {
 		return {
 			action: action,
 			damaged: this.damaged,
@@ -203,10 +173,10 @@ export class Car {
 		return reward;
 	}
 
-	lazyAction(borders: Point[][], traffic: Car[], backprop = false): number {
-		if (!this.useBrain) return -1;
+	lazyAction(borders: Point[][], traffic: Car[], backprop = false): null | number[] {
+		if (!this.useBrain) return null;
 		const sData = this.getSensorData(borders, traffic);
-		this.sensorOffsets = sData;
+		console.log(sData);
 		const action = this.brain.forward(sData, backprop);
 		return this.brain.makeChoice(action);
 	}

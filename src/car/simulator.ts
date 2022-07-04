@@ -1,32 +1,48 @@
 import { Road } from "./road";
 import { getRandomInt } from "../utils";
 import { Car } from "./car";
-import { ModelConfig } from "../network/config";
+import { AppConfig } from "../network/config";
+
+type Loss = {
+    loss: number,
+    count: number,
+}
 
 export class Simulator {
     trafficCount: number;
     brainCount: number;
     smartTraffic: boolean;
+    player: string;
     activeBrains: number;
-    trafficConfig: ModelConfig;
-    brainConfig: ModelConfig;
+    trafficConfig: AppConfig;
+    brainConfig: AppConfig;
     driverSpeed: number;
     laneCount: number;
     road: Road;
     startLane: number;
     traffic!: Car[];
     smartCars!: Car[];
+    loss: Loss;
 
-    constructor(trafficCount: number, brainCount: number, smartTraffic = false) {
+    constructor(trafficCount: number, brainCount: number, smartTraffic = false, player = false) {
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
         this.activeBrains = brainCount;
         this.smartTraffic = smartTraffic;
+        this.player = "network";
+        this.loss = {
+            loss: 0,
+            count: 0,
+        }
+        if (player) {
+            this.player = "player";
+            this.brainCount = 1;
+        }
 
-        this.trafficConfig = new ModelConfig("trafficForward", "forward");
+        this.trafficConfig = new AppConfig("trafficForward", "forward");
         this.trafficConfig.load();
 
-        this.brainConfig = new ModelConfig("trainBrain", "fsd");
+        this.brainConfig = new AppConfig("trainBrain", "fsd");
         this.brainConfig.load();
 
         this.driverSpeed = 3;
@@ -46,10 +62,31 @@ export class Simulator {
     }
 
     #updateSmartCars() {
-        this.smartCars.forEach(car => {
-            const action = car.lazyAction(this.road.borders, this.traffic, true);
-            car.update(this.road.borders, this.traffic, action);
-        });
+        if (this.player === "player") {
+            const car = this.smartCars[0];
+            if (car.damaged) return
+            const sData = car.getSensorData(this.road.borders, this.traffic);
+            const output = car.brain.forward(sData, true);
+            car.update(this.road.borders, this.traffic);
+            const target = car.controls.getOutputs();
+
+            // find average loss
+            this.loss.loss += car.brain.lossFunction(target, output);
+            this.loss.count++;
+            console.log(this.loss.loss / this.loss.count);
+            console.log(target, output);
+
+            // derivative of loss function (how much gradient needs to be adjusted)
+            const d = car.brain.deriveLoss(target, output);
+
+            // backward pass to update weights
+            car.brain.backward(d);
+        } else {
+            this.smartCars.forEach(car => {
+                const action = car.lazyAction(this.road.borders, this.traffic, true);
+                car.update(this.road.borders, this.traffic, action);
+            });
+        }
     }
 
     #updateTraffic() {
@@ -63,7 +100,7 @@ export class Simulator {
         const smartCars: Car[] = [];
         for (let i = 0; i < this.brainCount; i++) {
             const y = this.road.getLaneCenter(this.startLane);
-            const car = new Car(i, 0, y, this.driverSpeed+1, "network");
+            const car = new Car(i, 0, y, this.driverSpeed + 1, this.player);
             car.loadBrainConfig(this.brainConfig);
             if (i !== 0) car.brain.mutate(this.brainConfig.mutationRate);
             smartCars.push(car);
