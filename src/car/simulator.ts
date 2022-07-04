@@ -32,7 +32,7 @@ export class Simulator {
         this.player = "network";
         this.loss = {
             loss: 0,
-            count: 0,
+            count: 1,
         }
         if (player) {
             this.player = "player";
@@ -71,14 +71,18 @@ export class Simulator {
             const target = car.controls.getOutputs();
 
             // find average loss
-            this.loss.loss += car.brain.lossFunction(target, output);
+            const loss = car.brain.lossFunction(target, output);
+            console.log(loss)
+            this.loss.loss += loss
             this.loss.count++;
 
-            // derivative of loss function (how much gradient needs to be adjusted)
-            const d = car.brain.deriveLoss(target, output);
+            if (loss < 0.1) {
+                // derivative of loss function (how much gradient needs to be adjusted)
+                const d = car.brain.deriveLoss(target, output);
 
-            // backward pass to update weights
-            car.brain.backward(d);
+                // backward pass to update weights
+                car.brain.backward(d);
+            }
         } else {
             this.smartCars.forEach(car => {
                 const action = car.lazyAction(this.road.borders, this.traffic, true);

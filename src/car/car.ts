@@ -117,7 +117,7 @@ export class Car {
 	}
 
 	getSensorData(borders: Point[][], traffic: Car[]) {
-		let sensorOffsets: number[] = [(this.y / 250), this.angle];
+		let sensorOffsets: number[] = [(this.y / 250), this.angle, (this.speed / this.maxSpeed)];
 		// update each sensor
 		this.sensor.update(borders, traffic);
 		const offsets = this.sensor.getSensorOffsets();
@@ -177,7 +177,7 @@ export class Car {
 		if (!this.useBrain) return null;
 		const sData = this.getSensorData(borders, traffic);
 		const action = this.brain.forward(sData, backprop);
-		return this.brain.makeChoice(action);
+		return this.brain.makeChoice(action, true);
 	}
 
 	recordPlay(borders: Point[][], traffic: Car[]) {

@@ -38,7 +38,7 @@ export class Network {
         this.deriveLoss = (targets, outputs) => {
             const derivatives = [];
             for (let i = 0; i < outputs.length; i++) {
-                derivatives[i] = (targets[i] - outputs[i]) * 2;
+                derivatives[i] = (outputs[i] - targets[i]) * 2;
             }
             return derivatives;
         }
