@@ -10,12 +10,13 @@ const NavComponent = (props: {
     model: Car;
     sim: Simulator
     state: string;
+    activeModel: string;
     save: () => void;
     destroy: () => void;
     reset: () => void;
     toggleView: () => void;
+    setActiveModel: (model: string) => void;
 }) => {
-    const [activeModel, setActiveModel] = useState(props.modelConfig.name);
     const [speed, setSpeed] = useState(0);
     const [distance, setDistance] = useState(0);
     const [activeBrains, setActiveBrains] = useState(props.sim.activeBrains);
@@ -25,11 +26,10 @@ const NavComponent = (props: {
     const handleShow = () => setShow(true);
 
     useEffect(() => {
-        setActiveModel(props.modelConfig.name);
         setSpeed(parseFloat(props.model.speed.toFixed(1)));
         setDistance(parseFloat(props.model.distance.toFixed(0)));
         setActiveBrains(props.sim.activeBrains);
-    }, [props.model.speed, props.model.distance, props.modelConfig.name, props.sim.activeBrains]);
+    }, [props.model.speed, props.model.distance, props.sim.activeBrains]);
 
     return (
         <Navbar bg="light" className="px-3">
@@ -46,7 +46,7 @@ const NavComponent = (props: {
                     className="px-2">alive = {activeBrains}</Navbar.Text>
                 <Navbar.Text
                     id="activeModel"
-                    className="px-2">model = {activeModel}</Navbar.Text>
+                    className="px-2">model = {props.activeModel}</Navbar.Text>
                 <Button
                     id="saveBtn"
                     onClick={props.save}
@@ -75,6 +75,7 @@ const NavComponent = (props: {
                 <ConfigForm
                     show={show}
                     handleHide={handleClose}
+                    setActiveModel={props.setActiveModel}
                     modelConfig={props.modelConfig} />
             </Nav>
         </Navbar>

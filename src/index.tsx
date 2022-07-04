@@ -27,13 +27,16 @@ let breakLoop = false;
 let episodeCounter = 0;
 
 // init default config
-let modelConfig = new ModelConfig("trainBrain", "fsd");
+let activeModel = "trainBrain";
+const setActiveModel = (model: string) => activeModel = model;
+let activeAlias = "fsd";
+let modelConfig = new ModelConfig(activeModel, activeAlias);
 modelConfig.load();
 
 // Prepare for training. This is called when the user submits the train config form.
 function beginTrain() {
 	const generations = modelConfig.generations
-	modelConfig = new ModelConfig("trainBrain", "fsd");
+	modelConfig = new ModelConfig(activeModel, activeAlias);
 	modelConfig.load();
 
 	numEpisodes = modelConfig.numEpisodes;
@@ -131,6 +134,8 @@ function animate(time: number = 0) {
 				reset={reset}
 				toggleView={toggleView}
 				animTime={time}
+				activeModel={activeModel}
+				setActiveModel={setActiveModel}
 				episodeCounter={episodeCounter}
 				modelConfig={modelConfig}
 				sim={sim}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
+import CarConfig from "./carConfig";
 import SimConfig from "./simConfig";
 import NetworkConfig from "./modelConfig";
 import { ModelConfig } from "../../network/config";
@@ -8,6 +9,7 @@ import { Button, Form, Modal } from "react-bootstrap";
 const ConfigForm = (props: {
     show: boolean;
     handleHide: () => void;
+    setActiveModel: (model: string) => void;
     modelConfig: ModelConfig;
 }) => {
     const [modelConfig, setModelConfig] = useState(props.modelConfig);
@@ -19,6 +21,8 @@ const ConfigForm = (props: {
     const defaultValues = {
         numEpisodes: 1000,
         numSteps: 2000,
+        activeModel: modelConfig.name,
+        alias: modelConfig.alias,
         epsilonDecay: modelConfig.epsilonDecay,
         mutationRate: modelConfig.mutationRate,
         learningRate: modelConfig.lr,
@@ -31,11 +35,13 @@ const ConfigForm = (props: {
     const onSubmit = (data: any) => {
         data = cleanData(data);
         console.log(data);
-        const config = new ModelConfig("trainBrain", "fsd");
+        const config = new ModelConfig(data.activeModel, data.alias);
         config.load();
-
+        props.setActiveModel(data.activeModel);
         config.numEpisodes = data.numEpisodes;
         config.numSteps = data.numSteps;
+        config.name = data.activeModel;
+        config.alias = data.alias;
         config.epsilonDecay = data.epsilonDecay;
         config.mutationRate = data.mutationRate;
         config.lr = data.learningRate;
@@ -57,6 +63,8 @@ const ConfigForm = (props: {
         return {
             numEpisodes: parseFloat(data.numEpisodes),
             numSteps: parseFloat(data.numSteps),
+            activeModel: data.activeModel.trim(),
+            alias: data.alias.trim(),
             epsilonDecay: parseFloat(data.epsilonDecay),
             mutationRate: parseFloat(data.mutationRate),
             learningRate: parseFloat(data.learningRate),
@@ -64,6 +72,11 @@ const ConfigForm = (props: {
             actionCount: parseInt(data.actionCount),
             layers: layers
         }
+    }
+
+    const submit = () => {
+        methods.handleSubmit(onSubmit);
+        props.handleHide();
     }
 
     return (
@@ -78,6 +91,8 @@ const ConfigForm = (props: {
             <Modal.Body>
                 <FormProvider {...methods}>
                     <Form>
+                        <h4 className="my-3">Model</h4>
+                        <CarConfig />
                         <h4 className="my-3">Simulator</h4>
                         <SimConfig />
                         <h4 className="my-3">Network</h4>
@@ -89,7 +104,7 @@ const ConfigForm = (props: {
                 <Button variant="secondary" onClick={props.handleHide}>
                     Close
                 </Button>
-                <Button variant="primary" onClick={methods.handleSubmit(onSubmit)}>
+                <Button variant="primary" onClick={submit}>
                     Save Changes
                 </Button>
             </Modal.Footer>

@@ -24,6 +24,8 @@ const App = (props: {
 	bestCar: Car;
 	episodeCounter: number;
 	animTime: number;
+	activeModel: string;
+	setActiveModel: (model: string) => void;
 }) => {
 	const [state, setState] = useState(states.welcome);
 
@@ -51,6 +53,8 @@ const App = (props: {
 		model={props.bestCar}
 		sim={props.sim}
 		state={state}
+		activeModel={props.activeModel}
+		setActiveModel={props.setActiveModel}
 		save={saveModel}
 		destroy={destroyModel}
 		reset={props.reset}
