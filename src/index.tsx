@@ -15,7 +15,7 @@ const reactRoot = ReactDOM.createRoot(document.getElementById("root")!);
 // simulator config
 let sim: Simulator
 const trafficCount = 50;
-const brainCount = 100;
+const brainCount = 500;
 let smartTraffic = false;
 //let teach = false;
 

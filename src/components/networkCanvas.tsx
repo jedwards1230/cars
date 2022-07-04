@@ -18,9 +18,9 @@ const NetworkCanvas = (props: { bestCar: Car; animTime: number; reset: () => voi
         const levelWidth = width / network.layers.length;
 
         const last = network.layers.length - 1;
-        let actionValues = network.layers[last].outputs;
-        for (let j = 0; j < actionValues.length; j++) {
-            actionValues[j] = actionValues[j] > 0.5 ? 1 : 0;
+        const actionValues = network.layers[last].outputs;
+        for (let i = 0; i < actionValues.length; i++) {
+            actionValues[i] = actionValues[i] > 0.5 ? 1 : 0;
         }
         network.layers[last].outputs = actionValues;
 

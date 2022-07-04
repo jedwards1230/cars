@@ -176,7 +176,6 @@ export class Car {
 	lazyAction(borders: Point[][], traffic: Car[], backprop = false): null | number[] {
 		if (!this.useBrain) return null;
 		const sData = this.getSensorData(borders, traffic);
-		console.log(sData);
 		const action = this.brain.forward(sData, backprop);
 		return this.brain.makeChoice(action);
 	}
@@ -244,6 +243,7 @@ export class Car {
 				this.speed += this.acceleration;
 			} else if (this.controls.backward) {
 				this.speed -= (this.acceleration * 3) / 2;
+				if (this.speed < 0) this.speed = 0;
 			}
 
 			// check direction
@@ -285,7 +285,7 @@ export class Car {
 	setColor() {
 		switch (this.controller) {
 			case "network":
-				this.color = "rgba(255, 0, 0, 0.5)";
+				this.color = "rgba(200, 50, 50, 0.5)";
 				break;
 			case "player":
 				this.color = "rgba(0, 255, 0, 1)";
@@ -299,7 +299,7 @@ export class Car {
 
 	draw(ctx: CanvasRenderingContext2D, bestCar = false) {
         if (this.damaged) {
-            ctx.fillStyle = "gray";
+            ctx.fillStyle = "rgba(145, 145, 145, 0.5)";
         } else if (bestCar) {
             ctx.fillStyle = "rgba(255, 0, 0, 1)";
         } else {

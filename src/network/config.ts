@@ -96,7 +96,7 @@ export type LayerConfig = {
 	weights?: number[][];
 }
 
-const defaultTrainBrain = {
+/* const defaultTrainBrain = {
 	name: "trainBrain",
 	alias: "fsd",
 	lr: 0.001,
@@ -290,26 +290,26 @@ const defaultTrainBrain = {
 		},
 	],
 	generations: [],
-};
+}; */
 
-/* const defaultTrainBrain1 = {
+const defaultTrainBrain = {
 	name: "trainBrain",
 	alias: "fsd",
 	lr: 0.001,
 	epsilonDecay: 0.9,
 	mutationRate: 0.25,
-	sensorCount: 5,
+	sensorCount: 7,
 	actionCount: 4,
 	layers: [
 		{
 			id: 0,
 			activation: "Tanh",
-			inputs: 5,
+			inputs: 9,
 			outputs: 8,
 		},
 		{
 			id: 1,
-			activation: "LeakyRelu",
+			activation: "Tanh",
 			inputs: 8,
 			outputs: 5,
 		},
@@ -321,7 +321,7 @@ const defaultTrainBrain = {
 		},
 	],
 	generations: [],
-}; */
+};
 
 const defaultForwardBrain = {
 	name: "trafficForward",

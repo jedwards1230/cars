@@ -36,7 +36,7 @@ const App = (props: {
 
 	const saveModel = () => {
 		props.bestCar.saveModelConfig();
-		props.reset();
+		//props.reset();
 	}
 
 	const nav = <NavComponent

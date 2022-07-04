@@ -73,8 +73,6 @@ export class Simulator {
             // find average loss
             this.loss.loss += car.brain.lossFunction(target, output);
             this.loss.count++;
-            console.log(this.loss.loss / this.loss.count);
-            console.log(target, output);
 
             // derivative of loss function (how much gradient needs to be adjusted)
             const d = car.brain.deriveLoss(target, output);

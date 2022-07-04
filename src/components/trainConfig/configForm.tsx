@@ -37,12 +37,12 @@ const ConfigForm = (props: {
     const onSubmit = (data: any) => {
         data = cleanData(data);
         console.log(data);
-        const config = new AppConfig(data.activeModel, data.alias);
+        const config = new AppConfig(data.name, data.alias);
         config.load();
-        props.setActiveModel(data.activeModel);
+        props.setActiveModel(data.name);
         config.numEpisodes = data.numEpisodes;
         config.numSteps = data.numSteps;
-        config.name = data.activeModel;
+        config.name = data.name;
         config.alias = data.alias;
         config.epsilonDecay = data.epsilonDecay;
         config.mutationRate = data.mutationRate;
@@ -51,6 +51,8 @@ const ConfigForm = (props: {
         config.actionCount = data.actionCount;
         config.layers = data.layers;
         config.save();
+        setModelConfig(config);
+        props.handleHide();
     }
 
     /** clean data to match types of ModelConfig */
@@ -78,11 +80,6 @@ const ConfigForm = (props: {
         }
     }
 
-    const submit = () => {
-        methods.handleSubmit(onSubmit);
-        props.handleHide();
-    }
-
     return (
         <Modal
             show={props.show}
@@ -108,7 +105,7 @@ const ConfigForm = (props: {
                 <Button variant="secondary" onClick={props.handleHide}>
                     Close
                 </Button>
-                <Button variant="primary" onClick={submit}>
+                <Button variant="primary" onClick={methods.handleSubmit(onSubmit)}>
                     Save Changes
                 </Button>
             </Modal.Footer>
