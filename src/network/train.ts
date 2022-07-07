@@ -1,4 +1,4 @@
-import { Car } from "../car/car";
+import { SmartCar } from "../car/car";
 import { Simulator } from "../car/simulator";
 import { Network } from "./network";
 
@@ -21,7 +21,7 @@ export type TrainInfo = {
  * 6. Update Car with action
  * 7. Backprop network with reward
  */
-export async function SGD(model: Car, sim: Simulator, maxTimeSteps: number): Promise<TrainInfo> {
+export async function SGD(model: SmartCar, sim: Simulator, maxTimeSteps: number): Promise<TrainInfo> {
     let speeds = [];
     let rLoss = 1;
     let count = 0;
@@ -88,7 +88,7 @@ export async function SGD(model: Car, sim: Simulator, maxTimeSteps: number): Pro
     };
 }
 
-export async function batchTrain(model: Car, sim: Simulator, maxTimeSteps: number): Promise<TrainInfo> {
+export async function batchTrain(model: SmartCar, sim: Simulator, maxTimeSteps: number): Promise<TrainInfo> {
     let speeds = [];
     let rLoss = 0;
     let count = 0;

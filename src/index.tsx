@@ -75,7 +75,7 @@ async function episodeLoop() {
 
 	// save max distance so we can mark model improvement
 	// the main goal is distance without crashing
-	const distanceMap = model.modelConfig.generations.map(
+	const distanceMap = model.config.generations.map(
 		(e: { distance: number }) => e.distance
 	);
 	const distanceMax = Math.max(...distanceMap, 1000);

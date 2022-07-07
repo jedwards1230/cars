@@ -1,13 +1,13 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Layer } from "../network/layers"
 import { Network } from "../network/network"
-import { Car } from "../car/car"
+import { SmartCar } from "../car/car"
 import {
     getRGBA,
     lerp
 } from "../utils";
 
-const NetworkCanvas = (props: { bestCar: Car; animTime: number; reset: () => void }) => {
+const NetworkCanvas = (props: { bestCar: SmartCar; animTime: number; reset: () => void }) => {
     const drawNetwork = (network: Network) => {
         const canvas = canvasRef.current! as HTMLCanvasElement;
         const ctx = canvas.getContext("2d")! as CanvasRenderingContext2D;

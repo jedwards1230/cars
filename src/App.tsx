@@ -5,7 +5,7 @@ import WelcomeView from "./components/welcome";
 import VisualView from "./components/visualView";
 import { AppConfig } from "./network/config";
 import { Simulator } from "./car/simulator";
-import { Car } from "./car/car";
+import { SmartCar } from "./car/car";
 
 export const states = {
 	welcome: "welcome",
@@ -21,7 +21,7 @@ const App = (props: {
 	startPlay: () => void;
 	modelConfig: AppConfig;
 	sim: Simulator;
-	bestCar: Car;
+	bestCar: SmartCar;
 	episodeCounter: number;
 	animTime: number;
 	activeModel: string;

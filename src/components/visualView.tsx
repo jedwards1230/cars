@@ -1,12 +1,12 @@
 import React from "react";
 import NetworkCanvas from "./networkCanvas";
-import { Car } from "../car/car";
+import { SmartCar } from "../car/car";
 import RoadCanvas from "./roadCanvas";
 import { Simulator } from "../car/simulator";
 
 const VisualView = (props: {
   sim: Simulator;
-  bestCar: Car;
+  bestCar: SmartCar;
   animTime: number;
   reset: () => void;
 }) => {

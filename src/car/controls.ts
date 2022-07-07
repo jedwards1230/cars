@@ -4,17 +4,25 @@ export class Controls {
     left: boolean;
     right: boolean;
 
-    constructor(controller: string) {
+    constructor(playable: boolean) {
         this.forward = true;
         this.backward = false;
         this.left = false;
         this.right = false;
 
-        if (controller === "player") {
+        if (playable) {
             this.#addKeyboardListeners();
         } else {
             this.forward = true;
         }
+    }
+
+	/** Update car controls */
+    update(input: number[]) {
+		this.forward = input[0] > 0.5 ? true : false;
+		this.backward = input[1] > 0.5 ? true : false;
+		this.left = input[2] > 0.5 ? true : false;
+		this.right = input[3] > 0.5 ? true : false;
     }
 
     getOutputs(): number[] {

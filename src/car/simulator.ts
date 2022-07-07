@@ -1,6 +1,6 @@
 import { Road } from "./road";
 import { getRandomInt } from "../utils";
-import { Car } from "./car";
+import { Car, DumbCar, SmartCar } from "./car";
 import { AppConfig } from "../network/config";
 
 type Loss = {
@@ -21,7 +21,7 @@ export class Simulator {
     road: Road;
     startLane: number;
     traffic!: Car[];
-    smartCars!: Car[];
+    smartCars!: SmartCar[];
     loss: Loss;
 
     constructor(trafficCount: number, brainCount: number, smartTraffic = false, player = false) {
@@ -93,18 +93,24 @@ export class Simulator {
 
     #updateTraffic() {
         this.traffic.forEach((car) => {
-            const action = this.smartTraffic ? car.lazyAction(this.road.borders, this.traffic) : null;
-            car.update(this.road.borders, this.traffic, action);
+            if (car instanceof SmartCar) {
+                const action = car.lazyAction(this.road.borders, this.traffic)
+                car.update(this.road.borders, this.traffic, action);
+            } else {
+                car.update(this.road.borders, this.traffic);
+            }
         });
     }
 
     #generateBrains() {
-        const smartCars: Car[] = [];
+        const smartCars: SmartCar[] = [];
         for (let i = 0; i < this.brainCount; i++) {
+            const playable = this.player === "player" ? true : false;
             const y = this.road.getLaneCenter(this.startLane);
-            const car = new Car(i, 0, y, this.driverSpeed + 1, this.player);
-            car.loadBrainConfig(this.brainConfig);
+
+            const car = new SmartCar(i, 0, y, this.driverSpeed + 1, this.brainConfig, playable);
             if (i !== 0) car.brain.mutate(this.brainConfig.mutationRate);
+
             smartCars.push(car);
         }
         this.smartCars = smartCars;
@@ -129,17 +135,16 @@ export class Simulator {
 
             let car;
             if (this.smartTraffic) {
-                car = new Car(idx, x, y, getRandomInt(2, 3), "network");
-                car.loadBrainConfig(this.trafficConfig);
+                car = new SmartCar(i, x, y, this.driverSpeed + 1, this.trafficConfig);
             } else {
-                car = new Car(idx, x, y, getRandomInt(2, 2), "dummy");
+                car = new DumbCar(idx, x, y);
             }
 
             this.traffic.push(car);
         }
     }
 
-    getBestCar(): Car {
+    getBestCar(): SmartCar {
         // find car that is undamaged and has greated x value
         const bestCar = this.smartCars.reduce((prev, curr) => {
             if (!curr.damaged && curr.x > prev.x) {

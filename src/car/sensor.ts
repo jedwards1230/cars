@@ -3,7 +3,7 @@ import {
     lerp,
     Point
 } from "../utils";
-import { Car } from "./car";
+import { Car, DumbCar, SmartCar } from "./car";
 
 type SensorReading = {
     x: number;
@@ -12,7 +12,7 @@ type SensorReading = {
 };
 
 export class Sensor {
-    car: Car;
+    car: SmartCar;
     rayCount: number;
     rayLength: number;
     raySpread: number;
@@ -20,7 +20,7 @@ export class Sensor {
     rays: Point[][];
     readings: SensorReading[];
 
-    constructor(car: Car, rays: number, direction: string) {
+    constructor(car: SmartCar, rays: number, direction: string) {
         this.car = car;
         this.rayCount = rays;
         this.rayLength = 200;
@@ -70,8 +70,9 @@ export class Sensor {
 
         // check overlap with other traffic
         for (let i = 0; i < traffic.length; i++) {
-            const poly = traffic[i].polygon;
-            if (this.car.id !== traffic[i].id && traffic[i].model !== "fsd") {
+            const car = traffic[i];
+            const poly = car.polygon;
+            if (this.car.id !== car.id && car instanceof DumbCar) {
                 for (let j = 0; j < poly.length; j++) {
                     const value = getIntersection(
                         ray[0],
