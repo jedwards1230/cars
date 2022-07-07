@@ -29,6 +29,8 @@ export class AppConfig {
 		this.numSteps = 1000;
 		this.smartCarCount = 1;
 		this.trafficCount = 30;
+
+		this.load();
 	}
 
 	/** Save config to localStorage */

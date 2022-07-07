@@ -12,7 +12,7 @@ export class Simulator {
     trafficCount: number;
     brainCount: number;
     smartTraffic: boolean;
-    player: string;
+    playable: boolean;
     activeBrains: number;
     trafficConfig: AppConfig;
     brainConfig: AppConfig;
@@ -24,26 +24,21 @@ export class Simulator {
     smartCars!: SmartCar[];
     loss: Loss;
 
-    constructor(trafficCount: number, brainCount: number, smartTraffic = false, player = false) {
+    constructor(trafficCount: number, brainCount: number, smartTraffic = false, playable = false) {
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
         this.activeBrains = brainCount;
         this.smartTraffic = smartTraffic;
-        this.player = "network";
+        this.playable = playable;
+        if (playable) this.brainCount = 1;
+
         this.loss = {
             loss: 0,
             count: 1,
         }
-        if (player) {
-            this.player = "player";
-            this.brainCount = 1;
-        }
 
         this.trafficConfig = new AppConfig("trafficForward", "forward");
-        this.trafficConfig.load();
-
         this.brainConfig = new AppConfig("trainBrain", "fsd");
-        this.brainConfig.load();
 
         this.driverSpeed = 3;
         this.laneCount = 3;
@@ -62,7 +57,7 @@ export class Simulator {
     }
 
     #updateSmartCars() {
-        if (this.player === "player") {
+        if (this.playable) {
             const car = this.smartCars[0];
             if (car.damaged) return
             const sData = car.getSensorData(this.road.borders, this.traffic);
@@ -105,10 +100,9 @@ export class Simulator {
     #generateBrains() {
         const smartCars: SmartCar[] = [];
         for (let i = 0; i < this.brainCount; i++) {
-            const playable = this.player === "player" ? true : false;
             const y = this.road.getLaneCenter(this.startLane);
 
-            const car = new SmartCar(i, 0, y, this.driverSpeed + 1, this.brainConfig, playable);
+            const car = new SmartCar(i, 0, y, this.driverSpeed + 1, this.brainConfig, this.playable);
             if (i !== 0) car.brain.mutate(this.brainConfig.mutationRate);
 
             smartCars.push(car);

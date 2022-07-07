@@ -31,7 +31,6 @@ let activeModel = "trainBrain";
 const setActiveModel = (model: string) => activeModel = model;
 let activeAlias = "fsd";
 let modelConfig = new AppConfig(activeModel, activeAlias);
-modelConfig.load();
 
 const startPlay = () => {
 	sim = new Simulator(trafficCount, brainCount, smartTraffic, true);
@@ -41,7 +40,6 @@ const startPlay = () => {
 function beginTrain() {
 	const generations = modelConfig.generations
 	modelConfig = new AppConfig(activeModel, activeAlias);
-	modelConfig.load();
 
 	numEpisodes = modelConfig.numEpisodes;
 	numSteps = modelConfig.numSteps;

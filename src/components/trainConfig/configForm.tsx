@@ -38,7 +38,6 @@ const ConfigForm = (props: {
         data = cleanData(data);
         console.log(data);
         const config = new AppConfig(data.name, data.alias);
-        config.load();
         props.setActiveModel(data.name);
         config.numEpisodes = data.numEpisodes;
         config.numSteps = data.numSteps;
