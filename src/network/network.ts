@@ -73,10 +73,6 @@ export class Network {
         return outputValues;
     }
 
-    recordPlay(inputs: number[], outputs: number[]) {
-        this.memory.push({inputs, outputs});
-    }
-
     saveLayers() {
         const layers: LayerConfig[] = [];
         this.layers.forEach((level, index) => {

@@ -262,12 +262,6 @@ export class SmartCar extends Car {
 		return reward;
 	}
 
-	recordPlay(borders: Point[][], traffic: Car[]) {
-		this.sensorOffsets = this.getSensorData(borders, traffic);
-		const outputs = this.controls.getOutputs();
-		this.brain.recordPlay(this.sensorOffsets, outputs);
-	}
-
 	saveModelConfig(info?: TrainInfo) {
 		if (info) this.config.generations.push(info);
 		this.config.layers = this.brain.saveLayers();
