@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Simulator } from "../car/simulator";
 
 const RoadCanvas = (props: {
-    sim: Simulator;
+    sim: Simulator
 }) => {
     const canvasRef = useRef(null)
     const [sim, setSim] = useState(props.sim);

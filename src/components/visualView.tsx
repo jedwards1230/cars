@@ -1,25 +1,20 @@
 import React from "react";
-import NetworkCanvas from "./networkCanvas";
-import { SmartCar } from "../car/car";
-import RoadCanvas from "./roadCanvas";
 import { Simulator } from "../car/simulator";
+import NetworkCanvas from "./networkCanvas";
+import RoadCanvas from "./roadCanvas";
 
 const VisualView = (props: {
-  sim: Simulator;
-  bestCar: SmartCar;
-  animTime: number;
-  reset: () => void;
+	sim: Simulator
 }) => {
-  return (
-    <div>
-      <RoadCanvas
-        sim={props.sim} />
-      <NetworkCanvas
-        bestCar={props.bestCar}
-        animTime={props.animTime}
-        reset={props.reset} />
-    </div>
-  )
+
+	return (
+		<>
+			<RoadCanvas 
+				sim={props.sim} />
+			<NetworkCanvas
+				network={props.sim.getBestCar().brain} />
+		</>
+	)
 }
 
 export default VisualView;

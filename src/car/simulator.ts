@@ -56,6 +56,10 @@ export class Simulator {
         this.activeBrains = this.smartCars.filter(car => !car.damaged).length;
     }
 
+    getLoss(): number {
+        return this.loss.loss / this.loss.count;
+    }
+
     #updateSmartCars() {
         if (this.playable) {
             const car = this.smartCars[0];

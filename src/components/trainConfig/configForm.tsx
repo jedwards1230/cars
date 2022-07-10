@@ -1,44 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import CarConfig from "./carConfig";
 import SimConfig from "./simConfig";
 import NetworkConfig from "./modelConfig";
 import { AppConfig } from "../../network/config";
 import { Button, Form, Modal } from "react-bootstrap";
+import { AppContext } from "../../App";
 
 const ConfigForm = (props: {
     show: boolean;
     handleHide: () => void;
-    setActiveModel: (model: string) => void;
-    modelConfig: AppConfig;
 }) => {
-    const [modelConfig, setModelConfig] = useState(props.modelConfig);
-
-    useEffect(() => {
-        setModelConfig(props.modelConfig);
-    }, [props.modelConfig]);
+    const appContext = useContext(AppContext);
+    const modelConfig = appContext.activeConfig!;
 
     const defaultValues = {
         numEpisodes: 1000,
         numSteps: 2000,
         smartCarCount: 1,
         trafficCount: 50,
-        activeModel: modelConfig.name,
-        alias: modelConfig.alias,
-        epsilonDecay: modelConfig.epsilonDecay,
-        mutationRate: modelConfig.mutationRate,
-        learningRate: modelConfig.lr,
-        sensorCount: modelConfig.sensorCount,
-        actionCount: modelConfig.actionCount,
-        layers: modelConfig.layers
+        activeModel: modelConfig.current.name,
+        alias: modelConfig.current.alias,
+        epsilonDecay: modelConfig.current.epsilonDecay,
+        mutationRate: modelConfig.current.mutationRate,
+        learningRate: modelConfig.current.lr,
+        sensorCount: modelConfig.current.sensorCount,
+        actionCount: modelConfig.current.actionCount,
+        layers: modelConfig.current.layers
     }
 
     const methods = useForm({defaultValues})
     const onSubmit = (data: any) => {
         data = cleanData(data);
         console.log(data);
+
+        const activeModel = appContext.activeModel!;
+        activeModel.current = data.name;
+
         const config = new AppConfig(data.name, data.alias);
-        props.setActiveModel(data.name);
         config.numEpisodes = data.numEpisodes;
         config.numSteps = data.numSteps;
         config.name = data.name;
@@ -50,7 +49,8 @@ const ConfigForm = (props: {
         config.actionCount = data.actionCount;
         config.layers = data.layers;
         config.save();
-        setModelConfig(config);
+
+        modelConfig.current = config;
         props.handleHide();
     }
 

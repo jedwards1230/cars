@@ -1,13 +1,15 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useContext, useState } from "react";
 import { Layer } from "../network/layers"
 import { Network } from "../network/network"
-import { SmartCar } from "../car/car"
 import {
     getRGBA,
     lerp
 } from "../utils";
+import { AppContext } from "../App";
 
-const NetworkCanvas = (props: { bestCar: SmartCar; animTime: number; reset: () => void }) => {
+const NetworkCanvas = (props: {
+    network: Network;
+}) => {
     const drawNetwork = (network: Network) => {
         const canvas = canvasRef.current! as HTMLCanvasElement;
         const ctx = canvas.getContext("2d")! as CanvasRenderingContext2D;
@@ -136,22 +138,26 @@ const NetworkCanvas = (props: { bestCar: SmartCar; animTime: number; reset: () =
         );
     }
     
-    const canvasRef = useRef(null)
-    const [brain, setBrain] = useState(props.bestCar.brain);
+    const appContext = useContext(AppContext);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const animTime = appContext.animTime!;
 
+    const [brain, setBrain] = useState<Network>(props.network);
+    
     useEffect(() => {
         const canvas = canvasRef.current! as HTMLCanvasElement;
         const ctx = canvas.getContext("2d")! as CanvasRenderingContext2D;
 
         canvas.width = window.innerWidth;
-        ctx.lineDashOffset = -props.animTime / 40;
+        ctx.lineDashOffset = -animTime.current / 40;
 
         drawNetwork(brain)
     })
 
     useEffect(() => {
-        setBrain(props.bestCar.brain);
-    }, [props.bestCar.brain])
+        setBrain(props.network);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.network]);
 
     return <canvas ref={canvasRef} id="networkCanvas" width={window.innerWidth} height="450" />
 }

@@ -183,3 +183,73 @@ export async function batchTrain(model: SmartCar, sim: Simulator, maxTimeSteps: 
         model: model.brain,
     };
 }
+
+
+    // Prepare for training. This is called when the user submits the train config form.
+	/* const beginTrain = () => {
+		const generations = activeConfig.generations
+		setActiveConfig(new AppConfig(activeModel, activeAlias));
+
+		setNumEpisodes(activeConfig.numEpisodes);
+		setNumSteps(activeConfig.numSteps);
+		setEpisodeCounter(0);
+		activeConfig.generations = generations;
+		activeConfig.save();
+		console.log("Model config inputs: ", activeConfig);
+
+		// beging training loop
+		setBreakLoop(false);
+		episodeLoop();
+	} */
+
+	/** Run Training Loop
+		 * 1. Start with fresh simulator and model
+		 * 2. Mutate brain weights slightly
+		 * 3. Train model for a n steps
+		 * 4. Save the model as a new generation if it is an improvement
+		 * 5. Reset simulator and model
+		 * 6. Repeat until all episodes are done
+		 */
+	/* const episodeLoop = async () => {
+		// reset simulator
+		setSim(new Simulator(trafficCount, 1, smartTraffic));
+
+		const model = sim.smartCars[0];
+
+		// collect episode info for training run
+		//const info = await SGD(model, sim, numSteps);
+		const info = await SGD(model, sim, numSteps);
+
+		// save max distance so we can mark model improvement
+		// the main goal is distance without crashing
+		const distanceMap = model.config.generations.map(
+			(e: { distance: number }) => e.distance
+		);
+		const distanceMax = Math.max(...distanceMap, 1000);
+
+		// good entries are models that are an improvement in the right direction.
+		// these get saved for future generations to evolve from.
+		const checkGoodEntry = (info: any) => {
+			if (info.speed < 0) return false;
+			if (info.distance > distanceMax * 0.9) return true;
+			return false;
+		};
+
+		// save only if model is labelled an improvement
+		if (checkGoodEntry(info)) {
+			model.saveModelConfig(info);
+		}
+
+		// break loop if we've reached the max number of episodes
+		setEpisodeCounter(episodeCounter + 1);
+		if (episodeCounter >= numEpisodes || episodeCounter < 0) setBreakLoop(true);
+
+		// if we're not breaking loop, continue training
+		if (breakLoop) {
+			console.log("training complete after ", episodeCounter, " episodes");
+			setEpisodeCounter(0);
+			reset(false);
+		} else {
+			setTimeout(episodeLoop, 10);
+		}
+	} */

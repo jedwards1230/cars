@@ -1,11 +1,14 @@
-import React, { useState } from "react";
-import './App.css';
-import NavComponent from "./components/nav";
-import WelcomeView from "./components/welcome";
-import VisualView from "./components/visualView";
+import React, { createContext, MutableRefObject, useRef } from "react";
 import { AppConfig } from "./network/config";
 import { Simulator } from "./car/simulator";
-import { SmartCar } from "./car/car";
+import {
+	BrowserRouter,
+	Routes,
+	Route,
+} from "react-router-dom";
+import Home from "./pages/home";
+import Genetic from "./pages/genetic";
+import Teach from "./pages/teach";
 
 export const states = {
 	welcome: "welcome",
@@ -14,63 +17,58 @@ export const states = {
 	config: "config"
 }
 
-const App = (props: {
-	beginTrain: () => void;
-	reset: () => void;
-	toggleView: () => void;
-	startPlay: () => void;
-	modelConfig: AppConfig;
-	sim: Simulator;
-	bestCar: SmartCar;
-	episodeCounter: number;
-	animTime: number;
-	activeModel: string;
-	setActiveModel: (model: string) => void;
-}) => {
-	const [state, setState] = useState(states.visual);
+export type AppContextConfig = {
+	activeAlias?: MutableRefObject<string>;
+	activeModel?: MutableRefObject<string>;
+	animFrame?: MutableRefObject<number>
+	animTime?: MutableRefObject<number>
+	sim?: MutableRefObject<Simulator>
+	activeConfig?: MutableRefObject<AppConfig>
+	simConfig?: {
+		trafficCount: MutableRefObject<number>
+		brainCount: MutableRefObject<number>
+		smartTraffic: MutableRefObject<boolean>
+	}
+}
 
-	const destroyModel = () => {
-		props.modelConfig.destroy();
-		props.reset();
+export const AppContext = createContext<AppContextConfig>({});
+
+const App = () => {
+	const trafficCount = useRef(50);
+	const brainCount = useRef(400);
+	const smartTraffic = useRef(false);
+
+	const activeAlias = useRef<string>("fsd");
+	const activeModel = useRef<string>("trainBrain");
+
+	const sim = useRef<Simulator>(new Simulator(trafficCount.current, brainCount.current, smartTraffic.current));
+
+	const defaultValues = {
+		sim: sim,
+		activeAlias: activeAlias,
+		activeModel: activeModel,
+		activeConfig: useRef<AppConfig>(new AppConfig(activeModel.current, activeAlias.current)),
+		animFrame: useRef<number>(0),
+		animTime: useRef<number>(0),
+		simConfig: {
+			trafficCount: trafficCount,
+			brainCount: brainCount,
+			smartTraffic: smartTraffic
+		},
 	}
 
-	const saveModel = () => {
-		props.bestCar.saveModelConfig();
-		//props.reset();
-	}
+	return (
+		<AppContext.Provider value={defaultValues} >
+			<BrowserRouter>
+				<Routes>
+					<Route path="/cars/" element={<Home />} />
+					<Route path="/cars/genetic" element={<Genetic />} />
+					<Route path="/cars/teach" element={<Teach />} />
+				</Routes>
+			</BrowserRouter>
+		</AppContext.Provider >
 
-	const nav = <NavComponent
-		modelConfig={props.modelConfig}
-		model={props.bestCar}
-		sim={props.sim}
-		state={state}
-		activeModel={props.activeModel}
-		setActiveModel={props.setActiveModel}
-		save={saveModel}
-		destroy={destroyModel}
-		reset={props.reset}
-		startPlay={props.startPlay} />
-
-	switch (state) {
-		case states.welcome:
-			return (
-				<WelcomeView
-					setState={setState} />
-			)
-		case states.visual:
-			return (
-				<>
-					{nav}
-					<VisualView
-						animTime={props.animTime}
-						sim={props.sim}
-						bestCar={props.bestCar}
-						reset={props.reset} />
-				</>
-			)
-		default:
-			return <div>Error</div>
-	}
+	)
 };
 
 export default App;
