@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../components/navbar";
 import VisualView from "../components/visualView";
 import { Simulator } from "../car/simulator";
-import { Button, Navbar } from "react-bootstrap";
+import { Navbar } from "react-bootstrap";
 import { AppContext } from "../context";
 
 const Teach = (props: any) => {
@@ -64,7 +64,7 @@ const Teach = (props: any) => {
 
 	return (
 		<>
-			<NavComponent run={run} >
+			<NavComponent run={run} saveModel={saveModel} destroyModel={destroyModel} >
 				{stats.map((stat, i) => {
 					return (
 						<Navbar.Text
@@ -74,18 +74,6 @@ const Teach = (props: any) => {
 					)
 				})}
 				{/* //todo: better way to send buttons to navbar */}
-				<Button
-					key={"saveBtn"}
-					id="saveBtn"
-					onClick={saveModel}
-					title={"Save Model"}
-					variant="outline-warning">💾</Button>
-				<Button
-					key={"destroyBtn"}
-					id="destroyBtn"
-					onClick={destroyModel}
-					title={"Destroy Model"}
-					variant="outline-danger">🗑️</Button>
 			</NavComponent>
 			<VisualView
 				sim={appContext.sim} />

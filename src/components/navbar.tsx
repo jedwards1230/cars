@@ -1,11 +1,13 @@
 import React, { ReactNode, useState } from "react";
-import { Link } from "react-router-dom";
-import { Button, ButtonGroup, Dropdown, Nav, Navbar, NavDropdown } from "react-bootstrap";
+import { Link, useLocation } from "react-router-dom";
+import { Button, ButtonGroup, DropdownButton, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import ConfigForm from "./trainConfig/configForm";
 
 const NavComponent = (props: {
     children: ReactNode;
     run: () => void,
+    saveModel?: () => void,
+    destroyModel?: () => void,
 }) => {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -17,18 +19,39 @@ const NavComponent = (props: {
             <Nav className="ms-auto">
                 {props.children}
 
-                <Dropdown as={ButtonGroup}>
+                <ButtonGroup>
+                    {props.saveModel &&
+                        <Button
+                            id="saveBtn"
+                            onClick={props.saveModel}
+                            title={"Save Model"}
+                            variant="outline-warning">💾</Button>}
+                    {props.destroyModel &&
+                        <Button
+                            id="destroyBtn"
+                            onClick={props.destroyModel}
+                            title={"Destroy Model"}
+                            variant="outline-danger">🗑️</Button>}
                     <Button variant="success" onClick={props.run}>Run</Button>
-
-                    <Dropdown.Toggle split variant="success" id="dropdown-basic" />
-
-                    <Dropdown.Menu>
-                        <NavDropdown.Item eventKey="1.1" as={Link} to="/cars/genetic">Genetic</NavDropdown.Item>
-                        <NavDropdown.Item eventKey="1.2" as={Link} to="/cars/teach">Teach</NavDropdown.Item>
+                    <DropdownButton as={ButtonGroup} title={"Mode"} align="end" >
+                        <NavDropdown.Item 
+                        eventKey="1.1" 
+                        as={Link} 
+                        to="/cars/genetic"
+                        active={
+                            useLocation().pathname === "/cars/genetic" ? true : false
+                        }>Genetic</NavDropdown.Item>
+                        <NavDropdown.Item 
+                            eventKey="1.2" 
+                            as={Link} 
+                            to="/cars/teach" 
+                            active={
+                                useLocation().pathname === "/cars/teach" ? true : false
+                            }>Teach</NavDropdown.Item>
                         <NavDropdown.Divider />
                         <NavDropdown.Item onClick={handleShow}>Config</NavDropdown.Item>
-                    </Dropdown.Menu>
-                </Dropdown>
+                    </DropdownButton>
+                </ButtonGroup>
                 <ConfigForm
                     show={show}
                     handleHide={handleClose} />

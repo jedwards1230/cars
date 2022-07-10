@@ -30,7 +30,7 @@ const ConfigForm = (props: {
         layers: appContext.activeConfig.layers
     }
 
-    const methods = useForm({defaultValues})
+    const methods = useForm({ defaultValues })
     const onSubmit = (data: any) => {
         data = cleanData(data);
         console.log(data);
@@ -49,7 +49,17 @@ const ConfigForm = (props: {
         config.lr = data.lr;
         config.sensorCount = data.sensorCount;
         config.actionCount = data.actionCount;
-        config.layers = data.layers;
+
+        if (config.layers.length === data.layers.length) {
+            data.layers.forEach((layer: LayerConfig, i: number) => {
+                if (layer.outputs === config.layers[i].outputs && layer.inputs === config.layers[i].inputs) {
+                    config.layers[i].activation = layer.activation;
+                }
+            })
+        } else {
+            config.layers = data.layers;
+        }
+
         config.save();
 
         appContext.activeConfig = config;

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../components/navbar";
 import VisualView from "../components/visualView";
-import { Button, Navbar } from "react-bootstrap";
+import { Navbar } from "react-bootstrap";
 import { AppContext } from "../context";
 import { Simulator } from "../car/simulator";
 
@@ -59,7 +59,7 @@ const Genetic = () => {
 
 	return (
 		<>
-			<NavComponent run={reset} >
+			<NavComponent run={reset} saveModel={saveModel} destroyModel={destroyModel} >
 				{stats.map((stat, i) => {
 					return (
 						<Navbar.Text
@@ -68,18 +68,6 @@ const Genetic = () => {
 							className="px-2">{stat.key} = {stat.value}</Navbar.Text>
 					)
 				})}
-				<Button
-					key={"saveBtn"}
-					id="saveBtn"
-					onClick={saveModel}
-					title={"Save Model"}
-					variant="outline-warning">💾</Button>,
-				<Button
-					key={"destroyBtn"}
-					id="destroyBtn"
-					onClick={destroyModel}
-					title={"Destroy Model"}
-					variant="outline-danger">🗑️</Button>
 			</NavComponent>
 			<VisualView
 				sim={appContext.sim} />
