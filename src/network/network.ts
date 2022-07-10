@@ -1,20 +1,15 @@
 import { MSE } from "../utils";
 import { AppConfig } from "./config";
 import {
-    Linear,
-    Sigmoid,
-    Relu,
-    LeakyRelu,
-    Tanh,
-    SoftMax,
+    LayerMap,
     Layer,
 } from "./layers";
 
 export class Network {
-    name!: string;
-    epsilon!: number;
-    lr!: number;
-    alias!: string;
+    name: string;
+    epsilon: number;
+    lr: number;
+    alias: string;
     memory: any[];
     layers: Layer[];
     confidence: number;
@@ -25,7 +20,11 @@ export class Network {
         this.memory = [];
         this.layers = [];
         this.confidence = 0.5;
-        this.loadBrain(modelConfig);
+        this.name = modelConfig.name;
+        this.lr = modelConfig.lr;
+        this.epsilon = modelConfig.epsilonDecay;
+        this.alias = modelConfig.alias;
+        this.setModelLayers(modelConfig.layers);
 
         this.lossFunction = (targets, outputs) => {
             let cost = 0
@@ -83,42 +82,12 @@ export class Network {
         return layers
     }
 
-    loadBrain(config: AppConfig) {
-        this.name = config.name;
-        this.lr = config.lr;
-        this.epsilon = config.epsilonDecay;
-        this.alias = config.alias;
-        this.setModelLayers(config.layers);
-    }
-
     /** Set model layers */
     setModelLayers = (layers: LayerConfig[]) => {
         const preparedLayers = new Array(layers.length);
         layers.forEach((layerConfig, i) => {
             layerConfig.lr = this.lr;
-            switch (layerConfig.activation) {
-                case "Linear":
-                    preparedLayers[i] = new Linear(layerConfig);
-                    break;
-                case "Sigmoid":
-                    preparedLayers[i] = new Sigmoid(layerConfig);
-                    break;
-                case "Relu":
-                    preparedLayers[i] = new Relu(layerConfig);
-                    break;
-                case "LeakyRelu":
-                    preparedLayers[i] = new LeakyRelu(layerConfig);
-                    break;
-                case "Tanh":
-                    preparedLayers[i] = new Tanh(layerConfig);
-                    break;
-                case "SoftMax":
-                    preparedLayers[i] = new SoftMax(layerConfig);
-                    break;
-                default:
-                    console.log("Unknown activation function");
-                    break;
-            }
+            preparedLayers[i] = new LayerMap[layerConfig.activation](layerConfig);
         })
         this.layers = preparedLayers;
     }

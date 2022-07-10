@@ -35,7 +35,7 @@ export class Simulator {
         this.trafficConfig = new AppConfig("trafficForward", "forward");
         this.brainConfig = smartConfig;
 
-        this.driverSpeed = 3;
+        this.driverSpeed = 4;
         this.laneCount = 3;
 
         this.road = new Road(this.laneCount);
@@ -100,7 +100,7 @@ export class Simulator {
         for (let i = 0; i < this.brainCount; i++) {
             const y = this.road.getLaneCenter(this.startLane);
 
-            const car = new SmartCar(i, 0, y, this.driverSpeed + 1, this.brainConfig, this.playable);
+            const car = new SmartCar(i, 0, y, this.driverSpeed, this.brainConfig, this.playable);
             if (i !== 0) car.brain.mutate(this.brainConfig.mutationRate);
 
             smartCars.push(car);
@@ -110,12 +110,12 @@ export class Simulator {
 
     #generateTraffic() {
         this.traffic = [];
-        let placed = new Array(this.road.laneCount).fill(100);
+        let placed = new Array(this.road.laneCount).fill(0);
 
         // randomize lane
         const getStartPosition = () => {
             const lane = getRandomInt(0, this.road.laneCount - 1);
-            placed[lane] = placed[lane] + getRandomInt(200, 350);
+            placed[lane] = placed[lane] + getRandomInt(200, 400);
             const x = placed[lane];
             const y = this.road.getLaneCenter(lane);
             return [x, y];
@@ -127,7 +127,7 @@ export class Simulator {
 
             let car;
             if (this.smartTraffic) {
-                car = new SmartCar(i, x, y, this.driverSpeed + 1, this.trafficConfig);
+                car = new SmartCar(i, x, y, this.driverSpeed, this.trafficConfig);
             } else {
                 car = new DumbCar(idx, x, y);
             }
@@ -139,7 +139,7 @@ export class Simulator {
     getBestCar(): SmartCar {
         // find car that is undamaged and has greated x value
         const bestCar = this.smartCars.reduce((prev, curr) => {
-            if (!curr.damaged && curr.x > prev.x) {
+            if (curr.fitness < prev.fitness) {
                 return curr;
             }
             return prev;
@@ -153,13 +153,14 @@ export class Simulator {
         ctx.save();
 
         // follow best car
-        ctx.translate(canvas.height * 0.7 - bestCar.x, 0);
+        ctx.translate(canvas.width * 0.3 - bestCar.x, 0);
 
         // draw road
         this.road.draw(ctx);
 
         // draw smart cars
         this.smartCars.forEach(car => {
+            car.checkInBounds(ctx);
             car.draw(ctx);
             ctx.globalAlpha = 1;
         });

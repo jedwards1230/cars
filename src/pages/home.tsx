@@ -15,8 +15,14 @@ const Home = () => {
 
     const animate = (time: number = 0) => {
         appContext.sim.update();
-        const bestCar = appContext.sim.getBestCar();
+        updateStats();
+        
+        appContext.animTime = time;
+        appContext.animFrame = requestAnimationFrame(animate)
+    }
 
+    const updateStats = () => {
+        const bestCar = appContext.sim.getBestCar();
         const newStats = [];
         newStats.push({
             key: "speed",
@@ -27,9 +33,6 @@ const Home = () => {
             value: `${bestCar.distance.toFixed(0)}`
         });
         setStats(newStats);
-
-        appContext.animTime = time;
-        appContext.animFrame = requestAnimationFrame(animate)
     }
 
     const reset = () => {

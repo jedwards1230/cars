@@ -6,6 +6,7 @@ import {
     lerp
 } from "../utils";
 import { AppContext } from "../context";
+import { NetworkCanvasDefaultHeight } from "../constants";
 
 const NetworkCanvas = (props: {
     network: Network;
@@ -159,7 +160,7 @@ const NetworkCanvas = (props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.network]);
 
-    return <canvas ref={canvasRef} id="networkCanvas" width={window.innerWidth} height="450" />
+    return <canvas ref={canvasRef} id="networkCanvas" width={window.innerWidth} height={NetworkCanvasDefaultHeight} />
 }
 
 export default NetworkCanvas;

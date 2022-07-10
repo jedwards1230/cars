@@ -15,7 +15,13 @@ const Teach = (props: any) => {
 
 	const animate = (time: number = 0) => {
 		appContext.sim.update();
+		updateStats();
 
+		appContext.animTime = time;
+		appContext.animFrame! = requestAnimationFrame(animate)
+	}
+
+	const updateStats = () => {
 		const bestCar = appContext.sim.getBestCar();
 		const newStats = [];
 		const loss = appContext.sim.getLoss();
@@ -28,13 +34,18 @@ const Teach = (props: any) => {
 			value: `${bestCar.distance.toFixed(0)}`
 		});
 		newStats.push({
+			key: "steps",
+			value: `${(bestCar.distance / bestCar.steps).toFixed(0)}`
+		})
+		newStats.push({
+			key: "angle",
+			value: `${bestCar.angle.toFixed(2)}`
+		})
+		newStats.push({
 			key: "loss",
 			value: `${loss.toFixed(4)}`
 		})
 		setStats(newStats);
-
-		appContext.animTime = time;
-		appContext.animFrame! = requestAnimationFrame(animate)
 	}
 
 	const reset = () => {

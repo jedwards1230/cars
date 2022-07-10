@@ -1,3 +1,4 @@
+import { RoadCanvasDefaultHeight } from "../constants";
 import { lerp } from "../utils";
 
 export class Road {
@@ -8,12 +9,11 @@ export class Road {
     bottom: number;
     left: number;
     right: number;
-    borders: Point[][];
+    borders: RoadBorder;
 
     constructor(laneCount = 4) {
-        const defaultY = 250;
-        this.y = defaultY / 2;
-        this.width = defaultY * 0.9;
+        this.y = RoadCanvasDefaultHeight / 2;
+        this.width = RoadCanvasDefaultHeight * 0.9;
         this.laneCount = laneCount;
 
         this.top = this.y - this.width / 2;

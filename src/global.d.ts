@@ -1,3 +1,4 @@
+/** Config for entire App */
 type AppContextConfig = {
 	activeAlias: string
 	activeModel: string
@@ -17,6 +18,7 @@ type AppContextConfig = {
 	}
 }
 
+/** Config for serialized Layer  */
 type LayerConfig = {
 	activation: string;
 	inputs: number;
@@ -27,6 +29,11 @@ type LayerConfig = {
 	weights?: number[][];
 }
 
+type LayerMapping = {
+	[key: string]: any
+}
+
+/** Results of training session */
 type TrainInfo = {
     time: number,
     loss: number,
@@ -36,10 +43,19 @@ type TrainInfo = {
     model: Network,
 }
 
+type Generation = {
+	id: number;
+	topScore: number;
+}
+
 type Point = {
 	x: number;
 	y: number;
 };
+
+type Polygon = Point[];
+
+type RoadBorder = Point[][];
 
 type SensorReading = {
     x: number;

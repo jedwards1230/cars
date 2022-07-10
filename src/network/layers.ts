@@ -248,3 +248,13 @@ export class Relu extends Layer {
         }
     }
 }
+
+export const LayerMap: LayerMapping = {
+    "Linear": Linear,
+    "Sigmoid": Sigmoid,
+    "Tanh": Tanh,
+    "Relu": Relu,
+    "LeakyRelu": LeakyRelu,
+    "DropOut": DropOut,
+    "SoftMax": SoftMax,
+}

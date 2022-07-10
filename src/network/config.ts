@@ -30,13 +30,27 @@ export class AppConfig {
 	/** Save config to localStorage */
 	save() {
 		const data = JSON.stringify(this, null, "\t");
-		console.log("saving", data)
 		localStorage.setItem(this.name, data);
+	}
+
+	clearWeights() {
+		this.layers.forEach((layer) => {
+			layer.biases = [];
+			layer.weights = new Array(layer.inputs);
+			for (let i = 0; i < layer.inputs; i++) {
+				layer.weights[i] = new Array(layer.outputs);
+				for (let j = 0; j < layer.outputs; j++) {
+					layer.weights[i][j] = 0;
+				}
+			}
+		});
+		this.save();
 	}
 
 	destroy() {
 		this.generations = [];
-		localStorage.removeItem(this.name);
+		this.clearWeights();
+		//localStorage.removeItem(this.name);
 	}
 
 	/** Load config from localStorage */

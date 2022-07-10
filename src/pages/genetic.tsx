@@ -15,25 +15,24 @@ const Genetic = () => {
 
 	const animate = (time: number = 0) => {
 		appContext.sim.update();
-
-		const bestCar = appContext.sim.getBestCar();
-		const newStats = [];
-		newStats.push({
-			key: "speed",
-			value: `${bestCar.speed.toFixed(1)}`
-		});
-		newStats.push({
-			key: "distance",
-			value: `${bestCar.distance.toFixed(0)}`
-		});
-		newStats.push({
-			key: "activeBrains",
-			value: `${appContext.sim.activeBrains.toFixed(0)}`
-		})
-		setStats(newStats);
+		updateStats();
 
 		appContext.animTime = time;
 		appContext.animFrame! = requestAnimationFrame(animate)
+	}
+
+	const updateStats = () => {
+		const bestCar = appContext.sim.getBestCar();
+		const newStats = [];
+		newStats.push({
+			key: "fitness",
+			value: `${bestCar.fitness.toFixed(8)}`
+		})
+		newStats.push({
+			key: "active",
+			value: `${appContext.sim.activeBrains.toFixed(0)}`
+		})
+		setStats(newStats);
 	}
 
 	const reset = () => {
@@ -48,7 +47,6 @@ const Genetic = () => {
 	const saveModel = () => {
 		const bestCar = appContext.sim.getBestCar();
 		bestCar.saveModelConfig();
-		//reset();
 	}
 
 	useEffect(() => {
@@ -65,7 +63,7 @@ const Genetic = () => {
 						<Navbar.Text
 							key={i}
 							id={stat.key}
-							className="px-2">{stat.key} = {stat.value}</Navbar.Text>
+							className="px-2">{stat.key}: {stat.value}</Navbar.Text>
 					)
 				})}
 			</NavComponent>

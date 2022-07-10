@@ -3,6 +3,7 @@ import { Sensor } from "./sensor";
 import { Network } from "../network/network";
 import { polysIntersect } from "../utils";
 import { AppConfig } from "../network/config";
+import { DamagedOffScreenBounds, RoadCanvasDefaultHeight } from "../constants";
 
 export class Car {
 	readonly width: number;
@@ -20,9 +21,10 @@ export class Car {
 	color!: string;
 
 	distance: number;
+	steps: number;
 	damaged: boolean;
 	actionCount: number;
-	polygon!: Point[];
+	polygon!: Polygon;
 
 	constructor(
 		id: number,
@@ -45,6 +47,7 @@ export class Car {
 		this.friction = 0.05;
 
 		this.distance = 0;
+		this.steps = 0;
 		this.damaged = false;
 
 		this.controls = new Controls(controller);
@@ -61,12 +64,19 @@ export class Car {
 		if (!this.damaged) {
 			this.#createPolygon();
 			this.distance += this.speed;
+			this.steps++;
 			this.#checkDamage(borders, traffic);
 		}
 	}
 
 	#checkDamage(borders: Point[][], traffic: Car[]) {
 		const damagedCars: Car[] = [];
+
+		// prevents turning around
+		if (Math.abs(this.angle) > 1.7) {
+			this.damaged = true;
+			return;
+		}
 
 		// check collision with road borders
 		borders.forEach((border) => {
@@ -86,14 +96,13 @@ export class Car {
 		// apply damage and stop controls
 		damagedCars.forEach(car => {
 			car.damaged = true;
-			// if car is instance of type smartcar
 			if (car instanceof SmartCar) car.speed = 0;
 			car.controls.stop();
 		});
 	}
 
 	#createPolygon() {
-		const points: Point[] = [];
+		const points: Polygon = [];
 		const rad = Math.hypot(this.width, this.height) / 2;
 		const alpha = Math.atan2(this.width, this.height);
 		points.push({
@@ -158,7 +167,7 @@ export class Car {
 
 	draw(ctx: CanvasRenderingContext2D, bestCar = false) {
         if (this.damaged) {
-            ctx.fillStyle = "rgba(145, 145, 145, 0.5)";
+            ctx.fillStyle = "rgba(145, 145, 145, 0.9)";
         } else if (bestCar) {
             ctx.fillStyle = "rgba(255, 0, 0, 1)";
         } else {
@@ -176,6 +185,7 @@ export class Car {
 
 export class SmartCar extends Car {
 	player: boolean;
+	fitness: number;
 	config: AppConfig;
 	sensor: Sensor;
 	brain: Network;
@@ -184,7 +194,8 @@ export class SmartCar extends Car {
 	constructor(id: number, x: number, y: number, maxSpeed: number, config: AppConfig, player = false) {
 		super(id, x, y, maxSpeed, player);
 		this.player = player;
-		this.color = player ? "rgba(0, 255, 0, 1)" : "rgba(200, 50, 50, 0.5)";
+		this.fitness = 0;
+		this.color = player ? "rgba(0, 255, 0, 1)" : "rgba(200, 50, 50, 0.7)";
 		
 		this.config = config;
 		this.actionCount = config.actionCount;
@@ -193,25 +204,47 @@ export class SmartCar extends Car {
 		this.sensor = new Sensor(this, config.sensorCount, "forward");
 	}
 
-	update(borders: Point[][], traffic: Car[], action?: null | number[]) {
+	update(borders: Point[][], traffic: Car[], action?: number[]) {
+		const stepFactor = this.distance / this.steps;
+		if (this.steps > 500 && stepFactor < 1) this.damaged = true;
 		if (action) this.controls.update(action);
 		super.update(borders, traffic);
+		this.evaluate();
 	}
 
-	lazyAction(borders: Point[][], traffic: Car[], backprop = false): null | number[] {
+	lazyAction(borders: Point[][], traffic: Car[], backprop = false): number[] {
 		const sData = this.getSensorData(borders, traffic);
 		const action = this.brain.forward(sData, backprop);
 		return this.brain.makeChoice(action, true);
 	}
 
 	getSensorData(borders: Point[][], traffic: Car[]) {
-		let sensorOffsets: number[] = [(this.y / 250), this.angle, (this.speed / this.maxSpeed)];
-		// update each sensor
 		this.sensor.update(borders, traffic);
+
+		const lanePosition = this.y / RoadCanvasDefaultHeight;
+		const angle = this.angle;
+		const speed = this.speed / this.maxSpeed;
+
 		const offsets = this.sensor.getSensorOffsets();
-		sensorOffsets = sensorOffsets.concat(offsets);
+		const sensorOffsets = [lanePosition, angle, speed].concat(offsets);
+
 		this.sensorOffsets = sensorOffsets;
 		return sensorOffsets;
+	}
+
+	/** Check fitness of car */
+	evaluate() {
+		const distance = this.distance;
+		let fitness = 0;
+		// higher step factor = faster, more focused car
+		const stepFactor = distance / this.steps;
+
+		fitness = stepFactor * distance;
+
+		if (this.damaged) fitness -= distance / 5;
+		if (this.controls.left && this.controls.right) fitness -= distance / 10;
+
+		this.fitness = Math.abs(1 / fitness); 
 	}
 
 	getMetrics(action: number[]) {
@@ -259,6 +292,19 @@ export class SmartCar extends Car {
 		}
 
 		return reward;
+	}
+
+	/** damage any car thats fallen too far behind */
+	checkInBounds(ctx: CanvasRenderingContext2D) {
+		this.polygon.forEach(point => {
+			if (ctx.isPointInPath(point.x - DamagedOffScreenBounds, point.y)) {
+				this.damaged = true;
+			}
+		})
+	}
+
+	draw(ctx: CanvasRenderingContext2D, bestCar?: boolean): void {
+		if (!this.damaged || bestCar) super.draw(ctx, bestCar);
 	}
 
 	saveModelConfig(info?: TrainInfo) {
