@@ -5,7 +5,7 @@ import ConfigForm from "./trainConfig/configForm";
 
 const NavComponent = (props: {
     children: ReactNode;
-    reset: () => void,
+    run: () => void,
 }) => {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -18,7 +18,7 @@ const NavComponent = (props: {
                 {props.children}
 
                 <Dropdown as={ButtonGroup}>
-                    <Button variant="success" onClick={props.reset}>Run</Button>
+                    <Button variant="success" onClick={props.run}>Run</Button>
 
                     <Dropdown.Toggle split variant="success" id="dropdown-basic" />
 

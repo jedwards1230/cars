@@ -5,7 +5,7 @@ export class Controls {
     right: boolean;
 
     constructor(playable: boolean) {
-        this.forward = true;
+        this.forward = !playable;
         this.backward = false;
         this.left = false;
         this.right = false;

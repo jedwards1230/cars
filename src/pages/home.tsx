@@ -45,7 +45,7 @@ const Home = () => {
 
     return (
         <>
-            <NavComponent reset={reset} >
+            <NavComponent run={reset} >
                 {stats.map((stat, i) => {
                     return (
                         <Navbar.Text

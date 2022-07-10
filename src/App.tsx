@@ -17,7 +17,6 @@ const App = () => {
 				<Route path="/cars/teach" element={<Teach />} />
 			</Routes>
 		</BrowserRouter>
-
 	)
 };
 

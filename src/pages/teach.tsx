@@ -8,7 +8,6 @@ import { AppContext } from "../context";
 const Teach = (props: any) => {
 	const appContext = useContext(AppContext);
 	const activeConfig = appContext.activeConfig;
-	const sim = appContext.sim;
 	const simConfig = appContext.simConfig!;
 
 	const [stats, setStats] = useState<{
@@ -17,11 +16,11 @@ const Teach = (props: any) => {
 	}[]>([]);
 
 	const animate = (time: number = 0) => {
-		sim.update();
+		appContext.sim.update();
 
-		const bestCar = sim.getBestCar();
+		const bestCar = appContext.sim.getBestCar();
 		const newStats = [];
-		const loss = sim.getLoss();
+		const loss = appContext.sim.getLoss();
 		newStats.push({
 			key: "speed",
 			value: `${bestCar.speed.toFixed(1)}`
@@ -41,7 +40,11 @@ const Teach = (props: any) => {
 	}
 
 	const reset = () => {
-		appContext.sim = new Simulator(simConfig.trafficCount, simConfig.brainCount, simConfig.smartTraffic)
+		appContext.sim = new Simulator(simConfig.trafficCount, simConfig.brainCount, simConfig.smartTraffic, true)
+	}
+
+	const run = () => {
+		reset();
 	}
 
 	const destroyModel = () => {
@@ -50,7 +53,7 @@ const Teach = (props: any) => {
 	}
 
 	const saveModel = () => {
-		const bestCar = sim.getBestCar();
+		const bestCar = appContext.sim.getBestCar();
 		bestCar.saveModelConfig();
 		//reset();
 	}
@@ -63,7 +66,7 @@ const Teach = (props: any) => {
 
 	return (
 		<>
-			<NavComponent reset={reset} >
+			<NavComponent run={run} >
 				{stats.map((stat, i) => {
 					return (
 						<Navbar.Text
@@ -72,27 +75,22 @@ const Teach = (props: any) => {
 							className="px-2">{stat.key} = {stat.value}</Navbar.Text>
 					)
 				})}
+				{/* //todo: better way to send buttons to navbar */}
 				<Button
 					key={"saveBtn"}
 					id="saveBtn"
 					onClick={saveModel}
 					title={"Save Model"}
-					variant="outline-warning">💾</Button>,
+					variant="outline-warning">💾</Button>
 				<Button
 					key={"destroyBtn"}
 					id="destroyBtn"
 					onClick={destroyModel}
 					title={"Destroy Model"}
-					variant="outline-danger">🗑️</Button>,
-				<Button
-					key={"startPlay"}
-					id="startPlay"
-					onClick={props.startPlay}
-					title={"Play"}
-					variant="outline-primary">Play</Button>
+					variant="outline-danger">🗑️</Button>
 			</NavComponent>
 			<VisualView
-				sim={sim} />
+				sim={appContext.sim} />
 		</>
 	)
 };

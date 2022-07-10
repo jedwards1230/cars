@@ -7,7 +7,6 @@ import { Simulator } from "../car/simulator";
 
 const Genetic = () => {
 	const appContext = useContext(AppContext);
-	const sim = appContext.sim;
 	const activeConfig = appContext.activeConfig!;
 	const simConfig = appContext.simConfig!;
 
@@ -17,9 +16,9 @@ const Genetic = () => {
 	}[]>([]);
 
 	const animate = (time: number = 0) => {
-		sim.update();
+		appContext.sim.update();
 
-		const bestCar = sim.getBestCar();
+		const bestCar = appContext.sim.getBestCar();
 		const newStats = [];
 		newStats.push({
 			key: "speed",
@@ -31,7 +30,7 @@ const Genetic = () => {
 		});
 		newStats.push({
 			key: "activeBrains",
-			value: `${sim.activeBrains.toFixed(0)}`
+			value: `${appContext.sim.activeBrains.toFixed(0)}`
 		})
 		setStats(newStats);
 
@@ -49,7 +48,7 @@ const Genetic = () => {
 	}
 
 	const saveModel = () => {
-		const bestCar = sim.getBestCar();
+		const bestCar = appContext.sim.getBestCar();
 		bestCar.saveModelConfig();
 		//reset();
 	}
@@ -62,7 +61,7 @@ const Genetic = () => {
 
 	return (
 		<>
-			<NavComponent reset={reset} >
+			<NavComponent run={reset} >
 				{stats.map((stat, i) => {
 					return (
 						<Navbar.Text
@@ -85,7 +84,7 @@ const Genetic = () => {
 					variant="outline-danger">🗑️</Button>
 			</NavComponent>
 			<VisualView
-				sim={sim} />
+				sim={appContext.sim} />
 		</>
 	)
 };

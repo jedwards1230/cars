@@ -66,7 +66,6 @@ export class Simulator {
 
             // find average loss
             const loss = car.brain.lossFunction(target, output);
-            console.log(loss)
             this.loss.loss += loss
             this.loss.count++;
 
