@@ -6,26 +6,28 @@ import { Row, Col } from "react-bootstrap";
 const CarConfig = () => {
     const { register } = useFormContext();
     return (
-        <Row>
-            <Col>
-                <div className="form-floating">
-                    <input
-                        {...register("activeModel")}
-                        type="text"
-                        className="form-control"></input>
-                    <label htmlFor="episodeCountInput">Active Model</label>
-                </div>
-            </Col>
-            <Col>
-                <div className="form-floating">
-                    <input
-                        {...register("alias")}
-                        type="text"
-                        className="form-control"></input>
-                    <label htmlFor="timeLimitInput">Alias</label>
-                </div>
-            </Col>
-        </Row>
+        <>
+            <Row>
+                <Col>
+                    <div className="form-floating">
+                        <input
+                            {...register("activeModel")}
+                            type="text"
+                            className="form-control"></input>
+                        <label htmlFor="episodeCountInput">Active Model</label>
+                    </div>
+                </Col>
+                <Col>
+                    <div className="form-floating">
+                        <input
+                            {...register("alias")}
+                            type="text"
+                            className="form-control"></input>
+                        <label htmlFor="timeLimitInput">Alias</label>
+                    </div>
+                </Col>
+            </Row>
+        </>
     )
 }
 

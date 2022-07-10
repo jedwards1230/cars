@@ -9,9 +9,11 @@ const Genetic = () => {
 	const appContext = useContext(AppContext);
 
 	const [stats, setStats] = useState<{
-		key: string,
-		value: string
-	}[]>([]);
+		fitness?: string,
+		active?: string
+		carsPassed?: string
+		steps?: string
+	}>({});
 
 	const animate = (time: number = 0) => {
 		appContext.sim.update();
@@ -23,16 +25,12 @@ const Genetic = () => {
 
 	const updateStats = () => {
 		const bestCar = appContext.sim.getBestCar();
-		const newStats = [];
-		newStats.push({
-			key: "fitness",
-			value: `${bestCar.fitness.toFixed(8)}`
-		})
-		newStats.push({
-			key: "active",
-			value: `${appContext.sim.activeBrains.toFixed(0)}`
-		})
-		setStats(newStats);
+		setStats({
+			fitness: bestCar.fitness.toFixed(8),
+			active: appContext.sim.activeBrains.toFixed(0),
+			carsPassed: bestCar.carsPassed.toFixed(0),
+			steps: bestCar.steps.toFixed(0)
+		});
 	}
 
 	const reset = () => {
@@ -58,12 +56,12 @@ const Genetic = () => {
 	return (
 		<>
 			<NavComponent run={reset} saveModel={saveModel} destroyModel={destroyModel} >
-				{stats.map((stat, i) => {
+				{Object.entries(stats).map(([k, v], i) => {
 					return (
 						<Navbar.Text
 							key={i}
-							id={stat.key}
-							className="px-2">{stat.key}: {stat.value}</Navbar.Text>
+							id={k}
+							className="px-2">{k}: {v}</Navbar.Text>
 					)
 				})}
 			</NavComponent>

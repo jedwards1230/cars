@@ -3,7 +3,7 @@ import { Simulator } from "./car/simulator";
 import { AppConfig } from "./network/config";
 
 const trafficCount = 50;
-const brainCount = 400;
+const brainCount = 1000;
 const smartTraffic = false;
 
 const activeAlias = "fsd";

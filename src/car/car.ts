@@ -190,11 +190,13 @@ export class SmartCar extends Car {
 	sensor: Sensor;
 	brain: Network;
 	sensorOffsets!: number[];
+	carsPassed: number;
 
 	constructor(id: number, x: number, y: number, maxSpeed: number, config: AppConfig, player = false) {
 		super(id, x, y, maxSpeed, player);
 		this.player = player;
 		this.fitness = 0;
+		this.carsPassed = 0;
 		this.color = player ? "rgba(0, 255, 0, 1)" : "rgba(200, 50, 50, 0.7)";
 		
 		this.config = config;
@@ -205,11 +207,22 @@ export class SmartCar extends Car {
 	}
 
 	update(borders: Point[][], traffic: Car[], action?: number[]) {
-		const stepFactor = this.distance / this.steps;
+		// kill those left behind
+		const stepFactor = (this.distance * 2) / this.steps;
 		if (this.steps > 500 && stepFactor < 1) this.damaged = true;
+
 		if (action) this.controls.update(action);
 		super.update(borders, traffic);
+
+		this.countCarsPassed(traffic);
+
 		this.evaluate();
+	}
+
+	countCarsPassed(traffic: Car[]) {
+		this.carsPassed = traffic.reduce((acc, car) => {
+			return (car.x < this.x) ? acc + 1 : acc;
+		}, 0);
 	}
 
 	lazyAction(borders: Point[][], traffic: Car[], backprop = false): number[] {
@@ -235,15 +248,15 @@ export class SmartCar extends Car {
 	/** Check fitness of car */
 	evaluate() {
 		const distance = this.distance;
-		let fitness = 0;
-		// higher step factor = faster, more focused car
-		const stepFactor = distance / this.steps;
+		let fitness = distance / 10;
 
-		fitness = stepFactor * distance;
+		// multiply for each car passed
+		fitness *= (this.carsPassed + 1);
 
-		if (this.damaged) fitness -= distance / 5;
-		if (this.controls.left && this.controls.right) fitness -= distance / 10;
+		// knock percentage of fitness if damaged
+		if (this.damaged) fitness *= 0.8;
 
+		// try to approach 0
 		this.fitness = Math.abs(1 / fitness); 
 	}
 

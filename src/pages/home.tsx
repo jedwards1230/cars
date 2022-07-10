@@ -9,30 +9,24 @@ const Home = () => {
     const appContext = useContext(AppContext);
 
     const [stats, setStats] = useState<{
-        key: string,
-        value: string
-    }[]>([]);
+        speed?: string,
+        distance?: string
+    }>({});
 
     const animate = (time: number = 0) => {
         appContext.sim.update();
         updateStats();
-        
+
         appContext.animTime = time;
         appContext.animFrame = requestAnimationFrame(animate)
     }
 
     const updateStats = () => {
         const bestCar = appContext.sim.getBestCar();
-        const newStats = [];
-        newStats.push({
-            key: "speed",
-            value: `${bestCar.speed.toFixed(1)}`
+        setStats({
+            speed: bestCar.fitness.toFixed(8),
+            distance: appContext.sim.activeBrains.toFixed(0)
         });
-        newStats.push({
-            key: "distance",
-            value: `${bestCar.distance.toFixed(0)}`
-        });
-        setStats(newStats);
     }
 
     const reset = () => {
@@ -48,12 +42,12 @@ const Home = () => {
     return (
         <>
             <NavComponent run={reset} >
-                {stats.map((stat, i) => {
+                {Object.entries(stats).map(([k, v], i) => {
                     return (
                         <Navbar.Text
                             key={i}
-                            id={stat.key}
-                            className="px-2">{stat.key} = {stat.value}</Navbar.Text>
+                            id={k}
+                            className="px-2">{k}: {v}</Navbar.Text>
                     )
                 })}
             </NavComponent>

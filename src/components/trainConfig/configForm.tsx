@@ -2,10 +2,11 @@ import React, { useContext } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import CarConfig from "./carConfig";
 import SimConfig from "./simConfig";
-import NetworkConfig from "./modelConfig";
+import NetworkConfig from "./networkConfig";
 import { AppConfig } from "../../network/config";
 import { Button, Form, Modal } from "react-bootstrap";
 import { AppContext } from "../../context";
+import TrainingConfig from "./trainingConfig";
 
 const ConfigForm = (props: {
     show: boolean;
@@ -109,6 +110,8 @@ const ConfigForm = (props: {
                         <SimConfig />
                         <h4 className="my-3">Network</h4>
                         <NetworkConfig />
+                        <h4 className="my-3">Training</h4>
+                        <TrainingConfig />
                     </Form>
                 </FormProvider>
             </Modal.Body>

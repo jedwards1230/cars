@@ -1,43 +1,37 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import { Row, Col } from "react-bootstrap";
+import LayerList from "./layerConfig";
 
 /** Number of simulations and steps per simulation */
-const SimConfig = () => {
+const NetworkConfig = () => {
     const { register } = useFormContext();
+
     return (
         <>
-            <Row className="py-3">
+            <Row>
                 <Col>
                     <div className="form-floating">
                         <input
-                            {...register("trafficCount")}
+                            {...register("sensorCount")}
                             type="number"
                             className="form-control"></input>
-                        <label htmlFor="episodeCountInput">Traffic Count</label>
+                        <label htmlFor="sensorCountInput">Sensor Count</label>
                     </div>
                 </Col>
                 <Col>
                     <div className="form-floating">
                         <input
-                            {...register("smartCarCount")}
+                            {...register("actionCount")}
                             type="number"
                             className="form-control"></input>
-                        <label htmlFor="timeLimitInput">Smart Car Count</label>
-                    </div>
-                </Col>
-                <Col>
-                    <div className="form-floating">
-                        <input
-                            {...register("mutationRate")}
-                            type="text"
-                            className="form-control"></input>
-                        <label htmlFor="mutationRateInput">Mutation Rate</label>
+                        <label htmlFor="actionCountInput">Action Count</label>
                     </div>
                 </Col>
             </Row>
+            <LayerList />
         </>
     )
 }
 
-export default SimConfig;
+export default NetworkConfig;

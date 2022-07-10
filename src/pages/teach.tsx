@@ -9,9 +9,12 @@ const Teach = (props: any) => {
 	const appContext = useContext(AppContext);
 
 	const [stats, setStats] = useState<{
-		key: string,
-		value: string
-	}[]>([]);
+		speed?: string,
+		distance?: string
+		steps?: string
+		angle?: string
+		loss?: string
+	}>({});
 
 	const animate = (time: number = 0) => {
 		appContext.sim.update();
@@ -23,29 +26,15 @@ const Teach = (props: any) => {
 
 	const updateStats = () => {
 		const bestCar = appContext.sim.getBestCar();
-		const newStats = [];
 		const loss = appContext.sim.getLoss();
-		newStats.push({
-			key: "speed",
-			value: `${bestCar.speed.toFixed(1)}`
+
+		setStats({
+			speed: bestCar.fitness.toFixed(8),
+			distance: appContext.sim.activeBrains.toFixed(0),
+			steps: (bestCar.distance / bestCar.steps).toFixed(0),
+			angle: bestCar.angle.toFixed(2),
+			loss: loss.toFixed(4)
 		});
-		newStats.push({
-			key: "distance",
-			value: `${bestCar.distance.toFixed(0)}`
-		});
-		newStats.push({
-			key: "steps",
-			value: `${(bestCar.distance / bestCar.steps).toFixed(0)}`
-		})
-		newStats.push({
-			key: "angle",
-			value: `${bestCar.angle.toFixed(2)}`
-		})
-		newStats.push({
-			key: "loss",
-			value: `${loss.toFixed(4)}`
-		})
-		setStats(newStats);
 	}
 
 	const reset = () => {
@@ -76,15 +65,14 @@ const Teach = (props: any) => {
 	return (
 		<>
 			<NavComponent run={run} saveModel={saveModel} destroyModel={destroyModel} >
-				{stats.map((stat, i) => {
+				{Object.entries(stats).map(([k, v], i) => {
 					return (
 						<Navbar.Text
 							key={i}
-							id={stat.key}
-							className="px-2">{stat.key} = {stat.value}</Navbar.Text>
+							id={k}
+							className="px-2">{k}: {v}</Navbar.Text>
 					)
 				})}
-				{/* //todo: better way to send buttons to navbar */}
 			</NavComponent>
 			<VisualView
 				sim={appContext.sim} />

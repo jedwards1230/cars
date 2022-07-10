@@ -98,13 +98,13 @@ const defaultTrainBrain = {
 	layers: [
 		{
 			id: 0,
-			activation: "Relu",
+			activation: "Tanh",
 			inputs: 10,
 			outputs: 15,
 		},
 		{
 			id: 1,
-			activation: "Relu",
+			activation: "Tanh",
 			inputs: 15,
 			outputs: 10,
 		},
