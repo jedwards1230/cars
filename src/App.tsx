@@ -10,13 +10,6 @@ import Home from "./pages/home";
 import Genetic from "./pages/genetic";
 import Teach from "./pages/teach";
 
-export const states = {
-	welcome: "welcome",
-	visual: "visual",
-	play: "play",
-	config: "config"
-}
-
 export type AppContextConfig = {
 	activeAlias?: MutableRefObject<string>;
 	activeModel?: MutableRefObject<string>;
