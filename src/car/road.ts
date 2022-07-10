@@ -1,4 +1,4 @@
-import { Point, lerp } from "../utils";
+import { lerp } from "../utils";
 
 export class Road {
     y: number;

@@ -1,15 +1,8 @@
 import {
     getIntersection,
     lerp,
-    Point
 } from "../utils";
 import { Car, DumbCar, SmartCar } from "./car";
-
-type SensorReading = {
-    x: number;
-    y: number;
-    offset: number;
-};
 
 export class Sensor {
     car: SmartCar;

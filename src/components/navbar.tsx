@@ -1,12 +1,11 @@
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, ButtonGroup, Dropdown, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import ConfigForm from "./trainConfig/configForm";
 
 const NavComponent = (props: {
+    children: ReactNode;
     reset: () => void,
-    stats: string[][];
-    buttons: JSX.Element[];
 }) => {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -16,18 +15,7 @@ const NavComponent = (props: {
         <Navbar bg="light" className="px-3">
             <Navbar.Brand as={Link} to="/cars">Miles' Driving School</Navbar.Brand>
             <Nav className="ms-auto">
-                {props.stats.map((stat, i) => {
-                    return (
-                        <Navbar.Text
-                            key={i}
-                            id={stat[0]}
-                            className="px-2">{stat[0]} = {stat[1]}</Navbar.Text>
-                    )
-                })}
-
-                {props.buttons.map((button, i) => {
-                    return button
-                })}
+                {props.children}
 
                 <Dropdown as={ButtonGroup}>
                     <Button variant="success" onClick={props.reset}>Run</Button>

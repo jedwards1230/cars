@@ -1,51 +1,62 @@
 import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../components/navbar";
 import VisualView from "../components/visualView";
-import { AppContext } from "../App";
+import { AppContext } from "../context";
 import { Simulator } from "../car/simulator";
+import { Navbar } from "react-bootstrap";
 
 const Home = () => {
     const appContext = useContext(AppContext);
-    const sim = appContext.sim!;
     const simConfig = appContext.simConfig!;
-    const animFrame = appContext.animFrame!;
-    const animTime = appContext.animTime!;
 
-    const [stats, setStats] = useState<string[][]>([]);
+    const [stats, setStats] = useState<{
+        key: string,
+        value: string
+    }[]>([]);
 
     const animate = (time: number = 0) => {
-        sim.current.update();
-        const bestCar = sim.current.getBestCar();
+        appContext.sim.update();
+        const bestCar = appContext.sim.getBestCar();
 
         const newStats = [];
-        newStats.push(["speed", bestCar.speed.toFixed(1)]);
-        newStats.push(["distance", bestCar.distance.toFixed(0)]);
+        newStats.push({
+            key: "speed",
+            value: `${bestCar.speed.toFixed(1)}`
+        });
+        newStats.push({
+            key: "distance",
+            value: `${bestCar.distance.toFixed(0)}`
+        });
         setStats(newStats);
 
-        animTime.current = time;
-        animFrame!.current = requestAnimationFrame(animate)
+        appContext.animTime = time;
+        appContext.animFrame = requestAnimationFrame(animate)
     }
 
     const reset = () => {
-        sim.current = new Simulator(simConfig.trafficCount.current, simConfig.brainCount.current, simConfig.smartTraffic.current)
+        appContext.sim = new Simulator(simConfig.trafficCount, simConfig.brainCount, simConfig.smartTraffic)
     }
 
     useEffect(() => {
         animate();
-        return () => cancelAnimationFrame(animFrame!.current);
+        return () => cancelAnimationFrame(appContext.animFrame);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const buttons: JSX.Element[] = [];
-
     return (
         <>
-            <NavComponent
-                reset={reset}
-                stats={stats}
-                buttons={buttons} />
+            <NavComponent reset={reset} >
+                {stats.map((stat, i) => {
+                    return (
+                        <Navbar.Text
+                            key={i}
+                            id={stat.key}
+                            className="px-2">{stat.key} = {stat.value}</Navbar.Text>
+                    )
+                })}
+            </NavComponent>
             <VisualView
-                sim={sim.current} />
+                sim={appContext.sim} />
         </>
     )
 };

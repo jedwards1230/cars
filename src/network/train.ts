@@ -1,15 +1,5 @@
 import { SmartCar } from "../car/car";
 import { Simulator } from "../car/simulator";
-import { Network } from "./network";
-
-export type TrainInfo = {
-    time: number,
-    loss: number,
-    speed: number,
-    distance: number,
-    damaged: boolean,
-    model: Network,
-}
 
 /**
  * Training Loop

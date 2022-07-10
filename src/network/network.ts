@@ -1,5 +1,5 @@
 import { MSE } from "../utils";
-import { LayerConfig, AppConfig } from "./config";
+import { AppConfig } from "./config";
 import {
     Linear,
     Sigmoid,

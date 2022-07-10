@@ -1,5 +1,4 @@
 import { lerp } from "../utils";
-import { LayerConfig } from "./config";
 
 export class Layer {
     inputs: number[];

@@ -2,84 +2,97 @@ import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../components/navbar";
 import VisualView from "../components/visualView";
 import { Simulator } from "../car/simulator";
-import { Button } from "react-bootstrap";
-import { AppContext } from "../App";
+import { Button, Navbar } from "react-bootstrap";
+import { AppContext } from "../context";
 
 const Teach = (props: any) => {
 	const appContext = useContext(AppContext);
-	const activeConfig = appContext.activeConfig!;
-	const sim = appContext.sim!;
+	const activeConfig = appContext.activeConfig;
+	const sim = appContext.sim;
 	const simConfig = appContext.simConfig!;
-	const animFrame = appContext.animFrame!;
-	const animTime = appContext.animTime!;
 
-    const [stats, setStats] = useState<string[][]>([]);
+	const [stats, setStats] = useState<{
+		key: string,
+		value: string
+	}[]>([]);
 
 	const animate = (time: number = 0) => {
-		sim.current.update();
+		sim.update();
 
-		const bestCar = sim.current.getBestCar();
+		const bestCar = sim.getBestCar();
 		const newStats = [];
-		const loss = sim.current.getLoss();
-		newStats.push(["speed", bestCar.speed.toFixed(1)]);
-		newStats.push(["distance", bestCar.distance.toFixed(0)]);
-		newStats.push(["loss", loss.toFixed(0)]);
-        setStats(newStats);
+		const loss = sim.getLoss();
+		newStats.push({
+			key: "speed",
+			value: `${bestCar.speed.toFixed(1)}`
+		});
+		newStats.push({
+			key: "distance",
+			value: `${bestCar.distance.toFixed(0)}`
+		});
+		newStats.push({
+			key: "loss",
+			value: `${loss.toFixed(4)}`
+		})
+		setStats(newStats);
 
-		animTime.current = time;
-		animFrame!.current = requestAnimationFrame(animate)
+		appContext.animTime = time;
+		appContext.animFrame! = requestAnimationFrame(animate)
 	}
 
 	const reset = () => {
-		sim.current = new Simulator(simConfig.trafficCount.current, simConfig.brainCount.current, simConfig.smartTraffic.current)
+		appContext.sim = new Simulator(simConfig.trafficCount, simConfig.brainCount, simConfig.smartTraffic)
 	}
 
 	const destroyModel = () => {
-		activeConfig.current.destroy();
+		activeConfig.destroy();
 		reset();
 	}
 
 	const saveModel = () => {
-		const bestCar = sim.current.getBestCar();
+		const bestCar = sim.getBestCar();
 		bestCar.saveModelConfig();
 		//reset();
 	}
 
-	const buttons = [
-		<Button
-			key={"saveBtn"}
-			id="saveBtn"
-			onClick={saveModel}
-			title={"Save Model"}
-			variant="outline-warning">💾</Button>,
-		<Button
-			key={"destroyBtn"}
-			id="destroyBtn"
-			onClick={destroyModel}
-			title={"Destroy Model"}
-			variant="outline-danger">🗑️</Button>,
-		<Button
-			key={"startPlay"}
-			id="startPlay"
-			onClick={props.startPlay}
-			title={"Play"}
-			variant="outline-primary">Play</Button>
-	]
-
 	useEffect(() => {
 		animate();
-		return () => cancelAnimationFrame(animFrame!.current);
+		return () => cancelAnimationFrame(appContext.animFrame);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (
 		<>
-			<NavComponent
-				reset={reset}
-				stats={stats}
-				buttons={buttons} />
+			<NavComponent reset={reset} >
+				{stats.map((stat, i) => {
+					return (
+						<Navbar.Text
+							key={i}
+							id={stat.key}
+							className="px-2">{stat.key} = {stat.value}</Navbar.Text>
+					)
+				})}
+				<Button
+					key={"saveBtn"}
+					id="saveBtn"
+					onClick={saveModel}
+					title={"Save Model"}
+					variant="outline-warning">💾</Button>,
+				<Button
+					key={"destroyBtn"}
+					id="destroyBtn"
+					onClick={destroyModel}
+					title={"Destroy Model"}
+					variant="outline-danger">🗑️</Button>,
+				<Button
+					key={"startPlay"}
+					id="startPlay"
+					onClick={props.startPlay}
+					title={"Play"}
+					variant="outline-primary">Play</Button>
+			</NavComponent>
 			<VisualView
-				sim={sim.current} />
+				sim={sim} />
 		</>
 	)
 };

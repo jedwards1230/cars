@@ -1,9 +1,8 @@
 import { Controls } from "./controls";
 import { Sensor } from "./sensor";
 import { Network } from "../network/network";
-import { polysIntersect, Point } from "../utils";
+import { polysIntersect } from "../utils";
 import { AppConfig } from "../network/config";
-import { TrainInfo } from "../network/train";
 
 export class Car {
 	readonly width: number;

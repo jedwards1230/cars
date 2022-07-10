@@ -3,11 +3,6 @@ import { getRandomInt } from "../utils";
 import { Car, DumbCar, SmartCar } from "./car";
 import { AppConfig } from "../network/config";
 
-type Loss = {
-    loss: number,
-    count: number,
-}
-
 export class Simulator {
     trafficCount: number;
     brainCount: number;

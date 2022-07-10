@@ -5,28 +5,27 @@ import SimConfig from "./simConfig";
 import NetworkConfig from "./modelConfig";
 import { AppConfig } from "../../network/config";
 import { Button, Form, Modal } from "react-bootstrap";
-import { AppContext } from "../../App";
+import { AppContext } from "../../context";
 
 const ConfigForm = (props: {
     show: boolean;
     handleHide: () => void;
 }) => {
     const appContext = useContext(AppContext);
-    const modelConfig = appContext.activeConfig!;
 
     const defaultValues = {
         numEpisodes: 1000,
         numSteps: 2000,
         smartCarCount: 1,
         trafficCount: 50,
-        activeModel: modelConfig.current.name,
-        alias: modelConfig.current.alias,
-        epsilonDecay: modelConfig.current.epsilonDecay,
-        mutationRate: modelConfig.current.mutationRate,
-        learningRate: modelConfig.current.lr,
-        sensorCount: modelConfig.current.sensorCount,
-        actionCount: modelConfig.current.actionCount,
-        layers: modelConfig.current.layers
+        activeModel: appContext.activeConfig.name,
+        alias: appContext.activeConfig.alias,
+        epsilonDecay: appContext.activeConfig.epsilonDecay,
+        mutationRate: appContext.activeConfig.mutationRate,
+        learningRate: appContext.activeConfig.lr,
+        sensorCount: appContext.activeConfig.sensorCount,
+        actionCount: appContext.activeConfig.actionCount,
+        layers: appContext.activeConfig.layers
     }
 
     const methods = useForm({defaultValues})
@@ -34,8 +33,7 @@ const ConfigForm = (props: {
         data = cleanData(data);
         console.log(data);
 
-        const activeModel = appContext.activeModel!;
-        activeModel.current = data.name;
+        appContext.activeModel = data.name;
 
         const config = new AppConfig(data.name, data.alias);
         config.numEpisodes = data.numEpisodes;
@@ -50,7 +48,7 @@ const ConfigForm = (props: {
         config.layers = data.layers;
         config.save();
 
-        modelConfig.current = config;
+        appContext.activeConfig = config;
         props.handleHide();
     }
 

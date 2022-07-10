@@ -1,5 +1,3 @@
-import { TrainInfo } from "./train";
-
 export class AppConfig {
 	name: string;
 	alias: string;
@@ -86,16 +84,6 @@ export class AppConfig {
 		}
 		return true;
 	}
-}
-
-export type LayerConfig = {
-	activation: string;
-	inputs: number;
-	outputs: number;
-	lr: number;
-	id: number;
-	biases?: number[];
-	weights?: number[][];
 }
 
 /* const defaultTrainBrain = {

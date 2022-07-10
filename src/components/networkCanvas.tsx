@@ -5,7 +5,7 @@ import {
     getRGBA,
     lerp
 } from "../utils";
-import { AppContext } from "../App";
+import { AppContext } from "../context";
 
 const NetworkCanvas = (props: {
     network: Network;
@@ -149,7 +149,7 @@ const NetworkCanvas = (props: {
         const ctx = canvas.getContext("2d")! as CanvasRenderingContext2D;
 
         canvas.width = window.innerWidth;
-        ctx.lineDashOffset = -animTime.current / 40;
+        ctx.lineDashOffset = -animTime / 40;
 
         drawNetwork(brain)
     })
