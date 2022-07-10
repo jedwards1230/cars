@@ -15,12 +15,11 @@ Working demo is [here](https://jedwards1230.github.io/cars/)
     * Evaluate each car
     * Select the best car
     * Repeat with genes of best car
-  * Reinforcement Learning
-    * Play-and-teach
-      * Control the car with keyboard
-      * Backpropagate with control input against network output
-    * TODO: Deep reinforcement with algorithmic correction
-      * Many training loops with algorithms that generate "correct" output for training
+  * Play-and-teach
+    * Control the car with keyboard
+    * Backpropagate with control input against network output
+  * TODO: Deep reinforcement with algorithmic correction
+    * Many training loops with algorithms that generate "correct" output for training
 
 ## Todo
 ### UI
