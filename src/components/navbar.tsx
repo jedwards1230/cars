@@ -34,17 +34,17 @@ const NavComponent = (props: {
                             variant="outline-danger">🗑️</Button>}
                     <Button variant="success" onClick={props.run}>Run</Button>
                     <DropdownButton as={ButtonGroup} title={"Mode"} align="end" >
-                        <NavDropdown.Item 
-                        eventKey="1.1" 
-                        as={Link} 
-                        to="/cars/genetic"
-                        active={
-                            useLocation().pathname === "/cars/genetic" ? true : false
-                        }>Genetic</NavDropdown.Item>
-                        <NavDropdown.Item 
-                            eventKey="1.2" 
-                            as={Link} 
-                            to="/cars/teach" 
+                        <NavDropdown.Item
+                            eventKey="1.1"
+                            as={Link}
+                            to="/cars/genetic"
+                            active={
+                                useLocation().pathname === "/cars/genetic" ? true : false
+                            }>Genetic</NavDropdown.Item>
+                        <NavDropdown.Item
+                            eventKey="1.2"
+                            as={Link}
+                            to="/cars/teach"
                             active={
                                 useLocation().pathname === "/cars/teach" ? true : false
                             }>Teach</NavDropdown.Item>
