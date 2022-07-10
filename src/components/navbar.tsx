@@ -26,7 +26,7 @@ const NavComponent = (props: {
                         <NavDropdown.Item eventKey="1.1" as={Link} to="/cars/genetic">Genetic</NavDropdown.Item>
                         <NavDropdown.Item eventKey="1.2" as={Link} to="/cars/teach">Teach</NavDropdown.Item>
                         <NavDropdown.Divider />
-                        <NavDropdown.Item eventKey="2.1" onClick={handleShow}>Config</NavDropdown.Item>
+                        <NavDropdown.Item onClick={handleShow}>Config</NavDropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
                 <ConfigForm

@@ -7,8 +7,6 @@ import { AppContext } from "../context";
 
 const Teach = (props: any) => {
 	const appContext = useContext(AppContext);
-	const activeConfig = appContext.activeConfig;
-	const simConfig = appContext.simConfig!;
 
 	const [stats, setStats] = useState<{
 		key: string,
@@ -40,7 +38,7 @@ const Teach = (props: any) => {
 	}
 
 	const reset = () => {
-		appContext.sim = new Simulator(simConfig.trafficCount, simConfig.brainCount, simConfig.smartTraffic, true)
+		appContext.sim = new Simulator(appContext.simConfig.trafficCount, appContext.simConfig.brainCount, appContext.activeConfig, appContext.simConfig.smartTraffic, true)
 	}
 
 	const run = () => {
@@ -48,7 +46,7 @@ const Teach = (props: any) => {
 	}
 
 	const destroyModel = () => {
-		activeConfig.destroy();
+		appContext.activeConfig.destroy();
 		reset();
 	}
 

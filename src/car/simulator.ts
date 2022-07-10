@@ -19,7 +19,7 @@ export class Simulator {
     smartCars!: SmartCar[];
     loss: Loss;
 
-    constructor(trafficCount: number, brainCount: number, smartTraffic = false, playable = false) {
+    constructor(trafficCount: number, brainCount: number, smartConfig: AppConfig, smartTraffic = false, playable = false) {
         this.trafficCount = trafficCount;
         this.brainCount = brainCount;
         this.activeBrains = brainCount;
@@ -33,7 +33,7 @@ export class Simulator {
         }
 
         this.trafficConfig = new AppConfig("trafficForward", "forward");
-        this.brainConfig = new AppConfig("trainBrain", "fsd");
+        this.brainConfig = smartConfig;
 
         this.driverSpeed = 3;
         this.laneCount = 3;

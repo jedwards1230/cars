@@ -7,8 +7,6 @@ import { Simulator } from "../car/simulator";
 
 const Genetic = () => {
 	const appContext = useContext(AppContext);
-	const activeConfig = appContext.activeConfig!;
-	const simConfig = appContext.simConfig!;
 
 	const [stats, setStats] = useState<{
 		key: string,
@@ -39,11 +37,11 @@ const Genetic = () => {
 	}
 
 	const reset = () => {
-		appContext.sim = new Simulator(simConfig.trafficCount, simConfig.brainCount, simConfig.smartTraffic)
+		appContext.sim = new Simulator(appContext.simConfig.trafficCount, appContext.simConfig.brainCount, appContext.activeConfig, appContext.simConfig.smartTraffic)
 	}
 
 	const destroyModel = () => {
-		activeConfig.destroy();
+		appContext.activeConfig.destroy();
 		reset();
 	}
 

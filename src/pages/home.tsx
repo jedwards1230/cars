@@ -7,7 +7,6 @@ import { Navbar } from "react-bootstrap";
 
 const Home = () => {
     const appContext = useContext(AppContext);
-    const simConfig = appContext.simConfig!;
 
     const [stats, setStats] = useState<{
         key: string,
@@ -34,7 +33,7 @@ const Home = () => {
     }
 
     const reset = () => {
-        appContext.sim = new Simulator(simConfig.trafficCount, simConfig.brainCount, simConfig.smartTraffic)
+        appContext.sim = new Simulator(appContext.simConfig.trafficCount, appContext.simConfig.brainCount, appContext.activeConfig, appContext.simConfig.smartTraffic)
     }
 
     useEffect(() => {

@@ -9,13 +9,15 @@ const smartTraffic = false;
 const activeAlias = "fsd";
 const activeModel = "trainBrain";
 
-const sim = new Simulator(trafficCount, brainCount, smartTraffic);
+const activeConfig = new AppConfig(activeModel, activeAlias)
+
+const sim = new Simulator(trafficCount, brainCount, activeConfig, smartTraffic);
 
 export const defaultAppContextConfig: AppContextConfig = {
 	sim: sim,
 	activeAlias: activeAlias,
 	activeModel: activeModel,
-	activeConfig: new AppConfig(activeModel, activeAlias),
+	activeConfig: activeConfig,
 	animFrame: 0,
 	animTime: 0,
 	simConfig: {
@@ -23,6 +25,11 @@ export const defaultAppContextConfig: AppContextConfig = {
 		brainCount: brainCount,
 		smartTraffic: smartTraffic
 	},
+	trainConfig: {
+		numEpisodes: 100,
+		numSteps: 1000,
+		counter: 0
+	}
 }
 
 export const AppContext = createContext<AppContextConfig>(defaultAppContextConfig);

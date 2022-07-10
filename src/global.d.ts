@@ -1,14 +1,19 @@
 type AppContextConfig = {
-	activeAlias?: MutableRefObject<string>;
-	activeModel?: MutableRefObject<string>;
-	animFrame?: MutableRefObject<number>
-	animTime?: MutableRefObject<number>
-	sim?: MutableRefObject<Simulator>
-	activeConfig?: MutableRefObject<AppConfig>
-	simConfig?: {
-		trafficCount: MutableRefObject<number>
-		brainCount: MutableRefObject<number>
-		smartTraffic: MutableRefObject<boolean>
+	activeAlias: string
+	activeModel: string
+	animFrame: number
+	animTime: number
+	sim: Simulator
+	activeConfig: AppConfig
+	simConfig: {
+		trafficCount: number
+		brainCount: number
+		smartTraffic: boolean
+	}
+	trainConfig: {
+		numEpisodes: number
+		numSteps: number
+		counter: number
 	}
 }
 

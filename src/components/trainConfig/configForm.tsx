@@ -12,12 +12,14 @@ const ConfigForm = (props: {
     handleHide: () => void;
 }) => {
     const appContext = useContext(AppContext);
+    const simConfig = appContext.simConfig;
+    const trainConfig = appContext.trainConfig;
 
     const defaultValues = {
-        numEpisodes: 1000,
-        numSteps: 2000,
-        smartCarCount: 1,
-        trafficCount: 50,
+        numEpisodes: trainConfig.numEpisodes,
+        numSteps: trainConfig.numSteps,
+        smartCarCount: simConfig.brainCount,
+        trafficCount: simConfig.trafficCount,
         activeModel: appContext.activeConfig.name,
         alias: appContext.activeConfig.alias,
         epsilonDecay: appContext.activeConfig.epsilonDecay,
@@ -36,8 +38,10 @@ const ConfigForm = (props: {
         appContext.activeModel = data.name;
 
         const config = new AppConfig(data.name, data.alias);
-        config.numEpisodes = data.numEpisodes;
-        config.numSteps = data.numSteps;
+        trainConfig.numEpisodes = data.numEpisodes;
+        trainConfig.numSteps = data.numSteps;
+        simConfig.brainCount = data.smartCarCount;
+        simConfig.trafficCount = data.trafficCount;
         config.name = data.name;
         config.alias = data.alias;
         config.epsilonDecay = data.epsilonDecay;
