@@ -9,9 +9,13 @@ const NavComponent = (props: {
     saveModel?: () => void,
     destroyModel?: () => void,
 }) => {
-    const [show, setShow] = useState(false);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const [showConfigForm, setConfigForm] = useState(false);
+    const closeConfigForm = () => setConfigForm(false);
+    const openConfigForm = () => setConfigForm(true);
+
+    /* const [showWeights, setWeights] = useState(false);
+    const closeWeights = () => setWeights(false);
+    const openWeights = () => setWeights(true); */
 
     return (
         <Navbar bg="light" className="px-3">
@@ -49,12 +53,16 @@ const NavComponent = (props: {
                                 useLocation().pathname === "/cars/teach" ? true : false
                             }>Teach</NavDropdown.Item>
                         <NavDropdown.Divider />
-                        <NavDropdown.Item onClick={handleShow}>Config</NavDropdown.Item>
+                        {/* <NavDropdown.Item onClick={openWeights}>Weights</NavDropdown.Item> */}
+                        <NavDropdown.Item onClick={openConfigForm}>Config</NavDropdown.Item>
                     </DropdownButton>
-                </ButtonGroup>
+                </ButtonGroup>{/* 
+                <WeightsModal
+                    show={showWeights}
+                    handleHide={closeWeights} /> */}
                 <ConfigForm
-                    show={show}
-                    handleHide={handleClose} />
+                    show={showConfigForm}
+                    handleHide={closeConfigForm} />
             </Nav>
         </Navbar>
     )

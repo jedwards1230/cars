@@ -53,7 +53,7 @@ const Teach = (props: any) => {
 
 	const saveModel = () => {
 		const bestCar = appContext.sim.getBestCar();
-		bestCar.saveModelConfig();
+		bestCar.saveModelConfig(appContext.activeConfig);
 		//reset();
 	}
 

@@ -273,17 +273,12 @@ export class SmartCar extends Car {
 		if (!this.damaged || bestCar) super.draw(ctx, bestCar);
 	}
 
-	saveModelConfig(generation?: Generation) {
-		//if (info) this.config.generations.push(info);
-		const layers = this.brain.saveLayers();
-		
-		if (generation) {
-			generation.layers = layers;
-			this.config.generations.push(generation);
-		}
-		this.config.layers = layers;
-		this.config.save();
-		return this.config;
+	saveModelConfig(config: AppConfig, generation?: Generation) {
+		if (generation) this.config.generations.push(generation);
+		config.layers = this.brain.saveLayers();
+		config.save();
+		this.config = config;
+		return config;
 	}
 
 	getMetrics(action: number[]) {

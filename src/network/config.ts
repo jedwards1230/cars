@@ -59,17 +59,14 @@ export class AppConfig {
 		localStorage.setItem(this.name, data);
 	}
 
-	clearWeights() {
-		this.layers.forEach((layer) => {
-			layer.biases = null;
-			layer.weights = null;
-		});
-		this.save();
+	clear() {
+		this.generations = [];
+		this.#clearWeights();
 	}
 
 	destroy() {
 		this.generations = [];
-		this.clearWeights();
+		this.#clearWeights();
 		//localStorage.removeItem(this.name);
 	}
 
@@ -104,5 +101,13 @@ export class AppConfig {
 			if (this.layers[i].outputs !== config.layers[i].outputs) return false;
 		}
 		return true;
+	}
+
+	#clearWeights() {
+		this.layers.forEach((layer) => {
+			layer.biases = null;
+			layer.weights = null;
+		});
+		this.save();
 	}
 }

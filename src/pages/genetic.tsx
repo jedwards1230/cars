@@ -22,7 +22,7 @@ const Genetic = () => {
 		if (appContext.sim.activeBrains === 0) {
 			const bestCar = appContext.sim.getBestCar();
 			const gen = getGeneration(bestCar);
-			appContext.activeConfig = bestCar.saveModelConfig(gen);
+			if (bestCar.distance > 300) appContext.activeConfig = bestCar.saveModelConfig(appContext.activeConfig, gen);
 			reset();
 		} else {
 			appContext.sim.update();
@@ -30,7 +30,7 @@ const Genetic = () => {
 		updateStats();
 
 		appContext.animTime = time;
-		appContext.animFrame! = requestAnimationFrame(animate)
+		appContext.animFrame = requestAnimationFrame(animate)
 	}
 
 	const getGeneration = (car: SmartCar): Generation => {
@@ -66,12 +66,12 @@ const Genetic = () => {
 	const saveModel = () => {
 		const bestCar = appContext.sim.getBestCar();
 		const gen = getGeneration(bestCar);
-		appContext.activeConfig = bestCar.saveModelConfig(gen);
+		appContext.activeConfig = bestCar.saveModelConfig(appContext.activeConfig, gen);
 		reset();
 	}
 
 	useEffect(() => {
-		appContext.simConfig.brainCount = 10;
+		appContext.simConfig.brainCount = 1000;
 		run();
 		animate();
 		return () => cancelAnimationFrame(appContext.animFrame);

@@ -155,7 +155,6 @@ export class Layer {
             const bRnd = Math.random();
             const biasLimit = bRnd * 2 - 1;
             if (rate > bRnd) {
-                console.log("setting limit", biasLimit);
                 this.biases[i] = biasLimit;
             } else {
                 this.biases[i] = lerp(

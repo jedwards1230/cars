@@ -47,7 +47,6 @@ type Generation = {
 	id: number;
 	distance: number;
 	score: number;
-	layers?: LayerConfig[];
 }
 
 type Point = {
