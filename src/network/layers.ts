@@ -140,8 +140,9 @@ export class Layer {
     mutate(amount: number, rate: number) {
         for (let i = 0; i < this.outputs.length; i++) {
             for (let j = 0; j < this.inputs.length; j++) {
-                const weightLimit = Math.random() * 2 - 1;
-                if (rate > Math.random()) {
+                const wRnd = Math.random();
+                const weightLimit = wRnd * 2 - 1;
+                if (rate > wRnd) {
                     this.weights[j][i] = weightLimit;
                 } else {
                     this.weights[j][i] = lerp(
@@ -151,8 +152,10 @@ export class Layer {
                     )
                 }
             }
-            const biasLimit = Math.random() * 2 - 1;
-            if (rate > Math.random()) {
+            const bRnd = Math.random();
+            const biasLimit = bRnd * 2 - 1;
+            if (rate > bRnd) {
+                console.log("setting limit", biasLimit);
                 this.biases[i] = biasLimit;
             } else {
                 this.biases[i] = lerp(
@@ -187,7 +190,7 @@ export class Sigmoid extends Layer {
         }
         this.deactivation = (x: number[]) => {
             return x.map(x => x * (1 - x));
-        }
+        }        
     }
 }
 

@@ -43,7 +43,7 @@ export class Simulator {
         this.road = new Road(this.laneCount);
         this.startLane = (brainCount === 1) ? getRandomInt(0, this.road.laneCount - 1) : 1;
         this.traffic = this.#generateTraffic();
-        this.smartCars = this.#generateBrains();
+        this.smartCars = this.#generateSmartCars();
     }
 
     update() {
@@ -102,14 +102,12 @@ export class Simulator {
         });
     }
 
-    #generateBrains() {
+    #generateSmartCars() {
         const smartCars: SmartCar[] = [];
+        const y = this.road.getLaneCenter(this.startLane);
         for (let i = 0; i < this.brainCount; i++) {
-            const y = this.road.getLaneCenter(this.startLane);
-
             const car = new SmartCar(i, 0, y, this.driverSpeed, this.brainConfig, this.playable);
             if (i > 0) car.brain.mutate(this.brainConfig.mutationAmount, this.brainConfig.mutationRate);
-
             smartCars.push(car);
         }
         return smartCars;
@@ -117,7 +115,7 @@ export class Simulator {
 
     #generateTraffic() {
         const traffic = [];
-        let placed = new Array(this.road.laneCount).fill(0);
+        const placed = new Array(this.road.laneCount).fill(0);
 
         // randomize lane
         const getStartPosition = () => {
@@ -132,12 +130,9 @@ export class Simulator {
             const idx = i + this.brainCount;
             const [x, y] = getStartPosition();
 
-            let car;
-            if (this.smartTraffic) {
-                car = new SmartCar(i, x, y, this.driverSpeed, this.trafficConfig);
-            } else {
-                car = new DumbCar(idx, x, y);
-            }
+            const car = this.smartTraffic 
+                ? new SmartCar(i, x, y, this.driverSpeed, this.trafficConfig) 
+                : new DumbCar(idx, x, y);
 
             traffic.push(car);
         }
@@ -198,6 +193,6 @@ export class Simulator {
         const alias = this.brainConfig.alias;
         this.brainConfig = new AppConfig(name, alias);
         this.traffic = this.#generateTraffic();
-        this.smartCars = this.#generateBrains();
+        this.smartCars = this.#generateSmartCars();
     }
 }

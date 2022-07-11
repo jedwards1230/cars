@@ -254,7 +254,7 @@ export class SmartCar extends Car {
 		// multiply for each car passed
 		// target speed before passing a car for start of sim
 		fitness *= this.carsPassed > 0 
-			? this.carsPassed * (this.carsPassed + 1)
+			? this.carsPassed ** (this.carsPassed + 1)
 			: this.speed / this.maxSpeed;
 
 		// knock percentage of fitness if damaged
