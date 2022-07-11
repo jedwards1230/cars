@@ -110,13 +110,11 @@ export class Simulator {
     }
 
     getBestCar(): SmartCar {
-        // find car that is undamaged and has greated x value
-        const bestCar = this.smartCars.reduce((prev, curr) => {
-            if (curr.fitness < prev.fitness) {
-                return curr;
-            }
-            return prev;
-        }, this.smartCars[0]);
+        let bestCar = this.smartCars[0];
+        for (let i = 0; i < this.smartCars.length; i++) {
+            const car = this.smartCars[i];
+            if (car.fitness < bestCar.fitness) bestCar = car;
+        }
         bestCar.countCarsPassed(this.traffic);
         return bestCar;
     }

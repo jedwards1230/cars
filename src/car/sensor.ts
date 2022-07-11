@@ -41,7 +41,7 @@ export class Sensor {
 
     getSensorOffsets() {
         return this.readings.map(
-            s => s == null ? 0 : parseFloat((1 - s.offset).toFixed(4))
+            s => s == null ? 0 : 1 - s.offset
         );
     }
 

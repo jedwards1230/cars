@@ -22,7 +22,7 @@ export class AppConfig {
 			{
 				id: 0,
 				activation: "Tanh",
-				inputs: 9,
+				inputs: 10,
 				outputs: 15,
 				lr: 0.01,
 				biases: null,

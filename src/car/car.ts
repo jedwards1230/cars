@@ -218,9 +218,11 @@ export class SmartCar extends Car {
 	}
 
 	countCarsPassed(traffic: Car[]) {
-		this.carsPassed = traffic.reduce((acc, car) => {
-			return (car.x < this.x) ? acc + 1 : acc;
-		}, 0);
+		let acc = 0;
+		for (let i = 0; i < traffic.length; i++) {
+			if (traffic[i].x < this.x) acc++;
+		}
+		this.carsPassed = acc;
 	}
 
 	lazyAction(borders: Point[][], traffic: Car[], backprop = false): number[] {
@@ -238,10 +240,10 @@ export class SmartCar extends Car {
 
 		const y = this.y / RoadCanvasDefaultHeight;
 		const angle = this.angle / 4;
-		//const speed = this.speed / this.maxSpeed;
+		const speed = this.speed / this.maxSpeed;
 
 		const offsets = this.sensor.getSensorOffsets();
-		const sensorOffsets = [y, angle].concat(offsets);
+		const sensorOffsets = [y, angle, speed].concat(offsets);
 
 		return sensorOffsets;
 	}
@@ -251,16 +253,16 @@ export class SmartCar extends Car {
 		const distance = this.distance;
 		let fitness = distance / 100;
 
-		const mOffset = Math.max(...this.sensorOffsets);
-		if (mOffset > 0.3) fitness *= 1.3;
+		/* const mOffset = Math.max(...this.sensorOffsets);
+		if (mOffset < 0.1) fitness *= 1.3; */
 
 		// knock percentage of fitness if damaged
-		if (this.damaged) fitness *= 0.95;
+		if (this.damaged) fitness *= 0.9;
 
 		// multiply for each car passed
 		// target speed before passing a car for start of sim
 		fitness *= this.carsPassed > 0 
-			? this.carsPassed ** (this.carsPassed + 1)
+			? this.carsPassed * (this.carsPassed + 1)
 			: this.speed / this.maxSpeed ** 2;
 
 		// try to approach 0

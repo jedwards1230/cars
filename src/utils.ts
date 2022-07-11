@@ -59,7 +59,11 @@ export function getRandomInt(min: number, max: number) {
 
 // dot product of two arrays
 export function dotProduct(A: any[], B: { [x: string]: number; }) {
-    return A.reduce((acc: number, cur: number, i: string | number) => acc + cur * B[i], 0);
+    let acc = 0;
+    for (let i = 0; i < A.length; i++) {
+        acc += A[i] * B[i];
+    }
+    return acc;
 }
 
 /** (targets - outputs) ** 2 */
