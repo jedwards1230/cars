@@ -207,12 +207,15 @@ export class SmartCar extends Car {
 	}
 
 	update(borders: Point[][], traffic: Car[], action?: number[]) {
-		// kill those left behind
+		// kill those left behind or too slow
 		const stepFactor = (this.distance * 2) / this.steps;
-		if (this.steps > 500 && stepFactor < 1) this.damaged = true;
+		if (this.steps > 300 && stepFactor < 1) this.damaged = true;
+		if (this.steps > 500 && this.carsPassed < 3) this.damaged = true;
 
-		if (action) this.controls.update(action);
-		super.update(borders, traffic);
+		if (!this.damaged) {
+			if (action) this.controls.update(action);
+			super.update(borders, traffic);
+		}
 
 		this.countCarsPassed(traffic);
 
@@ -251,7 +254,10 @@ export class SmartCar extends Car {
 		let fitness = distance / 10;
 
 		// multiply for each car passed
-		fitness *= (this.carsPassed + 1);
+		// target speed before passing a car for start of sim
+		fitness *= this.carsPassed > 0 
+			? this.carsPassed 
+			: this.speed / this.maxSpeed;
 
 		// knock percentage of fitness if damaged
 		if (this.damaged) fitness *= 0.8;
@@ -309,19 +315,19 @@ export class SmartCar extends Car {
 
 	/** damage any car thats fallen too far behind */
 	checkInBounds(ctx: CanvasRenderingContext2D) {
-		this.polygon.forEach(point => {
-			if (ctx.isPointInPath(point.x - DamagedOffScreenBounds, point.y)) {
-				this.damaged = true;
-			}
-		})
+		//console.log("this", this.x, ctx.isPointInPath(this.x - DamagedOffScreenBounds, this.y));
+		if (ctx.isPointInPath(this.x - DamagedOffScreenBounds, this.y)) {
+			this.damaged = true;
+		}
 	}
 
 	draw(ctx: CanvasRenderingContext2D, bestCar?: boolean): void {
 		if (!this.damaged || bestCar) super.draw(ctx, bestCar);
 	}
 
-	saveModelConfig(info?: TrainInfo) {
-		if (info) this.config.generations.push(info);
+	saveModelConfig(generation?: number) {
+		//if (info) this.config.generations.push(info);
+		if (generation) this.config.generation = generation;
 		this.config.layers = this.brain.saveLayers();
 		this.config.save();
 	}

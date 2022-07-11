@@ -4,6 +4,7 @@ export class AppConfig {
 	lr: number;
 	layers: LayerConfig[];
 	generations: TrainInfo[];
+	generation: number;
 	epsilonDecay: number;
 	mutationRate: number;
 	sensorCount: number;
@@ -17,6 +18,7 @@ export class AppConfig {
 		this.lr = 0.01;
 		this.layers = [];
 		this.generations = [];
+		this.generation = 0;
 		this.epsilonDecay = 0.99;
 		this.mutationRate = 0.1;
 		this.sensorCount = 0;
@@ -35,7 +37,7 @@ export class AppConfig {
 
 	clearWeights() {
 		this.layers.forEach((layer) => {
-			layer.biases = [];
+			layer.biases = new Array(layer.outputs).fill(0.1);
 			layer.weights = new Array(layer.inputs);
 			for (let i = 0; i < layer.inputs; i++) {
 				layer.weights[i] = new Array(layer.outputs);
@@ -49,6 +51,7 @@ export class AppConfig {
 
 	destroy() {
 		this.generations = [];
+		this.generation = 0;
 		this.clearWeights();
 		//localStorage.removeItem(this.name);
 	}

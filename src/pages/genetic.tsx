@@ -9,27 +9,36 @@ const Genetic = () => {
 	const appContext = useContext(AppContext);
 
 	const [stats, setStats] = useState<{
-		fitness?: string,
+		fitness?: string
 		active?: string
 		carsPassed?: string
 		steps?: string
+		generation? : string
 	}>({});
 
 	const animate = (time: number = 0) => {
-		appContext.sim.update();
-		updateStats();
+		const generation: number = appContext.activeConfig.generation;
+		if (appContext.sim.activeBrains === 0) {
+			const bestCar = appContext.sim.getBestCar();
+			bestCar.saveModelConfig(generation + 1);
+			reset();
+		} else {
+			appContext.sim.update();
+		}
+		updateStats(generation);
 
 		appContext.animTime = time;
 		appContext.animFrame! = requestAnimationFrame(animate)
 	}
 
-	const updateStats = () => {
+	const updateStats = (generation: number) => {
 		const bestCar = appContext.sim.getBestCar();
 		setStats({
 			fitness: bestCar.fitness.toFixed(8),
 			active: appContext.sim.activeBrains.toFixed(0),
 			carsPassed: bestCar.carsPassed.toFixed(0),
-			steps: bestCar.steps.toFixed(0)
+			steps: appContext.sim.steps.toFixed(0),
+			generation: generation.toFixed(0)
 		});
 	}
 
@@ -44,7 +53,10 @@ const Genetic = () => {
 
 	const saveModel = () => {
 		const bestCar = appContext.sim.getBestCar();
-		bestCar.saveModelConfig();
+		const generation: number = appContext.activeConfig.generation;
+		bestCar.saveModelConfig(generation + 1);
+		appContext.activeConfig = bestCar.config;
+		reset();
 	}
 
 	useEffect(() => {

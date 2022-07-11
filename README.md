@@ -10,21 +10,21 @@ Working demo is [here](https://jedwards1230.github.io/cars/)
   * Gain better understanding of Machine Learning Algorithms
 
 ## Modes of Training
-  * Genetic
+  * Neuroevolution of Augmenting Topologies (NEAT algorithm) (WIP)
     * Randomly generate a population of cars
     * Evaluate each car
     * Select the best car
-    * Repeat with genes of best car
-  * Play-and-teach
+    * Repeat with mutations of best car
+  * Play-and-Teach (TO FIX)
     * Control the car with keyboard
-    * Backpropagate with control input against network output
-  * TODO: Deep reinforcement with algorithmic correction
+    * Backpropagate with control input against network output predictions
+  * Deep Reinforcement (TODO)
     * Many training loops with algorithms that generate "correct" output for training
 
 ## Todo
 ### UI
 * Web workers for training?
-* Input validation for forms
+* Form validation
   * Ensure network inputs/outputs are anchored to sensor inputs/action counts output
   * Establish better defaults
   * Tooltips or help would be cool

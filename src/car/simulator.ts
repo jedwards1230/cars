@@ -18,6 +18,7 @@ export class Simulator {
     traffic!: Car[];
     smartCars!: SmartCar[];
     loss: Loss;
+    steps: number;
 
     constructor(trafficCount: number, brainCount: number, smartConfig: AppConfig, smartTraffic = false, playable = false) {
         this.trafficCount = trafficCount;
@@ -37,6 +38,7 @@ export class Simulator {
 
         this.driverSpeed = 4;
         this.laneCount = 3;
+        this.steps = 0;
 
         this.road = new Road(this.laneCount);
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
@@ -45,6 +47,7 @@ export class Simulator {
     }
 
     update() {
+        this.steps++;
         this.#updateTraffic();
         this.#updateSmartCars();
 
@@ -153,7 +156,8 @@ export class Simulator {
         ctx.save();
 
         // follow best car
-        ctx.translate(canvas.width * 0.3 - bestCar.x, 0);
+        const canvasOffset = canvas.width * 0.3 - bestCar.x;
+        ctx.translate(canvasOffset, 0);
 
         // draw road
         this.road.draw(ctx);
