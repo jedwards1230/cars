@@ -4,29 +4,45 @@ export class AppConfig {
 	lr: number;
 	layers: LayerConfig[];
 	generations: Generation[];
-	generation: number;
 	epsilonDecay: number;
 	mutationAmount: number;
 	mutationRate: number;
 	sensorCount: number;
 	actionCount: number;
-	smartCarCount: number;
-	trafficCount: number;
 
 	constructor(name: string, alias: string) {
 		this.name = name;
 		this.alias = alias;
 		this.lr = 0.01;
-		this.layers = [];
 		this.generations = [];
-		this.generation = 0;
 		this.epsilonDecay = 0.99;
-		this.mutationAmount = 0.1;
-		this.mutationRate = 0.0;
-		this.sensorCount = 0;
-		this.actionCount = 0;
-		this.smartCarCount = 1;
-		this.trafficCount = 30;
+		this.mutationAmount = 0.01;
+		this.mutationRate = 0.01;
+		this.sensorCount = 7;
+		this.actionCount = 4;
+		this.layers = [
+			{
+				id: 0,
+				activation: "Tanh",
+				inputs: 10,
+				outputs: 15,
+				lr: 0.01,
+			},
+			{
+				id: 1,
+				activation: "Tanh",
+				inputs: 15,
+				outputs: 10,
+				lr: 0.01,
+			},
+			{
+				id: 2,
+				activation: "Sigmoid",
+				inputs: 10,
+				outputs: 4,
+				lr: 0.01,
+			},
+		];
 
 		this.load();
 	}
@@ -53,7 +69,6 @@ export class AppConfig {
 
 	destroy() {
 		this.generations = [];
-		this.generation = 0;
 		this.clearWeights();
 		//localStorage.removeItem(this.name);
 	}
@@ -62,14 +77,14 @@ export class AppConfig {
 	load() {
 		// Check localStorage
 		const data = localStorage.getItem(this.name);
-		const config = data ? JSON.parse(data) : defaultTrainBrain;
+		if (!data) return;
+		const config = JSON.parse(data)
 
-		this.smartCarCount = config.smartCarCount;
-		this.trafficCount = config.trafficCount;
 		this.name = config.name;
 		this.alias = config.alias;
 		this.lr = config.lr;
 		this.epsilonDecay = config.epsilonDecay;
+		this.mutationAmount = config.mutationAmount;
 		this.mutationRate = config.mutationRate;
 		this.sensorCount = config.sensorCount;
 		this.actionCount = config.actionCount;
@@ -91,35 +106,3 @@ export class AppConfig {
 		return true;
 	}
 }
-
-const defaultTrainBrain = {
-	name: "trainBrain",
-	alias: "fsd",
-	lr: 0.01,
-	epsilonDecay: 0.9,
-	mutationAmount: 0.015,
-	mutationRate: 0.01,
-	sensorCount: 7,
-	actionCount: 4,
-	layers: [
-		{
-			id: 0,
-			activation: "Tanh",
-			inputs: 10,
-			outputs: 15,
-		},
-		{
-			id: 1,
-			activation: "Tanh",
-			inputs: 15,
-			outputs: 10,
-		},
-		{
-			id: 2,
-			activation: "Sigmoid",
-			inputs: 10,
-			outputs: 4,
-		},
-	],
-	generations: [],
-};

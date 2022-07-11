@@ -22,7 +22,7 @@ const Genetic = () => {
 		if (appContext.sim.activeBrains === 0) {
 			const bestCar = appContext.sim.getBestCar();
 			const gen = getGeneration(bestCar);
-			if (bestCar.carsPassed >= 3) appContext.activeConfig = bestCar.saveModelConfig(gen);
+			if (bestCar.carsPassed >= 2) appContext.activeConfig = bestCar.saveModelConfig(gen);
 			reset();
 		} else {
 			appContext.sim.update();
@@ -51,7 +51,7 @@ const Genetic = () => {
 	}
 
 	const reset = () => {
-		appContext.sim = new Simulator(appContext.simConfig.trafficCount, appContext.simConfig.brainCount, appContext.activeConfig, appContext.simConfig.smartTraffic)
+		appContext.sim = new Simulator(appContext.simConfig.trafficCount, appContext.simConfig.brainCount, appContext.activeConfig, appContext.simConfig.smartTraffic);
 	}
 
 	const run = () => {

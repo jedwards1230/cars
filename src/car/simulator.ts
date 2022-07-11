@@ -41,7 +41,7 @@ export class Simulator {
         this.steps = 0;
 
         this.road = new Road(this.laneCount);
-        this.startLane = getRandomInt(0, this.road.laneCount - 1);
+        this.startLane = (brainCount === 1) ? getRandomInt(0, this.road.laneCount - 1) : 1;
         this.traffic = this.#generateTraffic();
         this.smartCars = this.#generateBrains();
     }
@@ -80,10 +80,14 @@ export class Simulator {
                 car.brain.backward(d);
             }
         } else {
+            const toDelete: number[] = [];
             this.smartCars.forEach(car => {
                 const action = car.lazyAction(this.road.borders, this.traffic, true);
                 car.update(this.road.borders, this.traffic, action);
+                if (car.damaged) toDelete.push(car.id);
             });
+            const bestCar = this.getBestCar();
+            this.smartCars = this.smartCars.filter(car => !toDelete.includes(car.id) || car.id === bestCar.id);
         }
     }
 
@@ -148,7 +152,6 @@ export class Simulator {
             }
             return prev;
         }, this.smartCars[0]);
-        console.log(bestCar.sensorOffsets);
         return bestCar;
     }
 

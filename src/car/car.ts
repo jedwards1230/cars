@@ -208,7 +208,7 @@ export class SmartCar extends Car {
 
 	update(borders: Point[][], traffic: Car[], action?: number[]) {
 		// kill those left behind or too slow
-		if (this.steps < 400 && this.steps > 10 && this.speed < 0.1) this.damaged = true;
+		if (this.steps < 400 && this.steps > 100 && this.speed < 0.1) this.damaged = true;
 		if (this.steps > 400 && this.carsPassed < 3) this.damaged = true;
 
 		if (!this.damaged) {
@@ -254,7 +254,7 @@ export class SmartCar extends Car {
 		// multiply for each car passed
 		// target speed before passing a car for start of sim
 		fitness *= this.carsPassed > 0 
-			? this.carsPassed * this.carsPassed
+			? this.carsPassed * (this.carsPassed + 1)
 			: this.speed / this.maxSpeed;
 
 		// knock percentage of fitness if damaged
@@ -275,8 +275,13 @@ export class SmartCar extends Car {
 
 	saveModelConfig(generation?: Generation) {
 		//if (info) this.config.generations.push(info);
-		if (generation) this.config.generations.push(generation);
-		this.config.layers = this.brain.saveLayers();
+		const layers = this.brain.saveLayers();
+		
+		if (generation) {
+			generation.layers = layers;
+			this.config.generations.push(generation);
+		}
+		this.config.layers = layers;
 		this.config.save();
 		return this.config;
 	}

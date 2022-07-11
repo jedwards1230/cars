@@ -21,7 +21,7 @@ export class Layer {
         this.id = -1;
         this.lr = config.lr;
 
-        this.biases = new Array(config.outputs).fill(0.1);
+        this.biases = new Array(config.outputs).fill(0);
         this.outputs = new Array(config.outputs);
 
         this.#randomize();
@@ -128,11 +128,13 @@ export class Layer {
 
     /** Randomize weights with (Math.random() * 2 - 1) */
     #randomize() {
-        for (let i = 0; i < this.inputs.length; i++) {
-            for (let j = 0; j < this.outputs.length; j++) {
-                this.weights[i][j] = Math.random() * 2 - 1;
-            }
-        }
+        this.weights.forEach(input => {
+            input.forEach(w => w = Math.random() * 2 - 1);
+        })
+        this.weights = this.weights.map(input => {
+            return input.map(b => b = Math.random() * 2 - 1);
+        })
+        this.biases = this.biases.map(b => b = Math.random() * 2 - 1);
     }
 
     mutate(amount: number, rate: number) {

@@ -4,11 +4,13 @@ import { AppContext } from "../context";
 
 const GenerationEntries = (props: any) => {
 	const appContext = useContext(AppContext);
+    // get reversed list of generations
+    const generations = appContext.activeConfig.generations.slice(0).reverse();
     
     return (
         <Container>
 				<ListGroup>
-					{appContext.activeConfig.generations.map((gen: Generation, i: number) => {
+					{generations.map((gen: Generation, i: number) => {
 						return (
 							<ListGroup.Item key={i} className="text-center">
 								<Row>

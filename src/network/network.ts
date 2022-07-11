@@ -18,13 +18,17 @@ export class Network {
 
     constructor(modelConfig: AppConfig) {
         this.memory = [];
-        this.layers = [];
         this.confidence = 0.5;
         this.name = modelConfig.name;
         this.lr = modelConfig.lr;
         this.epsilon = modelConfig.epsilonDecay;
         this.alias = modelConfig.alias;
-        this.setModelLayers(modelConfig.layers);
+        
+        this.layers = new Array(modelConfig.layers.length);
+        modelConfig.layers.forEach((layerConfig, i) => {
+            layerConfig.lr = this.lr;
+            this.layers[i] = new LayerMap[layerConfig.activation](layerConfig);
+        })
 
         this.lossFunction = (targets, outputs) => {
             let cost = 0
@@ -80,16 +84,6 @@ export class Network {
         });
 
         return layers
-    }
-
-    /** Set model layers */
-    setModelLayers = (layers: LayerConfig[]) => {
-        const preparedLayers = new Array(layers.length);
-        layers.forEach((layerConfig, i) => {
-            layerConfig.lr = this.lr;
-            preparedLayers[i] = new LayerMap[layerConfig.activation](layerConfig);
-        })
-        this.layers = preparedLayers;
     }
 
     decay() {
