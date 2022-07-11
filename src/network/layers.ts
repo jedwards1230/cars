@@ -14,20 +14,21 @@ export class Layer {
 
     constructor(config: LayerConfig) {
         this.inputs = new Array(config.inputs);
-        this.weights = new Array(config.inputs);
-        for (let i = 0; i < config.inputs; i++) {
-            this.weights[i] = new Array(config.outputs).fill(0);
-        }
+        this.outputs = new Array(config.outputs);
         this.id = -1;
         this.lr = config.lr;
 
-        this.biases = new Array(config.outputs).fill(0);
-        this.outputs = new Array(config.outputs);
-
-        this.#randomize();
-
-        if (config.biases) this.biases = [...config.biases];
-        if (config.weights) this.weights = [...config.weights];
+        if (config.biases && config.weights) {
+            this.biases = [...config.biases];
+            this.weights = [...config.weights];
+        } else {
+            this.biases = new Array(config.outputs);
+            this.weights = new Array(config.inputs);
+            for (let i = 0; i < config.inputs; i++) {
+                this.weights[i] = new Array(config.outputs);
+            }
+            this.#randomize();
+        }
     }
 
     /** Forward propagation */
@@ -128,18 +129,17 @@ export class Layer {
 
     /** Randomize weights with (Math.random() * 2 - 1) */
     #randomize() {
-        this.weights.forEach(input => {
-            input.forEach(w => w = Math.random() * 2 - 1);
-        })
-        this.weights = this.weights.map(input => {
-            return input.map(b => b = Math.random() * 2 - 1);
-        })
-        this.biases = this.biases.map(b => b = Math.random() * 2 - 1);
+        for (let i = 0; i < this.outputs.length; i++) {
+            for (let j = 0; j < this.inputs.length; j++) {
+                this.weights[j][i] = Math.random() * 2 - 1;
+            }
+            this.biases[i] = Math.random() * 2 - 1;
+        }
     }
 
     mutate(amount: number, rate: number) {
-        for (let i=0; i < this.outputs.length; i++) {
-            for (let j=0; j < this.inputs.length; j++) {
+        for (let i = 0; i < this.outputs.length; i++) {
+            for (let j = 0; j < this.inputs.length; j++) {
                 const weightLimit = Math.random() * 2 - 1;
                 if (rate > Math.random()) {
                     this.weights[j][i] = weightLimit;

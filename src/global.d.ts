@@ -25,8 +25,8 @@ type LayerConfig = {
 	outputs: number;
 	lr: number;
 	id: number;
-	biases?: number[];
-	weights?: number[][];
+	biases: null | number[];
+	weights: null | number[][];
 }
 
 type LayerMapping = {

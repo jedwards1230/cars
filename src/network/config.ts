@@ -27,6 +27,8 @@ export class AppConfig {
 				inputs: 10,
 				outputs: 15,
 				lr: 0.01,
+				biases: null,
+				weights: null,
 			},
 			{
 				id: 1,
@@ -34,6 +36,8 @@ export class AppConfig {
 				inputs: 15,
 				outputs: 10,
 				lr: 0.01,
+				biases: null,
+				weights: null,
 			},
 			{
 				id: 2,
@@ -41,6 +45,8 @@ export class AppConfig {
 				inputs: 10,
 				outputs: 4,
 				lr: 0.01,
+				biases: null,
+				weights: null,
 			},
 		];
 
@@ -55,14 +61,8 @@ export class AppConfig {
 
 	clearWeights() {
 		this.layers.forEach((layer) => {
-			layer.biases = new Array(layer.outputs).fill(0.1);
-			layer.weights = new Array(layer.inputs);
-			for (let i = 0; i < layer.inputs; i++) {
-				layer.weights[i] = new Array(layer.outputs);
-				for (let j = 0; j < layer.outputs; j++) {
-					layer.weights[i][j] = 0;
-				}
-			}
+			layer.biases = null;
+			layer.weights = null;
 		});
 		this.save();
 	}
