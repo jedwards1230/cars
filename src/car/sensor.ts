@@ -46,7 +46,7 @@ export class Sensor {
     }
 
     #getReading(ray: Point[], roadBorders: Point[][], traffic: Car[]) : null | SensorReading {
-        let touches = [];
+        const touches = [];
 
         // check overlap with borders
         for (let i = 0; i < roadBorders.length; i++) {

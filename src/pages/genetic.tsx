@@ -6,24 +6,25 @@ import { Simulator } from "../car/simulator";
 import { SmartCar } from "../car/car";
 import RoadCanvas from "../components/roadCanvas";
 import GenerationEntries from "../components/generationEntries";
+import NetworkCanvas from "../components/networkCanvas";
 
 const Genetic = () => {
 	const appContext = useContext(AppContext);
 
 	const [stats, setStats] = useState<{
-		fitness?: string
-		active?: string
-		carsPassed?: string
-		steps?: string
-		generation?: number
+		active?: number | string
+		bestID?: number | string
+		carsPassed?: number | string
+		steps?: number | string
 	}>({});
 
 	const animate = (time: number = 0) => {
 		if (appContext.sim.activeBrains === 0) {
 			const bestCar = appContext.sim.getBestCar();
 			const gen = getGeneration(bestCar);
-			if (bestCar.distance > 300) appContext.activeConfig = bestCar.saveModelConfig(appContext.activeConfig, gen);
+			if (bestCar.carsPassed >= 1) appContext.activeConfig = bestCar.saveModelConfig(appContext.activeConfig, gen);
 			reset();
+			console.log(appContext.activeConfig);
 		} else {
 			appContext.sim.update();
 		}
@@ -44,9 +45,10 @@ const Genetic = () => {
 	const updateStats = () => {
 		const bestCar = appContext.sim.getBestCar();
 		setStats({
-			fitness: bestCar.fitness.toFixed(8),
-			active: appContext.sim.activeBrains.toFixed(0),
-			generation: appContext.activeConfig.generations.length
+			bestID: bestCar.id,
+			active: appContext.sim.activeBrains,
+			carsPassed: bestCar.carsPassed,
+			steps: bestCar.steps,
 		});
 	}
 
@@ -90,8 +92,8 @@ const Genetic = () => {
 					)
 				})}
 			</NavComponent>
-			<RoadCanvas
-				sim={appContext.sim} />
+			<RoadCanvas sim={appContext.sim} />
+			<NetworkCanvas network={appContext.sim.getBestCar().brain} />
 			<GenerationEntries />
 		</>
 	)

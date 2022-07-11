@@ -152,11 +152,8 @@ export class Car {
 		}
 
 		// add friction
-		if (this.speed > 0) {
-			this.speed -= this.friction;
-		} else if (this.speed < 0) {
-			this.speed += this.friction;
-		}
+		if (this.speed > 0) this.speed -= this.friction;
+		else if (this.speed < 0) this.speed += this.friction;
 		if (Math.abs(this.speed) < this.friction) this.speed = 0;
 
 		this.speed = parseFloat(this.speed.toFixed(2));
@@ -212,11 +209,10 @@ export class SmartCar extends Car {
 		if (this.steps > 400 && this.carsPassed < 3) this.damaged = true;
 
 		if (!this.damaged) {
-			if (action) this.controls.update(action);
+			if (action) this.controls.update(action, 0.5);
 			super.update(borders, traffic);
 		}
 
-		this.countCarsPassed(traffic);
 		this.evaluate();
 	}
 
@@ -228,8 +224,12 @@ export class SmartCar extends Car {
 
 	lazyAction(borders: Point[][], traffic: Car[], backprop = false): number[] {
 		const sData = this.getSensorData(borders, traffic);
-		const action = this.brain.forward(sData, backprop);
-		return this.brain.makeChoice(action, true);
+		if (!this.sensorOffsets || this.sensorOffsets.toString() !== sData.toString()) {
+			this.sensorOffsets = sData;
+			const action = this.brain.forward(sData, backprop);
+			return this.brain.makeChoice(action);
+		}
+		return this.brain.layers[this.brain.layers.length-1].outputs;
 	}
 
 	getSensorData(borders: Point[][], traffic: Car[]) {
@@ -242,7 +242,6 @@ export class SmartCar extends Car {
 		const offsets = this.sensor.getSensorOffsets();
 		const sensorOffsets = [y, angle, speed].concat(offsets);
 
-		this.sensorOffsets = sensorOffsets;
 		return sensorOffsets;
 	}
 
@@ -251,14 +250,17 @@ export class SmartCar extends Car {
 		const distance = this.distance;
 		let fitness = distance / 100;
 
+		const mOffset = Math.max(...this.sensorOffsets);
+		if (mOffset > 0.3) fitness *= 1.3;
+
+		// knock percentage of fitness if damaged
+		if (this.damaged) fitness *= 0.95;
+
 		// multiply for each car passed
 		// target speed before passing a car for start of sim
 		fitness *= this.carsPassed > 0 
 			? this.carsPassed ** (this.carsPassed + 1)
-			: this.speed / this.maxSpeed;
-
-		// knock percentage of fitness if damaged
-		if (this.damaged) fitness *= 0.9;
+			: this.speed / this.maxSpeed ** 2;
 
 		// try to approach 0
 		this.fitness = Math.abs(1 / fitness); 

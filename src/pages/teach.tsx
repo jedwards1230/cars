@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../components/navbar";
-import { Simulator } from "../car/simulator";
+import { Teacher } from "../car/simulator";
 import { Navbar } from "react-bootstrap";
 import { AppContext } from "../context";
 import NetworkCanvas from "../components/networkCanvas";
@@ -10,11 +10,9 @@ const Teach = (props: any) => {
 	const appContext = useContext(AppContext);
 
 	const [stats, setStats] = useState<{
-		speed?: string,
-		distance?: string
-		steps?: string
-		angle?: string
-		loss?: string
+		speed?: number | string
+		distance?: number | string
+		loss?: number | string
 	}>({});
 
 	const animate = (time: number = 0) => {
@@ -26,20 +24,19 @@ const Teach = (props: any) => {
 	}
 
 	const updateStats = () => {
-		const bestCar = appContext.sim.getBestCar();
-		const loss = appContext.sim.getLoss();
+		const sim = appContext.sim as Teacher;
+		const bestCar = sim.getBestCar();
+		const loss = sim.getLoss();
 
 		setStats({
-			speed: bestCar.fitness.toFixed(8),
-			distance: appContext.sim.activeBrains.toFixed(0),
-			steps: (bestCar.distance / bestCar.steps).toFixed(0),
-			angle: bestCar.angle.toFixed(2),
+			speed: bestCar.speed.toFixed(1),
+			distance: bestCar.distance.toFixed(0),
 			loss: loss.toFixed(4)
 		});
 	}
 
 	const reset = () => {
-		appContext.sim = new Simulator(appContext.simConfig.trafficCount, appContext.simConfig.brainCount, appContext.activeConfig, appContext.simConfig.smartTraffic, true)
+		appContext.sim = new Teacher(appContext.simConfig.trafficCount, appContext.activeConfig, appContext.simConfig.smartTraffic)
 	}
 
 	const run = () => {
@@ -59,7 +56,7 @@ const Teach = (props: any) => {
 
 	useEffect(() => {
 		appContext.simConfig.brainCount = 1;
-		reset();
+		run();
 		animate();
 		return () => cancelAnimationFrame(appContext.animFrame);
 		// eslint-disable-next-line react-hooks/exhaustive-deps

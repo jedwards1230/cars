@@ -7,6 +7,7 @@ import {
 
 export class Network {
     name: string;
+    config: AppConfig;
     epsilon: number;
     lr: number;
     alias: string;
@@ -19,6 +20,7 @@ export class Network {
     constructor(modelConfig: AppConfig) {
         this.memory = [];
         this.confidence = 0.5;
+        this.config = modelConfig;
         this.name = modelConfig.name;
         this.lr = modelConfig.lr;
         this.epsilon = modelConfig.epsilonDecay;
@@ -97,9 +99,11 @@ export class Network {
     }
 
     /** Slightly mutate weights for model */
-    mutate(amount: number = 0.1, rate: number = 0) {
-        this.layers.forEach((layer) => {
+    mutate(amount: number = 0.1, rate: number = 0): Network {
+        const mutated = new Network(this.config);
+        mutated.layers.forEach((layer) => {
             layer.mutate(amount, rate);
         })
+        return mutated;
     }
 }

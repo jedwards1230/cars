@@ -28,6 +28,7 @@ export class Layer {
                 this.weights[i] = new Array(config.outputs);
             }
             this.#randomize();
+            this.biases = new Array(config.outputs).fill(0.1);
         }
     }
 
@@ -141,28 +142,19 @@ export class Layer {
         for (let i = 0; i < this.outputs.length; i++) {
             for (let j = 0; j < this.inputs.length; j++) {
                 const wRnd = Math.random();
-                const weightLimit = wRnd * 2 - 1;
-                if (rate > wRnd) {
-                    this.weights[j][i] = weightLimit;
-                } else {
-                    this.weights[j][i] = lerp(
-                        this.weights[j][i],
-                        weightLimit,
-                        amount,
-                    )
-                }
-            }
-            const bRnd = Math.random();
-            const biasLimit = bRnd * 2 - 1;
-            if (rate > bRnd) {
-                this.biases[i] = biasLimit;
-            } else {
-                this.biases[i] = lerp(
+                this.weights[j][i] = lerp(
                     this.biases[i],
-                    biasLimit,
-                    amount
-                )
+                    wRnd * 2 - 1,
+                    (rate > wRnd) ? 0.5 : amount
+                );
             }
+
+            const bRnd = Math.random();
+            this.biases[i] = lerp(
+                this.biases[i],
+                bRnd * 2 - 1,
+                (rate > bRnd) ? 0.5 : amount
+            );
         }
     }
 }

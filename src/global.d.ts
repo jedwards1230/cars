@@ -4,7 +4,7 @@ type AppContextConfig = {
 	activeModel: string
 	animFrame: number
 	animTime: number
-	sim: import("./car/simulator").Simulator
+	sim: import("./car/simulator").Teacher | import("./car/simulator").Simulator
 	activeConfig: import("./network/config").AppConfig
 	simConfig: {
 		trafficCount: number

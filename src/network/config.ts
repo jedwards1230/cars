@@ -16,8 +16,8 @@ export class AppConfig {
 		this.lr = 0.01;
 		this.generations = [];
 		this.epsilonDecay = 0.99;
-		this.mutationAmount = 0.01;
-		this.mutationRate = 0.01;
+		this.mutationAmount = 0.2;
+		this.mutationRate = 0.005;
 		this.sensorCount = 7;
 		this.actionCount = 4;
 		this.layers = [
