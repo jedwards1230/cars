@@ -39,7 +39,7 @@ export class Layer {
 
         const bias = this.biases;
 
-        let preActive = new Array(this.outputs.length);
+        const preActive = new Array(this.outputs.length);
         for (let i = 0; i < this.outputs.length; i++) {
             let sum = 0;
             // input * weight
@@ -75,22 +75,19 @@ export class Layer {
             dB[i] = delta[i] * dA[i];
         }
 
-        // layer delta
-        // dZ = delta * derivate(y) * weight
-        const dZ = new Array(x.length).fill(0);
-        for (let i = 0; i < x.length; i++) {
-            for (let j = 0; j < y.length; j++) {
-                dZ[i] += weights[i][j] * dB[j];
-            }
-        }
-
         // weight delta
         // dW = delta * derivate(y) * input
         const dW = new Array(x.length);
+
+        // layer delta
+        // dZ = delta * derivate(y) * weight
+        const dZ = new Array(x.length).fill(0);
+
         for (let i = 0; i < x.length; i++) {
-            dW[i] = new Array(y.length).fill(0);
+            dW[i] = new Array(y.length);
             for (let j = 0; j < y.length; j++) {
                 dW[i][j] = x[i] * dB[j];
+                dZ[i] += weights[i][j] * dB[j];
             }
         }
 

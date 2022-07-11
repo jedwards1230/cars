@@ -19,15 +19,6 @@ const NetworkConfig = () => {
                         <label htmlFor="sensorCountInput">Sensor Count</label>
                     </div>
                 </Col>
-                <Col>
-                    <div className="form-floating">
-                        <input
-                            {...register("actionCount")}
-                            type="number"
-                            className="form-control"></input>
-                        <label htmlFor="actionCountInput">Action Count</label>
-                    </div>
-                </Col>
             </Row>
             <LayerList />
         </>

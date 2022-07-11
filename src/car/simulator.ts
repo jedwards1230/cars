@@ -34,7 +34,7 @@ export class Simulator {
         this.x = 0;
 
         this.road = new Road(this.laneCount);
-        this.startLane = (brainCount === 1) ? getRandomInt(0, this.road.laneCount - 1) : 1;
+        this.startLane = getRandomInt(0, this.road.laneCount - 1);
         this.traffic = this.generateTraffic();
         this.smartCars = this.generateSmartCars();
     }
@@ -49,25 +49,27 @@ export class Simulator {
 
     protected updateSmartCars() {
         const toDelete: number[] = [];
-        this.smartCars.forEach(car => {
+        for (let i = 0; i < this.smartCars.length; i++) {
+            const car = this.smartCars[i];
             const action = car.lazyAction(this.road.borders, this.traffic, true);
             car.update(this.road.borders, this.traffic, action);
             if (car.damaged) toDelete.push(car.id);
             else if (car.x > this.x) this.x = car.x;
-        });
+        }
         const bestCar = this.getBestCar();
         this.smartCars = this.smartCars.filter(car => !toDelete.includes(car.id) || car.id === bestCar.id);
     }
 
     protected updateTraffic() {
-        this.traffic.forEach((car) => {
+        for (let i = 0; i < this.traffic.length; i++) {
+            const car = this.traffic[i];
             if (car instanceof SmartCar) {
                 const action = car.lazyAction(this.road.borders, this.traffic)
                 car.update(this.road.borders, this.traffic, action);
             } else {
                 car.update(this.road.borders, this.traffic);
             }
-        });
+        }
     }
 
     protected generateSmartCars() {
@@ -76,7 +78,6 @@ export class Simulator {
         for (let i = 0; i < this.brainCount; i++) {
             const car = new SmartCar(i, 0, y, this.driverSpeed, this.brainConfig);
             if (i > 0) car.brain = smartCars[0].brain.mutate(this.brainConfig.mutationAmount, this.brainConfig.mutationRate);
-
             smartCars.push(car);
         }
         return smartCars;
@@ -133,17 +134,19 @@ export class Simulator {
         this.road.draw(ctx);
 
         // draw smart cars
-        this.smartCars.forEach(car => {
+        for (let i = 0; i < this.smartCars.length; i++) {
+            const car = this.smartCars[i];
             car.checkInBounds(canvasOffset);
             car.draw(ctx);
             ctx.globalAlpha = 1;
-        });
+        }
 
         // draw traffic
-        this.traffic.forEach(car => {
+        for (let i = 0; i < this.traffic.length; i++) {
+            const car = this.traffic[i];
             car.draw(ctx);
             ctx.globalAlpha = 1;
-        });
+        }
 
         if (!bestCar.damaged) bestCar.sensor.draw(ctx);
         bestCar.draw(ctx, true);

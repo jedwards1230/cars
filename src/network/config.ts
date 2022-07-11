@@ -8,7 +8,6 @@ export class AppConfig {
 	mutationAmount: number;
 	mutationRate: number;
 	sensorCount: number;
-	actionCount: number;
 
 	constructor(name: string, alias: string) {
 		this.name = name;
@@ -19,12 +18,11 @@ export class AppConfig {
 		this.mutationAmount = 0.2;
 		this.mutationRate = 0.005;
 		this.sensorCount = 7;
-		this.actionCount = 4;
 		this.layers = [
 			{
 				id: 0,
 				activation: "Tanh",
-				inputs: 10,
+				inputs: 9,
 				outputs: 15,
 				lr: 0.01,
 				biases: null,
@@ -84,7 +82,6 @@ export class AppConfig {
 		this.mutationAmount = config.mutationAmount;
 		this.mutationRate = config.mutationRate;
 		this.sensorCount = config.sensorCount;
-		this.actionCount = config.actionCount;
 		this.layers = config.layers;
 		this.generations = config.generations;
 		this.save();
@@ -104,10 +101,11 @@ export class AppConfig {
 	}
 
 	#clearWeights() {
-		this.layers.forEach((layer) => {
+		for (let i = 0; i < this.layers.length; i++) {
+			const layer = this.layers[i];
 			layer.biases = null;
 			layer.weights = null;
-		});
+		}
 		this.save();
 	}
 }

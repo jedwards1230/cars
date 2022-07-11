@@ -21,7 +21,6 @@ export class Car {
 	distance: number;
 	steps: number;
 	damaged: boolean;
-	actionCount: number;
 
 	color!: string;
 	polygon!: Polygon;
@@ -51,7 +50,6 @@ export class Car {
 		this.damaged = false;
 
 		this.controls = new Controls(controller);
-		this.actionCount = 2;
 
 		this.#createPolygon();
 	}
@@ -79,26 +77,29 @@ export class Car {
 		}
 
 		// check collision with road borders
-		borders.forEach((border) => {
+		for (let i = 0; i < borders.length; i++) {
+			const border = borders[i];
 			if (polysIntersect(this.polygon, border)) {
 				damagedCars.push(this);
 			}
-		});
+		}
 
 		// check collision with traffic
-		traffic.forEach(car => {
+		for (let i = 0; i < traffic.length; i++) {
+			const car = traffic[i];
 			if (car !== this && polysIntersect(this.polygon, car.polygon)) {
 				damagedCars.push(this);
 				//damagedCars.push(car);
 			}
-		});
+		}
 
 		// apply damage and stop controls
-		damagedCars.forEach(car => {
+		for (let i = 0; i < damagedCars.length; i++) {
+			const car = damagedCars[i];
 			car.damaged = true;
 			if (car instanceof SmartCar) car.speed = 0;
 			car.controls.stop();
-		});
+		}
 	}
 
 	#createPolygon() {
@@ -173,9 +174,10 @@ export class Car {
 
         ctx.beginPath();
         ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
-		this.polygon.forEach((point, i) => {
+		for (let i = 1; i < this.polygon.length; i++) {
+			const point = this.polygon[i];
 			ctx.lineTo(point.x, point.y);
-		});
+		}
         ctx.fill();
     }
 }
@@ -197,7 +199,6 @@ export class SmartCar extends Car {
 		this.color = player ? "rgba(0, 255, 0, 1)" : "rgba(200, 50, 50, 0.7)";
 		
 		this.config = config;
-		this.actionCount = config.actionCount;
 		this.brain = new Network(config);
 
 		this.sensor = new Sensor(this, config.sensorCount, "forward");
@@ -236,11 +237,11 @@ export class SmartCar extends Car {
 		this.sensor.update(borders, traffic);
 
 		const y = this.y / RoadCanvasDefaultHeight;
-		const angle = this.angle;
-		const speed = this.speed / this.maxSpeed;
+		const angle = this.angle / 4;
+		//const speed = this.speed / this.maxSpeed;
 
 		const offsets = this.sensor.getSensorOffsets();
-		const sensorOffsets = [y, angle, speed].concat(offsets);
+		const sensorOffsets = [y, angle].concat(offsets);
 
 		return sensorOffsets;
 	}
@@ -299,7 +300,7 @@ export class SmartCar extends Car {
 		const right = 3;
 
 		const mOffset = Math.max(...this.sensorOffsets);
-		const reward = new Array(this.actionCount).fill(0);
+		const reward = [0, 0, 0, 0];
 
 		if (this.damaged) {
 			reward[forward] -= 1;
@@ -312,12 +313,10 @@ export class SmartCar extends Car {
 			reward[left] -= 1;
 			reward[right] -= 1;
 		}
-		if (this.actionCount > 2) {
-			if (this.angle > 0.1) {
-				reward[left] -= 0.5;
-			} else if (this.angle < -0.1) {
-				reward[right] -= 0.5;
-			}
+		if (this.angle > 0.1) {
+			reward[left] -= 0.5;
+		} else if (this.angle < -0.1) {
+			reward[right] -= 0.5;
 		}
 
 		if (mOffset > 0) {

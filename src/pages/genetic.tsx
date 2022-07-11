@@ -19,10 +19,12 @@ const Genetic = () => {
 	}>({});
 
 	const animate = (time: number = 0) => {
-		if (appContext.sim.activeBrains === 0) {
+		if (appContext.sim.activeBrains < 1) {
 			const bestCar = appContext.sim.getBestCar();
 			const gen = getGeneration(bestCar);
-			if (bestCar.carsPassed >= 1) appContext.activeConfig = bestCar.saveModelConfig(appContext.activeConfig, gen);
+			if (bestCar.carsPassed >= 1 || appContext.activeConfig.generations.length <= 1) {
+				appContext.activeConfig = bestCar.saveModelConfig(appContext.activeConfig, gen);
+			}
 			reset();
 			console.log(appContext.activeConfig);
 		} else {

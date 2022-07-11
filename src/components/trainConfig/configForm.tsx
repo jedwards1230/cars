@@ -28,7 +28,6 @@ const ConfigForm = (props: {
         mutationRate: appContext.activeConfig.mutationRate,
         learningRate: appContext.activeConfig.lr,
         sensorCount: appContext.activeConfig.sensorCount,
-        actionCount: appContext.activeConfig.actionCount,
         layers: appContext.activeConfig.layers
     }
 
@@ -55,14 +54,14 @@ const ConfigForm = (props: {
         config.mutationRate = data.mutationRate;
         config.lr = data.lr;
         config.sensorCount = data.sensorCount;
-        config.actionCount = data.actionCount;
 
         if (config.layers.length === data.layers.length) {
-            data.layers.forEach((layer: LayerConfig, i: number) => {
+            for (let i = 0; i < data.layers.length; i++) {
+                const layer = config.layers[i];
                 if (layer.outputs === config.layers[i].outputs && layer.inputs === config.layers[i].inputs) {
                     config.layers[i].activation = layer.activation;
                 }
-            })
+            }
         } else {
             config.layers = data.layers;
         }
@@ -94,7 +93,6 @@ const ConfigForm = (props: {
             mutationRate: parseFloat(data.mutationRate),
             lr: parseFloat(data.learningRate),
             sensorCount: parseInt(data.sensorCount),
-            actionCount: parseInt(data.actionCount),
             layers: layers
         }
     }

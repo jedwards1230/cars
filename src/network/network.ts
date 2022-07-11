@@ -27,10 +27,11 @@ export class Network {
         this.alias = modelConfig.alias;
         
         this.layers = new Array(modelConfig.layers.length);
-        modelConfig.layers.forEach((layerConfig, i) => {
+        for (let i = 0; i < modelConfig.layers.length; i++) {
+            const layerConfig = modelConfig.layers[i];
             layerConfig.lr = this.lr;
             this.layers[i] = new LayerMap[layerConfig.activation](layerConfig);
-        })
+        }
 
         this.lossFunction = (targets, outputs) => {
             let cost = 0
@@ -70,9 +71,9 @@ export class Network {
         // choose random
         const random = Math.random();
         if (greedy && (random < this.epsilon)) {
-            outputValues.forEach(value => {
-                value = Math.floor(Math.random() * outputValues.length);
-            })
+            for (let i = 0; i < outputValues.length; i++) {
+                outputValues[i] = Math.floor(Math.random() * outputValues.length);
+            }
         } 
         this.decay();
         return outputValues;
@@ -80,10 +81,11 @@ export class Network {
 
     saveLayers() {
         const layers: LayerConfig[] = [];
-        this.layers.forEach((level, index) => {
-            level.id = index;
+        for (let i = 0; i < this.layers.length; i++) {
+            const level = this.layers[i];
+            level.id = i;
             layers.push(level.save());
-        });
+        }
 
         return layers
     }
@@ -101,9 +103,9 @@ export class Network {
     /** Slightly mutate weights for model */
     mutate(amount: number = 0.1, rate: number = 0): Network {
         const mutated = new Network(this.config);
-        mutated.layers.forEach((layer) => {
-            layer.mutate(amount, rate);
-        })
+        for (let i = 0; i < mutated.layers.length; i++) {
+            mutated.layers[i].mutate(amount, rate);
+        }
         return mutated;
     }
 }
