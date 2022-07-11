@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../components/navbar";
-import VisualView from "../components/visualView";
 import { AppContext } from "../context";
 import { Simulator } from "../car/simulator";
 import { Navbar } from "react-bootstrap";
+import RoadCanvas from "../components/roadCanvas";
+import NetworkCanvas from "../components/networkCanvas";
 
 const Home = () => {
     const appContext = useContext(AppContext);
@@ -14,7 +15,11 @@ const Home = () => {
     }>({});
 
     const animate = (time: number = 0) => {
-        appContext.sim.update();
+        if (appContext.sim.activeBrains === 0) {
+			reset();
+		} else {
+			appContext.sim.update();
+		}
         updateStats();
 
         appContext.animTime = time;
@@ -34,6 +39,8 @@ const Home = () => {
     }
 
     useEffect(() => {
+		appContext.simConfig.brainCount = 1;
+        reset();
         animate();
         return () => cancelAnimationFrame(appContext.animFrame);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -51,8 +58,10 @@ const Home = () => {
                     )
                 })}
             </NavComponent>
-            <VisualView
-                sim={appContext.sim} />
+			<RoadCanvas 
+				sim={appContext.sim} />
+			<NetworkCanvas
+				network={appContext.sim.getBestCar().brain} />
         </>
     )
 };

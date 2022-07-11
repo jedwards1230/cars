@@ -22,9 +22,11 @@ const NetworkCanvas = (props: {
 
         const last = network.layers.length - 1;
         const actionValues = network.layers[last].outputs;
-        for (let i = 0; i < actionValues.length; i++) {
-            actionValues[i] = actionValues[i] > 0.5 ? 1 : 0;
-        }
+        const [forward, backward, left, right] = actionValues;
+        actionValues[0] = (forward > 0.5 && forward > backward) ? 1 : 0;
+        actionValues[1] = (backward > 0.5 && backward > forward) ? 1 : 0;
+        actionValues[2] = (left > 0.5 && left > right) ? 1 : 0;
+        actionValues[3] = (right > 0.5 && right > left) ? 1 : 0;
         network.layers[last].outputs = actionValues;
 
         for (let i = network.layers.length - 1; i >= 0; i--) {

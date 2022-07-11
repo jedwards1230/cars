@@ -4,8 +4,8 @@ type AppContextConfig = {
 	activeModel: string
 	animFrame: number
 	animTime: number
-	sim: Simulator
-	activeConfig: AppConfig
+	sim: import("./car/simulator").Simulator
+	activeConfig: import("./network/config").AppConfig
 	simConfig: {
 		trafficCount: number
 		brainCount: number
@@ -40,12 +40,13 @@ type TrainInfo = {
     speed: number,
     distance: number,
     damaged: boolean,
-    model: Network,
+    model: import("./network/network").Network,
 }
 
 type Generation = {
 	id: number;
-	topScore: number;
+	distance: number;
+	score: number;
 }
 
 type Point = {

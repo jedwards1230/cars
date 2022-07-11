@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../components/navbar";
-import VisualView from "../components/visualView";
 import { Simulator } from "../car/simulator";
 import { Navbar } from "react-bootstrap";
 import { AppContext } from "../context";
+import NetworkCanvas from "../components/networkCanvas";
+import RoadCanvas from "../components/roadCanvas";
 
 const Teach = (props: any) => {
 	const appContext = useContext(AppContext);
@@ -57,6 +58,8 @@ const Teach = (props: any) => {
 	}
 
 	useEffect(() => {
+		appContext.simConfig.brainCount = 1;
+		reset();
 		animate();
 		return () => cancelAnimationFrame(appContext.animFrame);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,8 +77,10 @@ const Teach = (props: any) => {
 					)
 				})}
 			</NavComponent>
-			<VisualView
+			<RoadCanvas 
 				sim={appContext.sim} />
+			<NetworkCanvas
+				network={appContext.sim.getBestCar().brain} />
 		</>
 	)
 };

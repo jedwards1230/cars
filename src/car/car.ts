@@ -18,12 +18,12 @@ export class Car {
 	y: number;
 	angle: number;
 	speed: number;
-	color!: string;
-
 	distance: number;
 	steps: number;
 	damaged: boolean;
 	actionCount: number;
+
+	color!: string;
 	polygon!: Polygon;
 
 	constructor(
@@ -73,7 +73,7 @@ export class Car {
 		const damagedCars: Car[] = [];
 
 		// prevents turning around
-		if (Math.abs(this.angle) > 1.7) {
+		if (Math.abs(this.angle) > 2) {
 			this.damaged = true;
 			return;
 		}
@@ -208,9 +208,8 @@ export class SmartCar extends Car {
 
 	update(borders: Point[][], traffic: Car[], action?: number[]) {
 		// kill those left behind or too slow
-		//const stepFactor = (this.distance * 2) / this.steps;
-		//if (this.steps > 300 && stepFactor < 1) this.damaged = true;
-		if (this.steps > 500 && this.carsPassed < 3) this.damaged = true;
+		if (this.steps < 400 && this.steps > 10 && this.speed < 0.1) this.damaged = true;
+		if (this.steps > 400 && this.carsPassed < 3) this.damaged = true;
 
 		if (!this.damaged) {
 			if (action) this.controls.update(action);
@@ -236,12 +235,12 @@ export class SmartCar extends Car {
 	getSensorData(borders: Point[][], traffic: Car[]) {
 		this.sensor.update(borders, traffic);
 
-		const lanePosition = this.y / RoadCanvasDefaultHeight;
+		const y = this.y / RoadCanvasDefaultHeight;
 		const angle = this.angle;
 		const speed = this.speed / this.maxSpeed;
 
 		const offsets = this.sensor.getSensorOffsets();
-		const sensorOffsets = [lanePosition, angle, speed].concat(offsets);
+		const sensorOffsets = [y, angle, speed].concat(offsets);
 
 		this.sensorOffsets = sensorOffsets;
 		return sensorOffsets;
@@ -250,7 +249,7 @@ export class SmartCar extends Car {
 	/** Check fitness of car */
 	evaluate() {
 		const distance = this.distance;
-		let fitness = distance / 10;
+		let fitness = distance / 100;
 
 		// multiply for each car passed
 		// target speed before passing a car for start of sim
@@ -259,7 +258,7 @@ export class SmartCar extends Car {
 			: this.speed / this.maxSpeed;
 
 		// knock percentage of fitness if damaged
-		if (this.damaged) fitness *= 0.8;
+		if (this.damaged) fitness *= 0.9;
 
 		// try to approach 0
 		this.fitness = Math.abs(1 / fitness); 
@@ -274,11 +273,12 @@ export class SmartCar extends Car {
 		if (!this.damaged || bestCar) super.draw(ctx, bestCar);
 	}
 
-	saveModelConfig(generation?: number) {
+	saveModelConfig(generation?: Generation) {
 		//if (info) this.config.generations.push(info);
-		if (generation) this.config.generation = generation;
+		if (generation) this.config.generations.push(generation);
 		this.config.layers = this.brain.saveLayers();
 		this.config.save();
+		return this.config;
 	}
 
 	getMetrics(action: number[]) {
@@ -333,5 +333,6 @@ export class DumbCar extends Car {
 	constructor(id: number, x: number, y: number) {
 		super(id, x, y, 2);
 		this.color = "rgba(0, 0, 255, 1)";
+		this.controls.forward = true;
 	}
 }

@@ -3,7 +3,7 @@ export class AppConfig {
 	alias: string;
 	lr: number;
 	layers: LayerConfig[];
-	generations: TrainInfo[];
+	generations: Generation[];
 	generation: number;
 	epsilonDecay: number;
 	mutationAmount: number;
@@ -97,8 +97,8 @@ const defaultTrainBrain = {
 	alias: "fsd",
 	lr: 0.01,
 	epsilonDecay: 0.9,
-	mutationAmount: 0.1,
-	mutationRate: 0.0,
+	mutationAmount: 0.015,
+	mutationRate: 0.01,
 	sensorCount: 7,
 	actionCount: 4,
 	layers: [

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import CarConfig from "./carConfig";
 import SimConfig from "./simConfig";
@@ -39,7 +39,11 @@ const ConfigForm = (props: {
 
         appContext.activeModel = data.name;
 
-        const config = new AppConfig(data.name, data.alias);
+        const config = (appContext.activeConfig.name !== data.name 
+                || appContext.activeConfig.alias !== data.alias)
+            ? new AppConfig(data.name, data.alias) 
+            : appContext.activeConfig;
+
         trainConfig.numEpisodes = data.numEpisodes;
         trainConfig.numSteps = data.numSteps;
         simConfig.brainCount = data.smartCarCount;
@@ -94,6 +98,11 @@ const ConfigForm = (props: {
             layers: layers
         }
     }
+
+    useEffect(() => {
+        methods.reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [appContext.simConfig.brainCount]);
 
     return (
         <Modal

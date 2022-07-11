@@ -15,8 +15,8 @@ export class Simulator {
     laneCount: number;
     road: Road;
     startLane: number;
-    traffic!: Car[];
-    smartCars!: SmartCar[];
+    traffic: Car[];
+    smartCars: SmartCar[];
     loss: Loss;
     steps: number;
 
@@ -42,8 +42,8 @@ export class Simulator {
 
         this.road = new Road(this.laneCount);
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
-        this.#generateTraffic();
-        this.#generateBrains();
+        this.traffic = this.#generateTraffic();
+        this.smartCars = this.#generateBrains();
     }
 
     update() {
@@ -108,11 +108,11 @@ export class Simulator {
 
             smartCars.push(car);
         }
-        this.smartCars = smartCars;
+        return smartCars;
     }
 
     #generateTraffic() {
-        this.traffic = [];
+        const traffic = [];
         let placed = new Array(this.road.laneCount).fill(0);
 
         // randomize lane
@@ -135,8 +135,9 @@ export class Simulator {
                 car = new DumbCar(idx, x, y);
             }
 
-            this.traffic.push(car);
+            traffic.push(car);
         }
+        return traffic
     }
 
     getBestCar(): SmartCar {
@@ -147,6 +148,7 @@ export class Simulator {
             }
             return prev;
         }, this.smartCars[0]);
+        console.log(bestCar.sensorOffsets);
         return bestCar;
     }
 
@@ -179,5 +181,20 @@ export class Simulator {
         bestCar.draw(ctx, true);
 
         ctx.restore();
+    }
+
+    reset() {
+        this.steps = 0;
+        this.startLane = getRandomInt(0, this.road.laneCount - 1);
+        this.loss = {
+            loss: 0,
+            count: 1,
+        }
+
+        const name = this.brainConfig.name;
+        const alias = this.brainConfig.alias;
+        this.brainConfig = new AppConfig(name, alias);
+        this.traffic = this.#generateTraffic();
+        this.smartCars = this.#generateBrains();
     }
 }

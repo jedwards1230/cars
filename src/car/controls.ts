@@ -12,17 +12,38 @@ export class Controls {
 
         if (playable) {
             this.#addKeyboardListeners();
-        } else {
-            this.forward = true;
         }
     }
 
 	/** Update car controls */
     update(input: number[]) {
-		this.forward = input[0] > 0.5 ? true : false;
-		this.backward = input[1] > 0.5 ? true : false;
-		this.left = input[2] > 0.5 ? true : false;
-		this.right = input[3] > 0.5 ? true : false;
+        const [forward, backward, left, right] = input;
+        const threshold = 0.5;
+
+        this.forward = (forward > threshold && forward > backward) ? true : false;
+        this.backward = (backward > threshold && backward > forward) ? true : false;
+        this.left = (left > threshold && left > right) ? true : false;
+        this.right = (right > threshold && right > left) ? true : false;
+    }
+
+    moveforward() {
+        this.forward = true;
+        this.backward = false;
+    }
+
+    movebackward() {
+        this.forward = false;
+        this.backward = true;
+    }
+
+    moveleft() {
+        this.left = true;
+        this.right = false;
+    }
+
+    moveright() {
+        this.left = false;
+        this.right = true;
     }
 
     getOutputs(): number[] {

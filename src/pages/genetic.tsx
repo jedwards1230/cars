@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../components/navbar";
-import VisualView from "../components/visualView";
 import { Navbar } from "react-bootstrap";
 import { AppContext } from "../context";
 import { Simulator } from "../car/simulator";
+import { SmartCar } from "../car/car";
+import RoadCanvas from "../components/roadCanvas";
+import GenerationEntries from "../components/generationEntries";
 
 const Genetic = () => {
 	const appContext = useContext(AppContext);
@@ -13,35 +15,47 @@ const Genetic = () => {
 		active?: string
 		carsPassed?: string
 		steps?: string
-		generation? : string
+		generation?: number
 	}>({});
 
 	const animate = (time: number = 0) => {
-		const generation: number = appContext.activeConfig.generation;
 		if (appContext.sim.activeBrains === 0) {
 			const bestCar = appContext.sim.getBestCar();
-			if (bestCar.carsPassed > 0) bestCar.saveModelConfig(generation + 1);
+			const gen = getGeneration(bestCar);
+			if (bestCar.carsPassed >= 3) appContext.activeConfig = bestCar.saveModelConfig(gen);
 			reset();
 		} else {
 			appContext.sim.update();
 		}
-		updateStats(generation);
+		updateStats();
 
 		appContext.animTime = time;
 		appContext.animFrame! = requestAnimationFrame(animate)
 	}
 
-	const updateStats = (generation: number) => {
+	const getGeneration = (car: SmartCar): Generation => {
+		return {
+			id: appContext.activeConfig.generations.length,
+			distance: Math.round(car.distance),
+			score: car.carsPassed,
+		}
+	}
+
+	const updateStats = () => {
 		const bestCar = appContext.sim.getBestCar();
 		setStats({
 			fitness: bestCar.fitness.toFixed(8),
 			active: appContext.sim.activeBrains.toFixed(0),
-			generation: generation.toFixed(0)
+			generation: appContext.activeConfig.generations.length
 		});
 	}
 
 	const reset = () => {
 		appContext.sim = new Simulator(appContext.simConfig.trafficCount, appContext.simConfig.brainCount, appContext.activeConfig, appContext.simConfig.smartTraffic)
+	}
+
+	const run = () => {
+		reset();
 	}
 
 	const destroyModel = () => {
@@ -51,13 +65,14 @@ const Genetic = () => {
 
 	const saveModel = () => {
 		const bestCar = appContext.sim.getBestCar();
-		const generation: number = appContext.activeConfig.generation;
-		bestCar.saveModelConfig(generation + 1);
-		appContext.activeConfig = bestCar.config;
+		const gen = getGeneration(bestCar);
+		appContext.activeConfig = bestCar.saveModelConfig(gen);
 		reset();
 	}
 
 	useEffect(() => {
+		appContext.simConfig.brainCount = 1000;
+		run();
 		animate();
 		return () => cancelAnimationFrame(appContext.animFrame);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,7 +80,7 @@ const Genetic = () => {
 
 	return (
 		<>
-			<NavComponent run={reset} saveModel={saveModel} destroyModel={destroyModel} >
+			<NavComponent run={run} saveModel={saveModel} destroyModel={destroyModel} >
 				{Object.entries(stats).map(([k, v], i) => {
 					return (
 						<Navbar.Text
@@ -75,8 +90,9 @@ const Genetic = () => {
 					)
 				})}
 			</NavComponent>
-			<VisualView
+			<RoadCanvas
 				sim={appContext.sim} />
+			<GenerationEntries />
 		</>
 	)
 };
