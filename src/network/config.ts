@@ -6,6 +6,7 @@ export class AppConfig {
 	generations: TrainInfo[];
 	generation: number;
 	epsilonDecay: number;
+	mutationAmount: number;
 	mutationRate: number;
 	sensorCount: number;
 	actionCount: number;
@@ -20,7 +21,8 @@ export class AppConfig {
 		this.generations = [];
 		this.generation = 0;
 		this.epsilonDecay = 0.99;
-		this.mutationRate = 0.1;
+		this.mutationAmount = 0.1;
+		this.mutationRate = 0.0;
 		this.sensorCount = 0;
 		this.actionCount = 0;
 		this.smartCarCount = 1;
@@ -95,7 +97,8 @@ const defaultTrainBrain = {
 	alias: "fsd",
 	lr: 0.01,
 	epsilonDecay: 0.9,
-	mutationRate: 0.1,
+	mutationAmount: 0.1,
+	mutationRate: 0.0,
 	sensorCount: 7,
 	actionCount: 4,
 	layers: [

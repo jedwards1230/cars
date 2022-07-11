@@ -103,9 +103,9 @@ export class Network {
     }
 
     /** Slightly mutate weights for model */
-    mutate(amount: number = 1) {
+    mutate(amount: number = 0.1, rate: number = 0) {
         this.layers.forEach((layer) => {
-            layer.mutate(amount);
+            layer.mutate(amount, rate);
         })
     }
 }

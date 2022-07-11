@@ -135,23 +135,30 @@ export class Layer {
         }
     }
 
-    mutate(rate: number, crossover?: Layer) {
+    mutate(amount: number, rate: number) {
         for (let i=0; i < this.outputs.length; i++) {
             for (let j=0; j < this.inputs.length; j++) {
-                const weightLimit = crossover ? crossover.weights[j][i] : Math.random() * 2 - 1;
-                this.weights[j][i] = lerp(
-                    this.weights[j][i],
-                    weightLimit,
-                    rate,
+                const weightLimit = Math.random() * 2 - 1;
+                if (rate > Math.random()) {
+                    this.weights[j][i] = weightLimit;
+                } else {
+                    this.weights[j][i] = lerp(
+                        this.weights[j][i],
+                        weightLimit,
+                        amount,
+                    )
+                }
+            }
+            const biasLimit = Math.random() * 2 - 1;
+            if (rate > Math.random()) {
+                this.biases[i] = biasLimit;
+            } else {
+                this.biases[i] = lerp(
+                    this.biases[i],
+                    biasLimit,
+                    amount
                 )
             }
-            const biasLimit = crossover ? crossover.biases[i] : Math.random() * 2 - 1;
-            this.biases[i] = lerp(
-                this.biases[i],
-                biasLimit,
-                rate
-            )
-            
         }
     }
 }

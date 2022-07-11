@@ -29,6 +29,15 @@ const SimConfig = () => {
                 <Col>
                     <div className="form-floating">
                         <input
+                            {...register("mutationAmount")}
+                            type="text"
+                            className="form-control"></input>
+                        <label htmlFor="mutationAmountInput">Mutation Amount</label>
+                    </div>
+                </Col>
+                <Col>
+                    <div className="form-floating">
+                        <input
                             {...register("mutationRate")}
                             type="text"
                             className="form-control"></input>

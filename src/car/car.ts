@@ -176,9 +176,9 @@ export class Car {
 
         ctx.beginPath();
         ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
-        for (let i = 1; i < this.polygon.length; i++) {
-            ctx.lineTo(this.polygon[i].x, this.polygon[i].y)
-        }
+		this.polygon.forEach((point, i) => {
+			ctx.lineTo(point.x, point.y);
+		});
         ctx.fill();
     }
 }
@@ -208,8 +208,8 @@ export class SmartCar extends Car {
 
 	update(borders: Point[][], traffic: Car[], action?: number[]) {
 		// kill those left behind or too slow
-		const stepFactor = (this.distance * 2) / this.steps;
-		if (this.steps > 300 && stepFactor < 1) this.damaged = true;
+		//const stepFactor = (this.distance * 2) / this.steps;
+		//if (this.steps > 300 && stepFactor < 1) this.damaged = true;
 		if (this.steps > 500 && this.carsPassed < 3) this.damaged = true;
 
 		if (!this.damaged) {
@@ -218,7 +218,6 @@ export class SmartCar extends Car {
 		}
 
 		this.countCarsPassed(traffic);
-
 		this.evaluate();
 	}
 
@@ -256,7 +255,7 @@ export class SmartCar extends Car {
 		// multiply for each car passed
 		// target speed before passing a car for start of sim
 		fitness *= this.carsPassed > 0 
-			? this.carsPassed 
+			? this.carsPassed * this.carsPassed
 			: this.speed / this.maxSpeed;
 
 		// knock percentage of fitness if damaged
@@ -264,6 +263,22 @@ export class SmartCar extends Car {
 
 		// try to approach 0
 		this.fitness = Math.abs(1 / fitness); 
+	}
+
+	/** damage any car thats fallen too far behind */
+	checkInBounds(canvasOffset: number) {
+		if (canvasOffset < 0 && Math.abs(canvasOffset) > this.x + DamagedOffScreenBounds) this.damaged = true;
+	}
+
+	draw(ctx: CanvasRenderingContext2D, bestCar?: boolean): void {
+		if (!this.damaged || bestCar) super.draw(ctx, bestCar);
+	}
+
+	saveModelConfig(generation?: number) {
+		//if (info) this.config.generations.push(info);
+		if (generation) this.config.generation = generation;
+		this.config.layers = this.brain.saveLayers();
+		this.config.save();
 	}
 
 	getMetrics(action: number[]) {
@@ -311,25 +326,6 @@ export class SmartCar extends Car {
 		}
 
 		return reward;
-	}
-
-	/** damage any car thats fallen too far behind */
-	checkInBounds(ctx: CanvasRenderingContext2D) {
-		//console.log("this", this.x, ctx.isPointInPath(this.x - DamagedOffScreenBounds, this.y));
-		if (ctx.isPointInPath(this.x - DamagedOffScreenBounds, this.y)) {
-			this.damaged = true;
-		}
-	}
-
-	draw(ctx: CanvasRenderingContext2D, bestCar?: boolean): void {
-		if (!this.damaged || bestCar) super.draw(ctx, bestCar);
-	}
-
-	saveModelConfig(generation?: number) {
-		//if (info) this.config.generations.push(info);
-		if (generation) this.config.generation = generation;
-		this.config.layers = this.brain.saveLayers();
-		this.config.save();
 	}
 }
 

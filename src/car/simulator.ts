@@ -104,7 +104,7 @@ export class Simulator {
             const y = this.road.getLaneCenter(this.startLane);
 
             const car = new SmartCar(i, 0, y, this.driverSpeed, this.brainConfig, this.playable);
-            if (i !== 0) car.brain.mutate(this.brainConfig.mutationRate);
+            if (i > 0) car.brain.mutate(this.brainConfig.mutationAmount, this.brainConfig.mutationRate);
 
             smartCars.push(car);
         }
@@ -164,7 +164,7 @@ export class Simulator {
 
         // draw smart cars
         this.smartCars.forEach(car => {
-            car.checkInBounds(ctx);
+            car.checkInBounds(canvasOffset);
             car.draw(ctx);
             ctx.globalAlpha = 1;
         });

@@ -24,6 +24,7 @@ const ConfigForm = (props: {
         activeModel: appContext.activeConfig.name,
         alias: appContext.activeConfig.alias,
         epsilonDecay: appContext.activeConfig.epsilonDecay,
+        mutationAmount: appContext.activeConfig.mutationAmount,
         mutationRate: appContext.activeConfig.mutationRate,
         learningRate: appContext.activeConfig.lr,
         sensorCount: appContext.activeConfig.sensorCount,
@@ -46,6 +47,7 @@ const ConfigForm = (props: {
         config.name = data.name;
         config.alias = data.alias;
         config.epsilonDecay = data.epsilonDecay;
+        config.mutationAmount = data.mutationAmount;
         config.mutationRate = data.mutationRate;
         config.lr = data.lr;
         config.sensorCount = data.sensorCount;
@@ -84,6 +86,7 @@ const ConfigForm = (props: {
             name: data.activeModel.trim(),
             alias: data.alias.trim(),
             epsilonDecay: parseFloat(data.epsilonDecay),
+            mutationAmount: parseFloat(data.mutationAmount),
             mutationRate: parseFloat(data.mutationRate),
             lr: parseFloat(data.learningRate),
             sensorCount: parseInt(data.sensorCount),

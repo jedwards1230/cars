@@ -20,7 +20,7 @@ const Genetic = () => {
 		const generation: number = appContext.activeConfig.generation;
 		if (appContext.sim.activeBrains === 0) {
 			const bestCar = appContext.sim.getBestCar();
-			bestCar.saveModelConfig(generation + 1);
+			if (bestCar.carsPassed > 0) bestCar.saveModelConfig(generation + 1);
 			reset();
 		} else {
 			appContext.sim.update();
@@ -36,8 +36,6 @@ const Genetic = () => {
 		setStats({
 			fitness: bestCar.fitness.toFixed(8),
 			active: appContext.sim.activeBrains.toFixed(0),
-			carsPassed: bestCar.carsPassed.toFixed(0),
-			steps: appContext.sim.steps.toFixed(0),
 			generation: generation.toFixed(0)
 		});
 	}
