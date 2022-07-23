@@ -19,7 +19,7 @@ const NavComponent = (props: {
 
     return (
         <Navbar bg="light" className="px-3">
-            <Navbar.Brand as={Link} to="/cars">Miles' Driving School</Navbar.Brand>
+            <Navbar.Brand as={Link} to="/">Miles' Driving School</Navbar.Brand>
             <Nav className="ms-auto">
                 {props.children}
 
@@ -41,16 +41,16 @@ const NavComponent = (props: {
                         <NavDropdown.Item
                             eventKey="1.1"
                             as={Link}
-                            to="/cars/genetic"
+                            to="/genetic"
                             active={
-                                useLocation().pathname === "/cars/genetic" ? true : false
+                                useLocation().pathname === "/genetic" ? true : false
                             }>Genetic</NavDropdown.Item>
                         <NavDropdown.Item
                             eventKey="1.2"
                             as={Link}
-                            to="/cars/teach"
+                            to="/teach"
                             active={
-                                useLocation().pathname === "/cars/teach" ? true : false
+                                useLocation().pathname === "/teach" ? true : false
                             }>Teach</NavDropdown.Item>
                         <NavDropdown.Divider />
                         {/* <NavDropdown.Item onClick={openWeights}>Weights</NavDropdown.Item> */}

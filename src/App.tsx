@@ -12,9 +12,9 @@ const App = () => {
 	return (
 		<BrowserRouter>
 			<Routes>
-				<Route path="/cars/" element={<Home />} />
-				<Route path="/cars/genetic" element={<Genetic />} />
-				<Route path="/cars/teach" element={<Teach />} />
+				<Route path="/" element={<Home />} />
+				<Route path="/genetic" element={<Genetic />} />
+				<Route path="/teach" element={<Teach />} />
 			</Routes>
 		</BrowserRouter>
 	)
