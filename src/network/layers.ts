@@ -142,7 +142,7 @@ export class Layer {
                 this.weights[j][i] = lerp(
                     this.biases[i],
                     wRnd * 2 - 1,
-                    (rate > wRnd) ? 0.5 : amount
+                    (rate > wRnd) ? 0.8 : amount
                 );
             }
 
@@ -150,7 +150,7 @@ export class Layer {
             this.biases[i] = lerp(
                 this.biases[i],
                 bRnd * 2 - 1,
-                (rate > bRnd) ? 0.5 : amount
+                amount
             );
         }
     }

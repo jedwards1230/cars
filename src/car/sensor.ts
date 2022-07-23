@@ -17,7 +17,7 @@ export class Sensor {
         this.car = car;
         this.rayCount = rays;
         this.rayLength = 200;
-        this.raySpread = Math.PI / 2;
+        this.raySpread = Math.PI / 3;
 
         this.direction = direction;
 

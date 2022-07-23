@@ -63,11 +63,11 @@ export class Car {
 			this.#createPolygon();
 			this.distance += this.speed;
 			this.steps++;
-			this.#checkDamage(borders, traffic);
+			this.checkDamage(borders, traffic);
 		}
 	}
 
-	#checkDamage(borders: Point[][], traffic: Car[]) {
+	protected checkDamage(borders: Point[][], traffic: Car[]) {
 		const damagedCars: Car[] = [];
 
 		// prevents turning around
@@ -206,15 +206,14 @@ export class SmartCar extends Car {
 
 	update(borders: Point[][], traffic: Car[], action?: number[]) {
 		// kill those left behind or too slow
-		if (this.steps < 400 && this.steps > 100 && this.speed < 0.1) this.damaged = true;
+		if (this.steps < 300 && this.steps > 100 && this.speed < 0.1) this.damaged = true;
 		if (this.steps > 400 && this.carsPassed < 3) this.damaged = true;
 
 		if (!this.damaged) {
 			if (action) this.controls.update(action, 0.5);
 			super.update(borders, traffic);
+			this.evaluate();
 		}
-
-		this.evaluate();
 	}
 
 	countCarsPassed(traffic: Car[]) {
@@ -251,19 +250,19 @@ export class SmartCar extends Car {
 	/** Check fitness of car */
 	evaluate() {
 		const distance = this.distance;
-		let fitness = distance / 100;
+		let fitness = (distance * distance) / 10;
 
 		/* const mOffset = Math.max(...this.sensorOffsets);
 		if (mOffset < 0.1) fitness *= 1.3; */
 
 		// knock percentage of fitness if damaged
-		if (this.damaged) fitness *= 0.9;
+		//if (this.damaged) fitness *= 0.9;
 
 		// multiply for each car passed
 		// target speed before passing a car for start of sim
 		fitness *= this.carsPassed > 0 
 			? this.carsPassed * (this.carsPassed + 1)
-			: this.speed / this.maxSpeed ** 2;
+			: this.speed / this.maxSpeed * 2;
 
 		// try to approach 0
 		this.fitness = Math.abs(1 / fitness); 

@@ -22,7 +22,7 @@ const Genetic = () => {
 		if (appContext.sim.activeBrains < 1) {
 			const bestCar = appContext.sim.getBestCar();
 			const gen = getGeneration(bestCar);
-			if (bestCar.carsPassed >= 1 || appContext.activeConfig.generations.length <= 1) {
+			if (bestCar.distance > 500) {
 				appContext.activeConfig = bestCar.saveModelConfig(appContext.activeConfig, gen);
 			}
 			reset();

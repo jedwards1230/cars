@@ -80,7 +80,7 @@ export class Network {
     }
 
     saveLayers() {
-        const layers: LayerConfig[] = [];
+        const layers: LayerConfig[] = new Array(this.layers.length);
         for (let i = 0; i < this.layers.length; i++) {
             const level = this.layers[i];
             level.id = i;
@@ -96,7 +96,7 @@ export class Network {
 
         // learning rate decay
         for (let i = this.layers.length - 1; i >= 0; i--) {
-            this.layers[i].lr = this.layers[i].lr > 0.0001 ? this.layers[i].lr * 0.99 : 0.0001;
+            this.layers[i].lr = this.layers[i].lr > 0.0001 ? this.layers[i].lr * 0.99 : 0.00001;
         }
     }
 
