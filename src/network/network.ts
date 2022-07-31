@@ -72,7 +72,7 @@ export class Network {
         const random = Math.random();
         if (greedy && (random < this.epsilon)) {
             for (let i = 0; i < outputValues.length; i++) {
-                outputValues[i] = Math.floor(Math.random() * outputValues.length);
+                outputValues[i] = (Math.random() * outputValues.length) | 0;
             }
         } 
         this.decay();

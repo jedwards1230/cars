@@ -53,8 +53,8 @@ export function getRGBA(value: number) {
 
 export function getRandomInt(min: number, max: number) {
     min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    max = max | 0;
+    return ((Math.random() * (max - min + 1)) | 0) + min;
 }
 
 // dot product of two arrays

@@ -85,7 +85,10 @@ export class Simulator {
 
     protected generateTraffic() {
         const traffic = [];
-        const placed = new Array(this.road.laneCount).fill(0);
+        const placed = new Array(this.road.laneCount)
+        for (let i = 0; i < this.road.laneCount; i++) {
+            placed[i] = 0;
+        }
 
         // randomize lane
         const getStartPosition = () => {
@@ -120,7 +123,7 @@ export class Simulator {
     }
 
     draw(canvas: HTMLCanvasElement) {
-        const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+        const ctx = canvas.getContext("2d", { alpha: false }) as CanvasRenderingContext2D;
         const bestCar = this.getBestCar();
         ctx.save();
 

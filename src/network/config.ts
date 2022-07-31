@@ -59,12 +59,12 @@ export class AppConfig {
 
 	clear() {
 		this.generations = [];
-		this.#clearWeights();
+		this.clearWeights();
 	}
 
 	destroy() {
 		this.generations = [];
-		this.#clearWeights();
+		this.clearWeights();
 		//localStorage.removeItem(this.name);
 	}
 
@@ -100,7 +100,7 @@ export class AppConfig {
 		return true;
 	}
 
-	#clearWeights() {
+	private clearWeights() {
 		for (let i = 0; i < this.layers.length; i++) {
 			const layer = this.layers[i];
 			layer.biases = null;

@@ -8,6 +8,7 @@ import { DamagedOffScreenBounds, RoadCanvasDefaultHeight } from "../constants";
 export class Car {
 	readonly width: number;
 	readonly height: number;
+	readonly minSpeed: number;
 	readonly maxSpeed: number;
 	readonly controls: Controls;
 	readonly id: number;
@@ -42,6 +43,7 @@ export class Car {
 
 		this.speed = 1;
 		this.maxSpeed = maxspeed;
+		this.minSpeed = (-maxspeed * 2) / 3;
 		this.acceleration = 0.2;
 		this.friction = 0.05;
 
@@ -51,16 +53,16 @@ export class Car {
 
 		this.controls = new Controls(controller);
 
-		this.#createPolygon();
+		this.createPolygon();
 	}
 
 	// update car object
 	update(borders: Point[][], traffic: Car[]) {
-		this.#move();
+		this.move();
 
 		// if damaged, only process slow down and sensors
 		if (!this.damaged) {
-			this.#createPolygon();
+			this.createPolygon();
 			this.distance += this.speed;
 			this.steps++;
 			this.checkDamage(borders, traffic);
@@ -68,8 +70,6 @@ export class Car {
 	}
 
 	protected checkDamage(borders: Point[][], traffic: Car[]) {
-		const damagedCars: Car[] = [];
-
 		// prevents turning around
 		if (Math.abs(this.angle) > 2) {
 			this.damaged = true;
@@ -80,11 +80,13 @@ export class Car {
 		for (let i = 0; i < borders.length; i++) {
 			const border = borders[i];
 			if (polysIntersect(this.polygon, border)) {
-				damagedCars.push(this);
+				this.damaged = true;
+				return;
 			}
 		}
 
 		// check collision with traffic
+		const damagedCars: Car[] = [];
 		for (let i = 0; i < traffic.length; i++) {
 			const car = traffic[i];
 			if (car !== this && polysIntersect(this.polygon, car.polygon)) {
@@ -94,15 +96,17 @@ export class Car {
 		}
 
 		// apply damage and stop controls
-		for (let i = 0; i < damagedCars.length; i++) {
-			const car = damagedCars[i];
-			car.damaged = true;
-			if (car instanceof SmartCar) car.speed = 0;
-			car.controls.stop();
+		if (damagedCars.length > 0) {
+			for (let i = 0; i < damagedCars.length; i++) {
+				const car = damagedCars[i];
+				car.damaged = true;
+				if (car instanceof SmartCar) car.speed = 0;
+				car.controls.stop();
+			}
 		}
 	}
 
-	#createPolygon() {
+	private createPolygon() {
 		const points: Polygon = [];
 		const rad = Math.hypot(this.width, this.height) / 2;
 		const alpha = Math.atan2(this.width, this.height);
@@ -126,7 +130,7 @@ export class Car {
 		this.polygon = points;
 	}
 
-	#move() {
+	private move() {
 		if (!this.damaged) {
 			// accelerate
 			if (this.controls.forward) {
@@ -145,11 +149,8 @@ export class Car {
 			}
 
 			// limit speed
-			if (this.speed > this.maxSpeed) {
-				this.speed = this.maxSpeed;
-			} else if (this.speed < (-this.maxSpeed * 2) / 3) {
-				this.speed = (-this.maxSpeed * 2) / 3;
-			}
+			if (this.speed > this.maxSpeed) this.speed = this.maxSpeed
+			else if (this.speed < this.minSpeed) this.speed = this.minSpeed;
 		}
 
 		// add friction
@@ -206,7 +207,7 @@ export class SmartCar extends Car {
 
 	update(borders: Point[][], traffic: Car[], action?: number[]) {
 		// kill those left behind or too slow
-		if (this.steps < 300 && this.steps > 100 && this.speed < 0.1) this.damaged = true;
+		if (this.steps > 100 && this.steps < 300 && this.speed < 0.1) this.damaged = true;
 		if (this.steps > 400 && this.carsPassed < 3) this.damaged = true;
 
 		if (!this.damaged) {

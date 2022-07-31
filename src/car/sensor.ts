@@ -26,11 +26,11 @@ export class Sensor {
     }
 
     update(roadBorders: Point[][], traffic: Car[]) {
-        this.#castRays();
+        this.castRays();
         this.readings = [];
         for (let i = 0; i < this.rays.length; i++) {
             this.readings.push(
-                this.#getReading(
+                this.getReading(
                     this.rays[i],
                     roadBorders,
                     traffic,
@@ -45,7 +45,7 @@ export class Sensor {
         );
     }
 
-    #getReading(ray: Point[], roadBorders: Point[][], traffic: Car[]) : null | SensorReading {
+    private getReading(ray: Point[], roadBorders: Point[][], traffic: Car[]) : null | SensorReading {
         const touches = [];
 
         // check overlap with borders
@@ -90,7 +90,7 @@ export class Sensor {
         return touches.find(e => e.offset === minOffset)!;
     }
 
-    #castRays() {
+    private castRays() {
         this.rays = [];
         for (let i = 0; i < this.rayCount; i++) {
             const rayAngle = lerp(

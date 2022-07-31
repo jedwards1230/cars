@@ -27,8 +27,11 @@ export class Layer {
             for (let i = 0; i < config.inputs; i++) {
                 this.weights[i] = new Array(config.outputs);
             }
-            this.#randomize();
-            this.biases = new Array(config.outputs).fill(0.1);
+            this.randomize();
+            this.biases = new Array(config.outputs)
+            for (let i = 0; i < config.outputs; i++) {
+                this.biases[i] = 0.1;
+            }
         }
     }
 
@@ -36,7 +39,6 @@ export class Layer {
     forward(inputs: number[], backprop = false) {
         const m = this.weights;
         const x = inputs;
-
         const bias = this.biases;
 
         const preActive = new Array(this.outputs.length);
@@ -81,7 +83,10 @@ export class Layer {
 
         // layer delta
         // dZ = delta * derivate(y) * weight
-        const dZ = new Array(x.length).fill(0);
+        const dZ = new Array(x.length);
+        for (let i = 0; i < x.length; i++) {
+            dZ[i] = 0;
+        }
 
         for (let i = 0; i < x.length; i++) {
             dW[i] = new Array(y.length);
@@ -126,7 +131,7 @@ export class Layer {
     }
 
     /** Randomize weights with (Math.random() * 2 - 1) */
-    #randomize() {
+    private randomize() {
         for (let i = 0; i < this.outputs.length; i++) {
             for (let j = 0; j < this.inputs.length; j++) {
                 this.weights[j][i] = Math.random() * 2 - 1;
@@ -146,12 +151,12 @@ export class Layer {
                 );
             }
 
-            const bRnd = Math.random();
+            /* const bRnd = Math.random();
             this.biases[i] = lerp(
                 this.biases[i],
                 bRnd * 2 - 1,
                 amount
-            );
+            ); */
         }
     }
 }
@@ -228,12 +233,8 @@ export class Linear extends Layer {
     constructor(config: LayerConfig) {
         super(config);
         this.name = "Linear";
-        this.activation = (x: number[]) => {
-            return x;
-        }
-        this.deactivation = (x: number[]) => {
-            return x;
-        }
+        this.activation = (x: number[]) => x
+        this.deactivation = (x: number[]) => x
     }
 }
 

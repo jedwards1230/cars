@@ -11,7 +11,7 @@ export class Controls {
         this.right = false;
 
         if (playable) {
-            this.#addKeyboardListeners();
+            this.addKeyboardListeners();
         }
     }
 
@@ -57,7 +57,7 @@ export class Controls {
         this.right = false;
     }
 
-    #addKeyboardListeners() {
+    private addKeyboardListeners() {
         document.onkeydown = (event) => {
             switch (event.key) {
                 case "ArrowUp":
