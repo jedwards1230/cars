@@ -2,7 +2,9 @@
 
 The project began with [this](https://www.youtube.com/watch?v=Rs_rAxEsAvI) tutorial. I wanted to take it further with different training algorithms and a UI. 
 
-Working demo is [here](https://jedwards1230.github.io/cars/)
+## Very much a WIP still
+
+I've been preoccupied with other projects and havent had a chance to clean this up and make it functional. The core is there, I really just need to setup training loops for the cars that will reliably train. Right now the production version doesn't really show off much learning. 
 
 ## Project Goals
   * Learn Javascript/Typescript
