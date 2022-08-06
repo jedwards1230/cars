@@ -11,7 +11,7 @@ import { Simulator } from "../car/simulator";
  * 6. Update Car with action
  * 7. Backprop network with reward
  */
-export async function train(model: SmartCar, sim: Simulator, maxTimeSteps: number): Promise<TrainInfo> {
+export function train(model: SmartCar, sim: Simulator, maxTimeSteps: number): TrainInfo {
     let speeds = [];
     let rLoss = 1;
     let count = 0;

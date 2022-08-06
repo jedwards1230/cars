@@ -1,5 +1,6 @@
 import { lerp } from "../utils";
 
+/** Base class for NN layer */
 export class Layer {
     inputs: number[];
     outputs: number[];
@@ -68,6 +69,7 @@ export class Layer {
         const x = this.inputs;
         const y = this.outputs;
 
+        // get derivative of activation function
         const dA = this.deactivation(y);
 
         // bias delta
@@ -77,10 +79,6 @@ export class Layer {
             dB[i] = delta[i] * dA[i];
         }
 
-        // weight delta
-        // dW = delta * derivate(y) * input
-        const dW = new Array(x.length);
-
         // layer delta
         // dZ = delta * derivate(y) * weight
         const dZ = new Array(x.length);
@@ -88,6 +86,9 @@ export class Layer {
             dZ[i] = 0;
         }
 
+        // weight delta
+        // dW = delta * derivate(y) * input
+        const dW = new Array(x.length);
         for (let i = 0; i < x.length; i++) {
             dW[i] = new Array(y.length);
             for (let j = 0; j < y.length; j++) {
@@ -102,6 +103,7 @@ export class Layer {
         return dZ;
     }
 
+    /** Update weights with learning rate */
     updateWeights(gradient: number[][]) {
         const m = 1 / gradient.length;
         for (let i = 0; i < gradient.length; i++) {
@@ -111,6 +113,7 @@ export class Layer {
         }
     }
 
+    /** Update biases with learning rate */
     updateBiases(gradient: number[]) {
         const m = 1 / gradient.length;
         for (let i = 0; i < this.biases.length; i++) {
@@ -118,6 +121,7 @@ export class Layer {
         }
     }
 
+    /** Save state of layer */
     save(): LayerConfig {
         return {
             id: this.id,
@@ -130,7 +134,7 @@ export class Layer {
         }
     }
 
-    /** Randomize weights with (Math.random() * 2 - 1) */
+    /** Randomize weights between -0.5 and 0.5 */
     private randomize() {
         for (let i = 0; i < this.outputs.length; i++) {
             for (let j = 0; j < this.inputs.length; j++) {
@@ -140,6 +144,7 @@ export class Layer {
         }
     }
 
+    /** Shift weights based on mutation rate */
     mutate(amount: number, rate: number) {
         for (let i = 0; i < this.outputs.length; i++) {
             for (let j = 0; j < this.inputs.length; j++) {
@@ -171,6 +176,7 @@ export class SoftMax extends Layer {
             const denom = scores.reduce((a, b) => a + b);
             return scores.map(s => s / denom);
         }
+        // todo: add derivative
     }
 }
 
