@@ -203,7 +203,7 @@ export class Sigmoid extends Layer {
         }
         this.deactivation = (x: number[]) => {
             return x.map(x => x * (1 - x));
-        }        
+        }
     }
 }
 

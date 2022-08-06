@@ -15,7 +15,7 @@ export class Controls {
         }
     }
 
-	/** Update car controls */
+    /** Update car controls */
     update(input: number[], threshold: number) {
         const [forward, backward, left, right] = input;
 

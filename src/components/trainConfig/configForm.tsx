@@ -38,9 +38,9 @@ const ConfigForm = (props: {
 
         appContext.activeModel = data.name;
 
-        const config = (appContext.activeConfig.name !== data.name 
-                || appContext.activeConfig.alias !== data.alias)
-            ? new AppConfig(data.name, data.alias) 
+        const config = (appContext.activeConfig.name !== data.name
+            || appContext.activeConfig.alias !== data.alias)
+            ? new AppConfig(data.name, data.alias)
             : appContext.activeConfig;
 
         trainConfig.numEpisodes = data.numEpisodes;
@@ -99,7 +99,7 @@ const ConfigForm = (props: {
 
     useEffect(() => {
         methods.reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [appContext.simConfig.brainCount]);
 
     return (

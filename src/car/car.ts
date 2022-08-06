@@ -165,22 +165,22 @@ export class Car {
 	}
 
 	draw(ctx: CanvasRenderingContext2D, bestCar = false) {
-        if (this.damaged) {
-            ctx.fillStyle = "rgba(145, 145, 145, 0.9)";
-        } else if (bestCar) {
-            ctx.fillStyle = "rgba(255, 0, 0, 1)";
-        } else {
+		if (this.damaged) {
+			ctx.fillStyle = "rgba(145, 145, 145, 0.9)";
+		} else if (bestCar) {
+			ctx.fillStyle = "rgba(255, 0, 0, 1)";
+		} else {
 			ctx.fillStyle = this.color;
 		}
 
-        ctx.beginPath();
-        ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+		ctx.beginPath();
+		ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
 		for (let i = 1; i < this.polygon.length; i++) {
 			const point = this.polygon[i];
 			ctx.lineTo(point.x, point.y);
 		}
-        ctx.fill();
-    }
+		ctx.fill();
+	}
 }
 
 export class SmartCar extends Car {
@@ -198,7 +198,7 @@ export class SmartCar extends Car {
 		this.fitness = 0;
 		this.carsPassed = 0;
 		this.color = player ? "rgba(0, 255, 0, 1)" : "rgba(200, 50, 50, 0.7)";
-		
+
 		this.config = config;
 		this.brain = new Network(config);
 
@@ -232,7 +232,7 @@ export class SmartCar extends Car {
 			const action = this.brain.forward(sData, backprop);
 			return this.brain.makeChoice(action);
 		}
-		return this.brain.layers[this.brain.layers.length-1].outputs;
+		return this.brain.layers[this.brain.layers.length - 1].outputs;
 	}
 
 	getSensorData(borders: Point[][], traffic: Car[]) {
@@ -261,12 +261,12 @@ export class SmartCar extends Car {
 
 		// multiply for each car passed
 		// target speed before passing a car for start of sim
-		fitness *= this.carsPassed > 0 
+		fitness *= this.carsPassed > 0
 			? this.carsPassed * (this.carsPassed + 1)
 			: this.speed / this.maxSpeed * 2;
 
 		// try to approach 0
-		this.fitness = Math.abs(1 / fitness); 
+		this.fitness = Math.abs(1 / fitness);
 	}
 
 	/** damage any car thats fallen too far behind */

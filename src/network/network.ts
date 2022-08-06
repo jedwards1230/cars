@@ -25,7 +25,7 @@ export class Network {
         this.lr = modelConfig.lr;
         this.epsilon = modelConfig.epsilonDecay;
         this.alias = modelConfig.alias;
-        
+
         this.layers = new Array(modelConfig.layers.length);
         for (let i = 0; i < modelConfig.layers.length; i++) {
             const layerConfig = modelConfig.layers[i];
@@ -74,7 +74,7 @@ export class Network {
             for (let i = 0; i < outputValues.length; i++) {
                 outputValues[i] = (Math.random() * outputValues.length) | 0;
             }
-        } 
+        }
         this.decay();
         return outputValues;
     }

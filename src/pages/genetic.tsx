@@ -21,7 +21,7 @@ const Genetic = () => {
 	const animate = (time: number = 0) => {
 		if (appContext.sim.activeBrains < 1) {
 			const bestCar = appContext.sim.getBestCar();
-			const gen = getGeneration(bestCar);
+			//const gen = getGeneration(bestCar);
 			if (bestCar.distance > 500) {
 				//appContext.activeConfig = bestCar.saveModelConfig(appContext.activeConfig, gen);
 			}
@@ -75,7 +75,7 @@ const Genetic = () => {
 	}
 
 	useEffect(() => {
-		appContext.simConfig.brainCount = 500;
+		appContext.simConfig.brainCount = 300;
 		run();
 		animate();
 		return () => cancelAnimationFrame(appContext.animFrame);
