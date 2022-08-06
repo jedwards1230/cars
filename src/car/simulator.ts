@@ -39,7 +39,7 @@ export class Simulator {
         this.smartCars = this.generateSmartCars();
     }
 
-    update() {
+    public update() {
         this.steps++;
         this.updateTraffic();
         this.updateSmartCars();
@@ -49,7 +49,8 @@ export class Simulator {
 
     protected updateSmartCars() {
         const toDelete: number[] = [];
-        for (let i = 0; i < this.smartCars.length; i++) {
+        const carCount = this.smartCars.length;
+        for (let i = 0; i < carCount; i++) {
             const car = this.smartCars[i];
             const action = car.lazyAction(this.road.borders, this.traffic, true);
             car.update(this.road.borders, this.traffic, action);
@@ -112,9 +113,10 @@ export class Simulator {
         return traffic
     }
 
-    getBestCar(): SmartCar {
+    public getBestCar(): SmartCar {
         let bestCar = this.smartCars[0];
-        for (let i = 0; i < this.smartCars.length; i++) {
+        const carCount = this.smartCars.length;
+        for (let i = 0; i < carCount; i++) {
             const car = this.smartCars[i];
             if (car.fitness < bestCar.fitness) bestCar = car;
         }
@@ -122,7 +124,7 @@ export class Simulator {
         return bestCar;
     }
 
-    draw(canvas: HTMLCanvasElement) {
+    public draw(canvas: HTMLCanvasElement) {
         const ctx = canvas.getContext("2d", { alpha: false }) as CanvasRenderingContext2D;
         const bestCar = this.getBestCar();
         ctx.save();
@@ -155,7 +157,7 @@ export class Simulator {
         ctx.restore();
     }
 
-    reset() {
+    public reset() {
         this.steps = 0;
         this.startLane = getRandomInt(0, this.road.laneCount - 1);
 
@@ -184,6 +186,7 @@ export class Teacher extends Simulator {
         const sData = car.getSensorData(this.road.borders, this.traffic);
         const output = car.brain.forward(sData, true);
         car.update(this.road.borders, this.traffic);
+        if (car.x > this.x) this.x = car.x;
         const target = car.controls.getOutputs();
 
         // find average loss
@@ -205,7 +208,7 @@ export class Teacher extends Simulator {
         return [new SmartCar(0, 0, y, this.driverSpeed, this.brainConfig, true)];;
     }
 
-    reset() {
+    public reset() {
         super.reset();
         this.loss = {
             loss: 0,
@@ -213,11 +216,11 @@ export class Teacher extends Simulator {
         }
     }
 
-    getBestCar(): SmartCar {
+    public getBestCar(): SmartCar {
         return this.smartCars[0];
     }
 
-    getLoss(): number {
+    public getLoss(): number {
         return this.loss.loss / this.loss.count;
     }
 }

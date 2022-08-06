@@ -30,7 +30,7 @@ export class Car {
 		id: number,
 		x: number,
 		y: number,
-		maxspeed: number = 2,
+		maxspeed: number = 3,
 		controller: boolean = false,
 	) {
 		this.id = id;
@@ -334,7 +334,7 @@ export class SmartCar extends Car {
 
 export class DumbCar extends Car {
 	constructor(id: number, x: number, y: number) {
-		super(id, x, y, 2);
+		super(id, x, y);
 		this.color = "rgba(0, 0, 255, 1)";
 		this.controls.forward = true;
 	}

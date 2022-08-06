@@ -41,12 +41,14 @@ export class Layer {
         const m = this.weights;
         const x = inputs;
         const bias = this.biases;
+        const inputCount = this.inputs.length;
+        const outputCount = this.outputs.length;
 
-        const preActive = new Array(this.outputs.length);
+        const preActive = new Array(outputCount);
         for (let i = 0; i < this.outputs.length; i++) {
             let sum = 0;
             // input * weight
-            for (let j = 0; j < this.inputs.length; j++) {
+            for (let j = 0; j < inputCount; j++) {
                 sum += x[j] * m[j][i];
             }
             // weighted + bias
@@ -68,30 +70,32 @@ export class Layer {
         const weights = this.weights;
         const x = this.inputs;
         const y = this.outputs;
+        const inputCount = this.inputs.length;
+        const outputCount = this.outputs.length;
 
         // get derivative of activation function
         const dA = this.deactivation(y);
 
         // bias delta
         // dB = delta * derivative(y)
-        const dB = new Array(y.length);
-        for (let i = 0; i < y.length; i++) {
+        const dB = new Array(outputCount);
+        for (let i = 0; i < outputCount; i++) {
             dB[i] = delta[i] * dA[i];
         }
 
         // layer delta
         // dZ = delta * derivate(y) * weight
-        const dZ = new Array(x.length);
-        for (let i = 0; i < x.length; i++) {
+        const dZ = new Array(inputCount);
+        for (let i = 0; i < inputCount; i++) {
             dZ[i] = 0;
         }
 
         // weight delta
         // dW = delta * derivate(y) * input
-        const dW = new Array(x.length);
-        for (let i = 0; i < x.length; i++) {
-            dW[i] = new Array(y.length);
-            for (let j = 0; j < y.length; j++) {
+        const dW = new Array(inputCount);
+        for (let i = 0; i < inputCount; i++) {
+            dW[i] = new Array(outputCount);
+            for (let j = 0; j < outputCount; j++) {
                 dW[i][j] = x[i] * dB[j];
                 dZ[i] += weights[i][j] * dB[j];
             }
@@ -106,8 +110,11 @@ export class Layer {
     /** Update weights with learning rate */
     updateWeights(gradient: number[][]) {
         const m = 1 / gradient.length;
-        for (let i = 0; i < gradient.length; i++) {
-            for (let j = 0; j < this.outputs.length; j++) {
+        const inputCount = this.inputs.length;
+        const outputCount = this.outputs.length;
+
+        for (let i = 0; i < inputCount; i++) {
+            for (let j = 0; j < outputCount; j++) {
                 this.weights[i][j] -= m * gradient[i][j] * this.lr;
             }
         }
@@ -116,7 +123,8 @@ export class Layer {
     /** Update biases with learning rate */
     updateBiases(gradient: number[]) {
         const m = 1 / gradient.length;
-        for (let i = 0; i < this.biases.length; i++) {
+        const outputCount = this.outputs.length;
+        for (let i = 0; i < outputCount; i++) {
             this.biases[i] -= m * gradient[i] * this.lr;
         }
     }
@@ -136,8 +144,11 @@ export class Layer {
 
     /** Randomize weights between -0.5 and 0.5 */
     private randomize() {
-        for (let i = 0; i < this.outputs.length; i++) {
-            for (let j = 0; j < this.inputs.length; j++) {
+        const inputCount = this.inputs.length;
+        const outputCount = this.outputs.length;
+
+        for (let i = 0; i < outputCount; i++) {
+            for (let j = 0; j < inputCount; j++) {
                 this.weights[j][i] = Math.random() * 2 - 1;
             }
             this.biases[i] = Math.random() * 2 - 1;
@@ -146,8 +157,11 @@ export class Layer {
 
     /** Shift weights based on mutation rate */
     mutate(amount: number, rate: number) {
-        for (let i = 0; i < this.outputs.length; i++) {
-            for (let j = 0; j < this.inputs.length; j++) {
+        const inputCount = this.inputs.length;
+        const outputCount = this.outputs.length;
+
+        for (let i = 0; i < outputCount; i++) {
+            for (let j = 0; j < inputCount; j++) {
                 const wRnd = Math.random();
                 this.weights[j][i] = lerp(
                     this.biases[i],
