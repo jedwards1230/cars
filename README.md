@@ -1,30 +1,39 @@
 # Miles' Driving School
 
-The project began with [this](https://www.youtube.com/watch?v=Rs_rAxEsAvI) tutorial. I wanted to take it further with different training algorithms and a UI. 
+The project began with [this](https://www.youtube.com/watch?v=Rs_rAxEsAvI) tutorial. I wanted to take it further with different training algorithms and a UI.
 
-## Very much a WIP still
+## UNDER CONSTRUCTION
 
-I've been preoccupied with other projects and havent had a chance to clean this up and make it functional. The core is there, I really just need to setup training loops for the cars that will reliably train. Right now the production version doesn't really show off much learning. 
+I've been distracted with other projects and haven't had a chance to clean this up and make it properly functional. The core is there, I really just need to focus on making training algos work, then it should be simple from there. I need to spend more time researching and properly planning a system rather than just jumping into it (which is what I did and why this is a mess now).
+
+## Network
+
+Check out the [Network](/src/network/) section for detailed information about the machine learning library I've built for this project.
 
 ## Project Goals
-  * Learn Javascript/Typescript
-  * Learn React
-  * Gain better understanding of Machine Learning Algorithms
 
-## Modes of Training
-  * Neuroevolution of Augmenting Topologies (NEAT algorithm) (WIP)
-    * Randomly generate a population of cars
-    * Evaluate each car
-    * Select the best car
-    * Repeat with mutations of best car
-  * Play-and-Teach (TO FIX)
-    * Control the car with keyboard
-    * Backpropagate with control input against network output predictions
-  * Deep Reinforcement (TODO)
-    * Many training loops with algorithms that generate "correct" output for training
+* Learn machine learning fundamentals
+* Learn Javascript/Typescript
+* Learn React
+
+<!-- ## Modes of Training
+
+Note: These are likely to change. These were the original thoughts and goals. I will be reworking these in the [Network](/src/network/) Section
+
+* Neuroevolution of Augmenting Topologies (NEAT algorithm) (WIP)
+  * Randomly generate a population of cars
+  * Evaluate each car
+  * Select the best car
+  * Repeat with mutations of best car
+* Live imitation training
+  * Control the car with keyboard
+  * Backpropagate with control input against network output predictions
+* Deep Reinforcement (TODO)
+  * Many training loops with algorithms that generate "correct" output for training -->
 
 ## Todo
-### UI
+
+* See [Network](/src/network/) section
 * Web workers for training?
 * Form validation
   * Ensure network inputs/outputs are anchored to sensor inputs/action counts output
@@ -32,8 +41,3 @@ I've been preoccupied with other projects and havent had a chance to clean this 
   * Tooltips or help would be cool
 * Save/load specific networks
   * View of all saved models. editable?
-
-### Network
-* better system for how rewards/expected values are calculated
-* better abstractions for network library
-* create better default model that actually works
