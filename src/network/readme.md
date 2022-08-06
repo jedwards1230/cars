@@ -15,7 +15,7 @@ This is mostly a learning tool to build an intuition for machine learning algori
 * Add Metrics
 * Learn about transformers and other neural network architectures
 
-## Structure
+## Classes
 
 ### Network
 
@@ -138,7 +138,7 @@ Note: This section is still a mess. I am in the process of reworking it. Thought
 
 When I began this project, I had some notions of how to train a network and how the algorithms worked, but I never really understood the implementation side. Some things just never clicked. I've had a few different iterations of a working algorithm, but nothing I felt confident with and definitely nothing I really understood.
 
-Since last working on this library, I have spent a good bit of time playing with mlagents for Unity games. Taking some time away from this project to play with that was very helpful. I was able to see how a network trains models in a variety of environments and a variety of inputs with different forms of training. This has helped build intuition and confidence with what to expect and what I want from this library.
+Since last working on this library, I have spent a good bit of time playing with [ml-agents](https://github.com/Unity-Technologies/ml-agents) for Unity games. Taking some time away from this project to play with that was very helpful. I was able to see how a network trains models in a variety of environments and a variety of inputs with different forms of training. This has helped build intuition and confidence with what to expect and what I want from this library.
 
 Todo:
 
