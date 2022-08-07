@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useContext, useState } from "react";
-import { Layer } from "../network/layers"
+import { Layer } from "../network/layer"
 import { Network } from "../network/network"
 import {
     getRGBA,

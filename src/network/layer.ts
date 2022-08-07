@@ -37,7 +37,7 @@ export class Layer {
     }
 
     /** Forward propagation */
-    forward(inputs: number[], backprop = false) {
+    public forward(inputs: number[], backprop = false) {
         const m = this.weights;
         const x = inputs;
         const bias = this.biases;
@@ -66,7 +66,7 @@ export class Layer {
     }
 
     /** Backward propagation */
-    backward(delta: number[]) {
+    public backward(delta: number[]) {
         const weights = this.weights;
         const x = this.inputs;
         const y = this.outputs;
@@ -108,7 +108,7 @@ export class Layer {
     }
 
     /** Update weights with learning rate */
-    updateWeights(gradient: number[][]) {
+    private updateWeights(gradient: number[][]) {
         const m = 1 / gradient.length;
         const inputCount = this.inputs.length;
         const outputCount = this.outputs.length;
@@ -121,7 +121,7 @@ export class Layer {
     }
 
     /** Update biases with learning rate */
-    updateBiases(gradient: number[]) {
+    private updateBiases(gradient: number[]) {
         const m = 1 / gradient.length;
         const outputCount = this.outputs.length;
         for (let i = 0; i < outputCount; i++) {
@@ -130,7 +130,7 @@ export class Layer {
     }
 
     /** Save state of layer */
-    save(): LayerConfig {
+    public save(): LayerConfig {
         return {
             id: this.id,
             activation: this.name,
@@ -156,7 +156,7 @@ export class Layer {
     }
 
     /** Shift weights based on mutation rate */
-    mutate(amount: number, rate: number) {
+    public mutate(amount: number, rate: number) {
         const inputCount = this.inputs.length;
         const outputCount = this.outputs.length;
 

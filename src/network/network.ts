@@ -3,7 +3,7 @@ import { AppConfig } from "./config";
 import {
     LayerMap,
     Layer,
-} from "./layers";
+} from "./layer";
 
 export class Network {
     name: string;
@@ -51,7 +51,7 @@ export class Network {
     }
 
     /** Forward pass each layer */
-    forward(inputs: number[], backprop = false): number[] {
+    public forward(inputs: number[], backprop = false): number[] {
         let outputs = this.layers[0].forward(inputs, backprop);
         for (let i = 1; i < this.layers.length; i++) {
             outputs = this.layers[i].forward(outputs, backprop);
@@ -60,14 +60,14 @@ export class Network {
     }
 
     /** Backward pass each layer */
-    backward(delta: number[]) {
+    public backward(delta: number[]) {
         for (let i = this.layers.length - 1; i >= 0; i--) {
             delta = this.layers[i].backward(delta);
         }
     }
 
     /** Choose action based on confidence or with epsilon greedy */
-    makeChoice(outputValues: number[], greedy = false) {
+    public makeChoice(outputValues: number[], greedy = false) {
         // choose random
         const random = Math.random();
         if (greedy && (random < this.epsilon)) {
@@ -79,7 +79,7 @@ export class Network {
         return outputValues;
     }
 
-    saveLayers() {
+    public saveLayers() {
         const layers: LayerConfig[] = new Array(this.layers.length);
         for (let i = 0; i < this.layers.length; i++) {
             const level = this.layers[i];
@@ -90,7 +90,16 @@ export class Network {
         return layers
     }
 
-    decay() {
+    /** Slightly mutate weights for model */
+    public mutate(amount: number = 0.1, rate: number = 0): Network {
+        const mutated = new Network(this.config);
+        for (let i = 0; i < mutated.layers.length; i++) {
+            mutated.layers[i].mutate(amount, rate);
+        }
+        return mutated;
+    }
+
+    private decay() {
         // epsilon decay
         if (this.epsilon > 0.01) this.epsilon *= 0.99;
 
@@ -98,14 +107,5 @@ export class Network {
         for (let i = this.layers.length - 1; i >= 0; i--) {
             this.layers[i].lr = this.layers[i].lr > 0.0001 ? this.layers[i].lr * 0.99 : 0.00001;
         }
-    }
-
-    /** Slightly mutate weights for model */
-    mutate(amount: number = 0.1, rate: number = 0): Network {
-        const mutated = new Network(this.config);
-        for (let i = 0; i < mutated.layers.length; i++) {
-            mutated.layers[i].mutate(amount, rate);
-        }
-        return mutated;
     }
 }
