@@ -40,6 +40,7 @@ network.backward(loss);
 const predictions = network.forward(inputs);
 
 // Evaluate with epsilon greedy policy
+//
 // Todo: this should maybe be checked before making the forward pass.
 //       no point in forward pass if we end up with random choice.
 const action = network.makeChoice(outputs, greedy);
@@ -64,7 +65,7 @@ The Layer class is the base class for all layers in the network. This receives c
 
 Each layer used by the network (Relu, Linear, etc) is a subclass of this. This is where the core math for the machine learning is done.
 
-Note: These functions should only be called from Layer or Network classes. The Network class manages most of the layer functions since it must distribute between differnt layer types.
+Note: These functions should only be called from Layer or Network classes. The Network class manages most of the layer functions since it must distribute between different layer types.
 
 ```typescript
 layer: Layer
