@@ -8,11 +8,17 @@ This is mostly a learning tool to build an intuition for machine learning algori
 
 ### Todo
 
+* Implement training algos
 * Add tests
-* Add documentation
+  * Need to find methods for testing
+  * Need to expand tests currently in place
+* Better documentation
 * Add Optimizers
+  * Classes for Adam, SGD, etc.
 * Add Loss Functions
+  * Classes for MSE, Cross Entropy, etc.
 * Add Metrics
+  * Tensorboard support would be neat
 * Learn about transformers, probably
 
 ## Classes
