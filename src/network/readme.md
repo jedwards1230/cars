@@ -79,6 +79,8 @@ backprop: boolean
 //
 // Note: using a subclass is required. Layer alone does not have 
 //       enough information for the network
+//       (activation/deactivation functions required for 
+//       forward/backward functions)
 const layer = new Sigmoid(config);
 
 // Forward pass
