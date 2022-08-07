@@ -13,7 +13,7 @@ This is mostly a learning tool to build an intuition for machine learning algori
 * Add Optimizers
 * Add Loss Functions
 * Add Metrics
-* Learn about transformers and other neural network architectures
+* Learn about transformers, probably
 
 ## Classes
 
