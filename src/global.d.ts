@@ -5,7 +5,7 @@ type AppContextConfig = {
 	animFrame: number
 	animTime: number
 	sim: import("./car/simulator").Teacher | import("./car/simulator").Simulator
-	activeConfig: import("./network/config").AppConfig
+	activeConfig: import("@jedwards1230/nn.js").AppConfig
 	simConfig: {
 		trafficCount: number
 		brainCount: number
@@ -16,31 +16,6 @@ type AppContextConfig = {
 		numSteps: number
 		counter: number
 	}
-}
-
-/** Config for serialized Layer  */
-type LayerConfig = {
-	activation: string;
-	inputs: number;
-	outputs: number;
-	lr: number;
-	id: number;
-	biases: null | number[];
-	weights: null | number[][];
-}
-
-type LayerMapping = {
-	[key: string]: any
-}
-
-/** Results of training session */
-type TrainInfo = {
-    time: number,
-    loss: number,
-    speed: number,
-    distance: number,
-    damaged: boolean,
-    model: import("./network/network").Network,
 }
 
 type Generation = {
@@ -63,6 +38,16 @@ type SensorReading = {
     y: number;
     offset: number;
 };
+
+type NavMetrics = {
+	speed?: number | string;
+	distance?: number | string;
+	active?: number | string;
+	bestID?: number | string;
+	carsPassed?: number | string;
+	steps?: number | string;
+	loss?: number | string;
+}
 
 type Loss = {
     loss: number,

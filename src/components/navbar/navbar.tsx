@@ -1,11 +1,11 @@
 //import Link from "next/link";
 import React, { ReactNode, useState } from "react";
-import { DropdownButton, NavDropdown } from "react-bootstrap";
-import ConfigForm from "../trainConfig/configForm";
-import { Box, Typography, Button, ButtonGroup } from "@mui/material"
+import { Button, ButtonGroup } from "@mui/material"
+import Link from "next/link";
+import styles from "./Navbar.module.css";
 
 const NavComponent = (props: {
-    children: ReactNode;
+    metrics: NavMetrics;
     run: () => void,
     saveModel?: () => void,
     destroyModel?: () => void,
@@ -15,18 +15,19 @@ const NavComponent = (props: {
     const openConfigForm = () => setConfigForm(true);
 
     return (
-        <Box
-            sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexDirection: "row",
-                margin: "0.5rem 2rem",
-            }}>
-            <Typography>Miles Driving School</Typography>
-            <Box>
-                {props.children}
-            </Box>
+        <div className={styles.navbar}>
+            <Link href='/'>
+                <a className={styles.title}>Miles Driving School</a>
+            </Link>
+            <div className={styles.metrics}>
+                {Object.entries(props.metrics).map(([k, v], i) => {
+                    return (
+                        <p key={i} id={k}>
+                            {k}: {v}
+                        </p>
+                    )
+                })}
+            </div>
 
             <ButtonGroup>
                 {props.saveModel &&
@@ -47,7 +48,7 @@ const NavComponent = (props: {
                     variant="contained"
                     onClick={props.run}>Run</Button>
             </ButtonGroup>
-        </Box>
+        </div>
     )
 }
 

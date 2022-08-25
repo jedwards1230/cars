@@ -2,17 +2,13 @@ import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../src/components/navbar/navbar";
 import { AppContext } from "../src/context";
 import { Simulator } from "../src/car/simulator";
-import { Navbar } from "react-bootstrap";
 import RoadCanvas from "../src/components/roadCanvas";
 import NetworkCanvas from "../src/components/networkCanvas";
 
 export default function Home() {
 	const appContext = useContext(AppContext);
 
-	const [stats, setStats] = useState < {
-		speed?: string,
-		distance?: string
-	} > ({});
+	const [stats, setStats] = useState<NavMetrics>({});
 
 	const animate = (time: number = 0) => {
 		if (appContext.sim.activeBrains === 0) {
@@ -29,8 +25,8 @@ export default function Home() {
 	const updateStats = () => {
 		const bestCar = appContext.sim.getBestCar();
 		setStats({
-			speed: bestCar.fitness.toFixed(8),
-			distance: appContext.sim.activeBrains.toFixed(0)
+			speed: bestCar.speed.toFixed(1),
+			distance: bestCar.distance.toFixed(0)
 		});
 	}
 
@@ -48,16 +44,7 @@ export default function Home() {
 
 	return (
 		<>
-			<NavComponent run={reset} >
-				{Object.entries(stats).map(([k, v], i) => {
-					return (
-						<Navbar.Text
-							key={i}
-							id={k}
-							className="px-2">{k}: {v}</Navbar.Text>
-					)
-				})}
-			</NavComponent>
+			<NavComponent run={reset} metrics={stats} />
 			<RoadCanvas
 				sim={appContext.sim} />
 			<NetworkCanvas

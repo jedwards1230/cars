@@ -1,6 +1,6 @@
 {
   "name": "cars",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,6 +14,7 @@
     "@jedwards1230/nn.js": "^1.1.0",
     "@mui/material": "^5.10.2",
     "next": "12.2.5",
+    "next-themes": "^0.2.0",
     "react": "18.2.0",
     "react-bootstrap": "^2.5.0",
     "react-chartjs-2": "^4.3.1",

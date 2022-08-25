@@ -1,0 +1,32 @@
+.navbar {
+    display: flex;
+    justify-content: flex-end;
+    background-color: var(--background);
+    color: var(--foreground);
+    align-items: center;
+    flex-direction: row;
+    padding: 0.5rem 2rem;
+    border-bottom: 1px solid var(--foreground);
+}
+
+.title {
+    margin-right: auto;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 0;
+    text-decoration: none;
+}
+
+.metrics {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.metrics p {
+    padding: 0 1rem;
+}

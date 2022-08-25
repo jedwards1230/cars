@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import NavComponent from "../src/components/navbar/navbar";
-import { Navbar } from "react-bootstrap";
 import { AppContext } from "../src/context";
 import { Simulator } from "../src/car/simulator";
 import { SmartCar } from "../src/car/car";
@@ -11,12 +10,7 @@ import NetworkCanvas from "../src/components/networkCanvas";
 const Genetic = () => {
 	const appContext = useContext(AppContext);
 
-	const [stats, setStats] = useState<{
-		active?: number | string
-		bestID?: number | string
-		carsPassed?: number | string
-		steps?: number | string
-	}>({});
+	const [stats, setStats] = useState<NavMetrics>({});
 
 	const animate = (time: number = 0) => {
 		if (appContext.sim.activeBrains < 1) {
@@ -63,7 +57,7 @@ const Genetic = () => {
 	}
 
 	const destroyModel = () => {
-		appContext.activeConfig.destroy();
+		//appContext.activeConfig.destroy();
 		reset();
 	}
 
@@ -84,16 +78,7 @@ const Genetic = () => {
 
 	return (
 		<>
-			<NavComponent run={run} saveModel={saveModel} destroyModel={destroyModel} >
-				{Object.entries(stats).map(([k, v], i) => {
-					return (
-						<Navbar.Text
-							key={i}
-							id={k}
-							className="px-2">{k}: {v}</Navbar.Text>
-					)
-				})}
-			</NavComponent>
+			<NavComponent run={reset} metrics={stats} />
 			<RoadCanvas sim={appContext.sim} />
 			<NetworkCanvas network={appContext.sim.getBestCar().brain} />
 			<GenerationEntries />

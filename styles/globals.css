@@ -1,10 +1,36 @@
+:root {
+	/* Your default theme */
+	--background: white;
+	--foreground: black;
+
+	--text-primary: #000;
+}
+
+[data-theme='dark'] {
+	--background: black;
+	--foreground: white;
+
+	--text-primary: #f8f8f2;
+}
+
 body,
 html {
 	height: 100%;
-  padding: 0;
-  margin: 0;
-	background: black;
-  overflow: hidden;
+	padding: 0;
+	margin: 0;
+	background: var(--background);
+	overflow: hidden;
+	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+		Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+* {
+	box-sizing: border-box;
 }
 
 body::-webkit-scrollbar {
@@ -14,7 +40,7 @@ body::-webkit-scrollbar {
 body {
 	justify-content: center;
 	align-items: center;
-	-ms-overflow-style: none; 
+	-ms-overflow-style: none;
 	scrollbar-width: none;
 }
 
@@ -30,7 +56,7 @@ body {
 }
 
 #trainStats {
-  width: 80%;
+	width: 80%;
 }
 
 #activeModel {
