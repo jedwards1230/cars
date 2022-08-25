@@ -2,7 +2,7 @@
   "name": "smart-cars",
   "version": "0.1.0",
   "private": false,
-  "homepage": "htts://jedwards1230.github.io/cars/",
+  "homepage": "https://jedwards1230.github.io/cars/",
   "engines": {
     "node": "18.x"
   },
