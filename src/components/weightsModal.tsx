@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { Accordion, Button, ListGroup, Modal, Table } from "react-bootstrap";
 import { AppContext } from "../context";
-import { Layer } from "../network/layer";
+import { Layer } from "@jedwards1230/nn.js";
 
 const WeightsModal = (props: {
     show: boolean;

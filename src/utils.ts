@@ -65,8 +65,3 @@ export function dotProduct(A: any[], B: { [x: string]: number; }) {
     }
     return acc;
 }
-
-/** (targets - outputs) ** 2 */
-export function MSE(targets: number, outputs: number) {
-    return (targets - outputs) ** 2;
-}

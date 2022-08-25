@@ -1,8 +1,7 @@
 import { Controls } from "./controls";
 import { Sensor } from "./sensor";
-import { Network } from "../network/network";
+import { Network, AppConfig } from "@jedwards1230/nn.js";
 import { polysIntersect } from "../utils";
-import { AppConfig } from "../network/config";
 import { DamagedOffScreenBounds, RoadCanvasDefaultHeight } from "../constants";
 
 export class Car {

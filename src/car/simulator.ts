@@ -1,7 +1,8 @@
 import { Road } from "./road";
 import { getRandomInt } from "../utils";
 import { Car, DumbCar, SmartCar } from "./car";
-import { AppConfig } from "../network/config";
+import { AppConfig } from "@jedwards1230/nn.js";
+
 
 export class Simulator {
     trafficCount: number;

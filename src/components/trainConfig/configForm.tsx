@@ -3,7 +3,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import CarConfig from "./carConfig";
 import SimConfig from "./simConfig";
 import NetworkConfig from "./networkConfig";
-import { AppConfig } from "../../network/config";
+import { AppConfig } from '@jedwards1230/nn.js';
 import { Button, Form, Modal } from "react-bootstrap";
 import { AppContext } from "../../context";
 import TrainingConfig from "./trainingConfig";

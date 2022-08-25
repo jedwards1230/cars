@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import { Simulator } from "./car/simulator";
-import { AppConfig } from "./network/config";
+import { AppConfig } from "@jedwards1230/nn.js";
 
 const trafficCount = 50;
 const brainCount = 1;
