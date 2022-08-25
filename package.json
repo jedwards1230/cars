@@ -2,13 +2,14 @@
   "name": "smart-cars",
   "version": "0.1.0",
   "private": false,
+  "homepage": "htts://jedwards1230.github.io/cars/",
   "engines": {
     "node": "18.x"
   },
   "dependencies": {
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
-    "@jedwards1230/nn.js": "^1.0.0",
+    "@jedwards1230/nn.js": "^1.0.1",
     "@types/node": "^18.7.13",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
