@@ -41,7 +41,6 @@ const Genetic = () => {
 	const updateStats = () => {
 		const bestCar = appContext.sim.getBestCar();
 		setStats({
-			bestID: bestCar.id,
 			active: appContext.sim.activeBrains,
 			carsPassed: bestCar.carsPassed,
 			steps: bestCar.steps,
@@ -78,7 +77,7 @@ const Genetic = () => {
 
 	return (
 		<>
-			<NavComponent run={reset} metrics={stats} />
+			<NavComponent run={reset} saveModel={saveModel} destroyModel={destroyModel} metrics={stats} />
 			<RoadCanvas sim={appContext.sim} />
 			<NetworkCanvas network={appContext.sim.getBestCar().brain} />
 			<GenerationEntries />

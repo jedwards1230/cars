@@ -43,7 +43,6 @@ type NavMetrics = {
 	speed?: number | string;
 	distance?: number | string;
 	active?: number | string;
-	bestID?: number | string;
 	carsPassed?: number | string;
 	steps?: number | string;
 	loss?: number | string;

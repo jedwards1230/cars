@@ -1,16 +1,16 @@
-import React, { useContext, useEffect } from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import CarConfig from "./carConfig";
-import SimConfig from "./simConfig";
-import NetworkConfig from "./networkConfig";
-import { AppConfig } from '@jedwards1230/nn.js';
-import { Button, Form, Modal } from "react-bootstrap";
+import { AppConfig } from "@jedwards1230/nn.js";
+import { useContext, useEffect } from "react";
+import { FormProvider, useForm } from 'react-hook-form';
 import { AppContext } from "../../context";
-import TrainingConfig from "./trainingConfig";
+import CarConfig from './carConfig';
+import SimConfig from './simConfig';
+import TrainingConfig from './trainingConfig';
+import styles from './ConfigForm.module.css'
+import LayerList from "./layerConfig";
 
-const ConfigForm = (props: {
-    show: boolean;
-    handleHide: () => void;
+const Modal = (props: {
+    open: boolean;
+    close: () => void;
 }) => {
     const appContext = useContext(AppContext);
     const simConfig = appContext.simConfig;
@@ -31,7 +31,6 @@ const ConfigForm = (props: {
         layers: appContext.activeConfig.layers
     }
 
-    const methods = useForm({ defaultValues })
     const onSubmit = (data: any) => {
         data = cleanData(data);
         console.log(data);
@@ -67,7 +66,7 @@ const ConfigForm = (props: {
         }
 
         appContext.activeConfig = config;
-        props.handleHide();
+        props.close();
     }
 
     /** clean data to match types of ModelConfig */
@@ -100,39 +99,36 @@ const ConfigForm = (props: {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [appContext.simConfig.brainCount]);
 
+    const methods = useForm({ defaultValues })
+
+    if (!props.open) return null;
+
     return (
-        <Modal
-            show={props.show}
-            onHide={props.handleHide}
-            backdrop="static"
-            size="lg">
-            <Modal.Header closeButton>
-                <Modal.Title>Settings</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <FormProvider {...methods}>
-                    <Form>
-                        <h4 className="my-3">Model</h4>
-                        <CarConfig />
-                        <h4 className="my-3">Simulator</h4>
-                        <SimConfig />
-                        <h4 className="my-3">Network</h4>
-                        <NetworkConfig />
-                        <h4 className="my-3">Training</h4>
-                        <TrainingConfig />
-                    </Form>
-                </FormProvider>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={props.handleHide}>
-                    Close
-                </Button>
-                <Button variant="primary" onClick={methods.handleSubmit(onSubmit)}>
+        <div className={styles.modal}>
+            <div className={styles.header}>
+                Settings
+            </div>
+
+            <FormProvider {...methods}>
+                <form className={styles.form}>
+                    <h4 className="my-3">Model</h4>
+                    <CarConfig />
+                    <h4 className="my-3">Network</h4>
+                    <LayerList />
+                    <h4 className="my-3">Simulator</h4>
+                    <SimConfig />
+                    <h4 className="my-3">Training</h4>
+                    <TrainingConfig />
+                </form>
+            </FormProvider>
+            <div className={styles.footer}>
+                <button onClick={props.close}>Close</button>
+                <button onClick={methods.handleSubmit(onSubmit)}>
                     Save Changes
-                </Button>
-            </Modal.Footer>
-        </Modal>
-    );
+                </button>
+            </div>
+        </div>
+    )
 }
 
-export default ConfigForm
+export default Modal;

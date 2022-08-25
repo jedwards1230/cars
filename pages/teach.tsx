@@ -59,7 +59,7 @@ const Teach = (props: any) => {
 
     return (
         <>
-            <NavComponent run={reset} metrics={stats} />
+            <NavComponent run={reset} metrics={stats} saveModel={saveModel} destroyModel={destroyModel}/>
             <RoadCanvas
                 sim={appContext.sim} />
             <NetworkCanvas

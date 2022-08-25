@@ -7,7 +7,7 @@ import { ThemeProvider } from 'next-themes';
 function MyApp({ Component, pageProps }) {
   return (
     <NoSsr>
-      <ThemeProvider defaultTheme="system">
+      <ThemeProvider defaultTheme="system" disableTransitionOnChange>
         <AppContext.Provider value={defaultAppContextConfig} >
           <Component {...pageProps} />
         </AppContext.Provider>

@@ -1,6 +1,6 @@
 import React from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
-import { Form, Button, Table } from "react-bootstrap";
+import { Button, Table } from "react-bootstrap";
 
 const LayerList = () => {
     const { control } = useFormContext();
@@ -54,14 +54,14 @@ const NetworkLayerItem = (props: {
                     className="form-control" ></input>
             </td>
             <td>
-                <Form.Select
+                <select
                     {...register(`layers.${props.index}.activation`)}>
                     <option value="Linear">Linear</option>
                     <option value="Relu">Relu</option>
                     <option value="LeakyRelu">LeakyRelu</option>
                     <option value="Sigmoid">Sigmoid</option>
                     <option value="Tanh">Tanh</option>
-                </Form.Select>
+                </select>
             </td>
             <td>
                 <Button variant="danger" onClick={() => props.remove(props.index)}>-</Button>

@@ -1,12 +1,36 @@
 .navbar {
     display: flex;
     justify-content: flex-end;
-    background-color: var(--background);
+    background-color: var(--background-secondary);
     color: var(--foreground);
     align-items: center;
     flex-direction: row;
     padding: 0.5rem 2rem;
     border-bottom: 1px solid var(--foreground);
+}
+
+.red {
+    background-color: var(--red);
+    border: 1px solid var(--red-secondary);
+}
+.red:hover {
+    background-color: var(--red-secondary);
+}
+
+.green {
+    background-color: var(--green);
+    border: 1px solid var(--green-secondary);
+}
+.green:hover {
+    background-color: var(--green-secondary);
+}
+
+.blue {
+    background-color: var(--blue);
+    border: 1px solid var(--blue-secondary);
+}
+.blue:hover {
+    background-color: var(--blue-secondary);
 }
 
 .title {
