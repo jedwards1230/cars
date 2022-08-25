@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import NavComponent from "../components/navbar";
+import NavComponent from "../src/components/navbar/navbar";
 import { Navbar } from "react-bootstrap";
-import { AppContext } from "../context";
-import { Simulator } from "../car/simulator";
-import { SmartCar } from "../car/car";
-import RoadCanvas from "../components/roadCanvas";
-import GenerationEntries from "../components/generationEntries";
-import NetworkCanvas from "../components/networkCanvas";
+import { AppContext } from "../src/context";
+import { Simulator } from "../src/car/simulator";
+import { SmartCar } from "../src/car/car";
+import RoadCanvas from "../src/components/roadCanvas";
+import GenerationEntries from "../src/components/generationEntries";
+import NetworkCanvas from "../src/components/networkCanvas";
 
 const Genetic = () => {
 	const appContext = useContext(AppContext);

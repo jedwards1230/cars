@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import NavComponent from "../components/navbar";
-import { Teacher } from "../car/simulator";
+import NavComponent from "../src/components/navbar/navbar";
+import { Teacher } from "../src/car/simulator";
 import { Navbar } from "react-bootstrap";
-import { AppContext } from "../context";
-import NetworkCanvas from "../components/networkCanvas";
-import RoadCanvas from "../components/roadCanvas";
+import { AppContext } from "../src/context";
+import NetworkCanvas from "../src/components/networkCanvas";
+import RoadCanvas from "../src/components/roadCanvas";
 
 const Teach = (props: any) => {
 	const appContext = useContext(AppContext);
