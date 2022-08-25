@@ -66,8 +66,6 @@ const ConfigForm = (props: {
             config.layers = data.layers;
         }
 
-        config.save();
-
         appContext.activeConfig = config;
         props.handleHide();
     }
