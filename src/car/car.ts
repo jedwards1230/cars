@@ -280,7 +280,6 @@ export class SmartCar extends Car {
 	saveModelConfig(config: AppConfig, generation?: Generation) {
 		if (generation) this.config.generations.push(generation);
 		config.layers = this.brain.saveLayers();
-		config.save();
 		this.config = config;
 		return config;
 	}

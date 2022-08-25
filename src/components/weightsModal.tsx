@@ -22,7 +22,7 @@ const WeightsModal = (props: {
             onHide={props.handleHide}
             size="lg">
             <Modal.Header closeButton>
-                <Modal.Title>"Weights and Biases"</Modal.Title>
+                <Modal.Title>Weights and Biases</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Accordion flush>
